@@ -53,8 +53,10 @@ const mensagemDiv = document.getElementById("mensagem") as HTMLDivElement;
 function atualizarMensagem(): void {
     if (temTarefas) {
         mensagemDiv.textContent = "Existem tarefas pendentes!";
+        mensagemDiv.classList.remove("sem-tarefas"); // vermelho    
     } else {
         mensagemDiv.textContent = "Não há tarefas no momento.";
+        mensagemDiv.classList.add("sem-tarefas"); // verde
     }
 }
 // Seleciona o botão e adiciona evento para alternar o estado
@@ -125,3 +127,49 @@ botao6.addEventListener('click', () => {
     // Mostra o valor na página
     resultadoDiv.innerHTML = texto;
 });
+
+//EXERCICIO 7
+//Seleciona o botão usando querySelector e faz cast para HTMLButtonElement
+const botaoGerador = document.querySelector('#botaoGerador') as HTMLButtonElement;
+// Seleciona uma div onde a mensagem vai aparecer.
+const resultadoGerado = document.querySelector('#resultadoGerador') as HTMLDivElement;
+//Adiciona um event listener para click.
+botaoGerador.addEventListener('click', () => {
+// Dentro do listener, altera o conteúdo da div usando innerHTML.
+resultadoGerado.innerHTML = "Texto gerado pelo TypeScript!";
+});
+
+//EXERCICIO 8
+// Seleciona a lista (ul ou ol) onde o item vai ser adicionado.
+const lista = document.querySelector('#lista') as HTMLOListElement;
+//Cria um novo elemento com document.createElement("li").
+const novoItem = document.createElement('li');
+//Define o texto do novo item.
+novoItem.textContent = "Nova Tarefa";
+//Adiciona o novo item à lista usando appendChild.
+lista.appendChild(novoItem);
+
+//EXERCICIO 9
+// Seleciona o elemento HTML
+const meuElemento = document.querySelector('#meuElemento') as HTMLDivElement | null;
+
+// Verifica se o elemento existe
+if (meuElemento !== null) {
+  // Atualiza o conteúdo
+  meuElemento.innerHTML = "O texto foi atualizado!";
+}
+
+//EXERCICIO 10
+// Cria uma variável do tipo unknown
+let valorDesconhecido: unknown = "Olá, mundo!";
+
+// Seleciona o elemento HTML onde vamos mostrar o valor
+const resultado = document.querySelector('#resultadoDez') as HTMLDivElement | null;
+
+// Antes de usar, verifica o tipo
+if (typeof valorDesconhecido === 'string' || typeof valorDesconhecido === 'number') {
+  // Se existir o elemento, atualiza o conteúdo
+  if (resultado !== null) {
+    resultado.innerHTML = `O valor é: ${valorDesconhecido}`;
+  }
+}

@@ -42,11 +42,14 @@ var temTarefas = false;
 var mensagemDiv = document.getElementById("mensagem");
 // Função para atualizar a mensagem
 function atualizarMensagem() {
-    if (temTarefas) {
-        mensagemDiv.textContent = "Existem tarefas pendentes!";
-    }
-    else {
-        mensagemDiv.textContent = "Não há tarefas no momento.";
+    if (mensagemDiv) {
+        if (temTarefas) {
+            mensagemDiv.textContent = "Existem tarefas pendentes!";
+            mensagemDiv.classList.remove("sem-tarefas"); // vermelho
+        } else {
+            mensagemDiv.textContent = "Não há tarefas no momento.";
+            mensagemDiv.classList.add("sem-tarefas"); // verde
+        }
     }
 }
 // Seleciona o botão e adiciona evento para alternar o estado
@@ -113,3 +116,42 @@ botao6.addEventListener('click', function () {
     // Mostra o valor na página
     resultadoDiv.innerHTML = texto;
 });
+//EXERCICIO 7
+//Seleciona o botão usando querySelector e faz cast para HTMLButtonElement
+var botaoGerador = document.querySelector('#botaoGerador');
+// Seleciona uma div onde a mensagem vai aparecer.
+var resultadoGerado = document.querySelector('#resultadoGerador');
+//Adiciona um event listener para click.
+botaoGerador.addEventListener('click', function () {
+    // Dentro do listener, altera o conteúdo da div usando innerHTML.
+    resultadoGerado.innerHTML = "Texto gerado pelo TypeScript!";
+});
+//EXERCICIO 8
+// Seleciona a lista (ul ou ol) onde o item vai ser adicionado.
+var lista = document.querySelector('#lista');
+//Cria um novo elemento com document.createElement("li").
+var novoItem = document.createElement('li');
+//Define o texto do novo item.
+novoItem.textContent = "Nova Tarefa";
+//Adiciona o novo item à lista usando appendChild.
+lista.appendChild(novoItem);
+//EXERCICIO 9
+// Seleciona o elemento HTML
+var meuElemento = document.querySelector('#meuElemento');
+// Verifica se o elemento existe
+if (meuElemento !== null) {
+    // Atualiza o conteúdo
+    meuElemento.innerHTML = "O texto foi atualizado!";
+}
+//EXERCICIO 10
+// Cria uma variável do tipo unknown
+var valorDesconhecido = "Olá, mundo!";
+// Seleciona o elemento HTML onde vamos mostrar o valor
+var resultado = document.querySelector('#resultadoDez');
+// Antes de usar, verifica o tipo
+if (typeof valorDesconhecido === 'string' || typeof valorDesconhecido === 'number') {
+    // Se existir o elemento, atualiza o conteúdo
+    if (resultado !== null) {
+        resultado.innerHTML = "O valor \u00E9: ".concat(valorDesconhecido);
+    }
+}
