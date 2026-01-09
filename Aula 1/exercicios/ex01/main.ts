@@ -15,10 +15,10 @@ buttonAdd.addEventListener("click", () => {
 
   list.appendChild(li);
   input.value = "";
-
-
-
+  
 });
+
+//                                                                                      EXERCICIOS GUIADOS 1
 //EXERCICIO 1
  // Cria uma variável do tipo string
 const mensagem: string = "Este texto vem do main.ts";
@@ -145,7 +145,7 @@ const lista = document.querySelector('#lista') as HTMLOListElement;
 //Cria um novo elemento com document.createElement("li").
 const novoItem = document.createElement('li');
 //Define o texto do novo item.
-novoItem.textContent = "Nova Tarefa";
+novoItem.textContent = "Item adicionado 1";
 //Adiciona o novo item à lista usando appendChild.
 lista.appendChild(novoItem);
 
@@ -161,7 +161,7 @@ if (meuElemento !== null) {
 
 //EXERCICIO 10
 // Cria uma variável do tipo unknown
-let valorDesconhecido: unknown = "Olá, mundo!";
+let valorDesconhecido: unknown = "Que tipo sou eu?";
 
 // Seleciona o elemento HTML onde vamos mostrar o valor
 const resultado = document.querySelector('#resultadoDez') as HTMLDivElement | null;
@@ -173,3 +173,4 @@ if (typeof valorDesconhecido === 'string' || typeof valorDesconhecido === 'numbe
     resultado.innerHTML = `O valor é: ${valorDesconhecido}`;
   }
 }
+                                                                                     

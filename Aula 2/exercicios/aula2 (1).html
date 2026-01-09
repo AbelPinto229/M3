@@ -1,0 +1,183 @@
+<html>
+
+<head>
+    <style>
+        body {
+            color: black;
+            font-family: Arial;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: #006600;
+        }
+
+        h2 {
+            color: #003366;
+        }
+
+        hr {
+            margin: 20px 0;
+        }
+
+        pre {
+            background-color: #f0f0f0;
+            padding: 10px;
+        }
+
+        b {
+            background-color: #f0f0f0;
+            padding: 2px 4px;
+        }
+
+        i {
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>💡 Exercícios de TypeScript — Arrays, Interfaces e Classes</h1>
+
+    <p>
+        📌 <b>Regras gerais:</b><br>
+        - Todos os resultados devem aparecer na página<br>
+        - Usar TypeScript com tipos explícitos<br>
+        - Usar HTML e CSS para organizar as tarefas
+    </p>
+
+    <hr>
+
+    <h1>🧑‍🏫 Exercícios Guiados (Em Aula)</h1>
+
+    <h2>📝 Exercício 1 — Criar interface Tarefa</h2>
+    <p>
+        Cria uma interface chamada <b>Tarefa</b> que defina a estrutura de um objeto de tarefa.
+    </p>
+    <p>
+        <i>Dica lógica:</i><br>
+        - A interface deve conter: <b>id</b> (number), <b>titulo</b> (string) e <b>concluida</b> (boolean).<br>
+        - Lembre-se que a interface apenas define o "contrato", não cria objetos reais ainda.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 2 — Criar classe TarefaClass</h2>
+    <p>
+        Cria uma classe <b>TarefaClass</b> que implemente a interface <b>Tarefa</b>.
+    </p>
+    <p>
+        <i>Dica lógica passo a passo:</i><br>
+        1. Implemente os atributos da interface.<br>
+        2. Crie um <b>constructor</b> que receba o id e o título.<br>
+        3. A propriedade `concluida` deve iniciar sempre como <b>false</b>.<br>
+        4. Adicione um método <b>marcarConcluida()</b> que mude o estado para true.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 3 — Array de objetos</h2>
+    <p>
+        Cria um array chamado <b>listaTarefas</b> que armazene vários objetos do tipo Tarefa.
+    </p>
+    <p>
+        <i>Dica lógica passo a passo:</i><br>
+        1. Declare o array com o tipo explícito: <b>Tarefa[]</b>.<br>
+        2. Adicione 2 ou 3 tarefas de exemplo manualmente.<br>
+        3. Percorra o array e mostre apenas os títulos numa <b>div</b> ou <b>ul</b>.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 4 — Adicionar tarefa via input</h2>
+    <p>
+        Cria um campo de texto e um botão para adicionar novas tarefas ao array.
+    </p>
+    <p>
+        <i>Dica lógica passo a passo:</i><br>
+        1. Capture o valor do input.<br>
+        2. Instancie a classe <b>TarefaClass</b> com um ID único (ex: `Date.now()`).<br>
+        3. Use <b>push()</b> para inserir no array.<br>
+        4. Chame uma função para atualizar a visualização no HTML.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 5 — Renderização dinâmica</h2>
+    <p>
+        Cria uma função que limpe a lista no HTML e a reconstrua sempre que o array mudar.
+    </p>
+    <p>
+        <i>Dica lógica passo a passo:</i><br>
+        1. Use <b>innerHTML = ""</b> para esvaziar o contentor.<br>
+        2. Use um ciclo (ex: <b>forEach</b>) para percorrer o array.<br>
+        3. Para cada item, crie um elemento HTML e adicione ao contentor principal.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 6 — Estilização por estado</h2>
+    <p>
+        Modifica a visualização para que tarefas concluídas tenham um estilo visual diferente.
+    </p>
+    <p>
+        <i>Dica lógica passo a passo:</i><br>
+        1. Na função de renderização, verifique se `tarefa.concluida` é true.<br>
+        2. Se sim, adicione uma classe CSS ou altere o <b>style.textDecoration</b> para "line-through".
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 7 — Remover tarefa</h2>
+    <p>
+        Adiciona um botão "Remover" ao lado de cada tarefa na lista.
+    </p>
+    <p>
+        <i>Dica lógica passo a passo:</i><br>
+        1. Ao criar o elemento HTML da tarefa, anexe um botão.<br>
+        2. O botão deve chamar uma função passando o <b>id</b> da tarefa.<br>
+        3. Use o método <b>filter</b> para remover o item do array e atualize a página.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 8 — Editar título</h2>
+    <p>
+        Permite ao utilizador alterar o nome de uma tarefa já existente.
+    </p>
+    <p>
+        <i>Dica lógica passo a passo:</i><br>
+        1. Adicione um botão "Editar".<br>
+        2. Use um <b>prompt</b> ou transforme o texto num input temporário.<br>
+        3. Localize o objeto no array pelo ID e atualize a propriedade <b>titulo</b>.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 9 — Contador de pendentes</h2>
+    <p>
+        Mostra no topo da página o número total de tarefas que ainda não foram concluídas.
+    </p>
+    <p>
+        <i>Dica lógica passo a passo:</i><br>
+        1. Use o método <b>filter</b> para criar um novo array apenas com tarefas onde `concluida === false`.<br>
+        2. Mostre o <b>length</b> desse novo array numa div de destaque.
+    </p>
+
+    <hr>
+
+
+    <hr>
+
+    <h2>🎯 Objetivos da Aula</h2>
+    <p>
+        ✔ Aprender a criar interfaces e classes<br>
+        ✔ Manipular arrays de objetos de forma eficiente<br>
+        ✔ Praticar a lógica de CRUD (Create, Read, Update, Delete)<br>
+        ✔ Sincronizar o estado do código com a Interface (DOM)
+    </p>
+
+</body>
+
+</html>

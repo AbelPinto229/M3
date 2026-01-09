@@ -42,14 +42,13 @@ var temTarefas = false;
 var mensagemDiv = document.getElementById("mensagem");
 // Função para atualizar a mensagem
 function atualizarMensagem() {
-    if (mensagemDiv) {
-        if (temTarefas) {
-            mensagemDiv.textContent = "Existem tarefas pendentes!";
-            mensagemDiv.classList.remove("sem-tarefas"); // vermelho
-        } else {
-            mensagemDiv.textContent = "Não há tarefas no momento.";
-            mensagemDiv.classList.add("sem-tarefas"); // verde
-        }
+    if (temTarefas) {
+        mensagemDiv.textContent = "Existem tarefas pendentes!";
+        mensagemDiv.classList.remove("sem-tarefas"); // vermelho    
+    }
+    else {
+        mensagemDiv.textContent = "Não há tarefas no momento.";
+        mensagemDiv.classList.add("sem-tarefas"); // verde
     }
 }
 // Seleciona o botão e adiciona evento para alternar o estado
@@ -101,7 +100,7 @@ function validarTexto(texto) {
         }
     }
 }
-validarTexto("AA"); // Texto inválido
+validarTexto("AAA"); // Texto válido
 //EXERCICIO 6
 // Seleciona o input e faz cast para HTMLInputElement
 var input6 = document.querySelector('#meuInput');
@@ -132,7 +131,7 @@ var lista = document.querySelector('#lista');
 //Cria um novo elemento com document.createElement("li").
 var novoItem = document.createElement('li');
 //Define o texto do novo item.
-novoItem.textContent = "Nova Tarefa";
+novoItem.textContent = "Item adicionado 1";
 //Adiciona o novo item à lista usando appendChild.
 lista.appendChild(novoItem);
 //EXERCICIO 9
@@ -145,7 +144,7 @@ if (meuElemento !== null) {
 }
 //EXERCICIO 10
 // Cria uma variável do tipo unknown
-var valorDesconhecido = "Olá, mundo!";
+var valorDesconhecido = "Que tipo sou eu?";
 // Seleciona o elemento HTML onde vamos mostrar o valor
 var resultado = document.querySelector('#resultadoDez');
 // Antes de usar, verifica o tipo
