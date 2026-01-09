@@ -111,7 +111,7 @@ function validarTexto(texto: string): void {
         }
     }
 }
-validarTexto("AA");   // Texto inválido
+validarTexto("AAA");   // Texto válido
 
 //EXERCICIO 6
 // Seleciona o input e faz cast para HTMLInputElement
