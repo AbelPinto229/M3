@@ -1,104 +1,159 @@
-/* ===== Reset básico ===== */
+/* --------------------
+   Reset básico
+-------------------- */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* ===== Body ===== */
+/* --------------------
+   Corpo da página
+-------------------- */
 body {
-    background-color: #f4f4f9;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* --------------------
+   Título
+-------------------- */
+h1 {
+    margin-bottom: 20px;
     color: #333;
-    padding: 20px;
-    line-height: 1.5;
 }
 
-/* ===== Cabeçalhos ===== */
-h1, h2, h3 {
-    margin-bottom: 10px;
-    color: #2c3e50;
+/* --------------------
+   Contador de pendentes
+-------------------- */
+#pendingCount {
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #444;
+    font-size: 18px;
 }
 
-/* ===== Inputs e Botões ===== */
-input[type="text"], input[type="number"] {
-    padding: 10px;
-    margin-right: 10px;
+/* --------------------
+   Input + botão Adicionar
+-------------------- */
+div.add-task {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+input#taskInput {
+    padding: 8px 12px;
+    font-size: 16px;
+    width: 250px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    width: 200px;
-    font-size: 14px;
+    margin-bottom: 10px;
 }
 
-button {
-    padding: 10px 15px;
-    background-color: #3498db;
+button#addBtn {
+    padding: 8px 12px;
+    font-size: 16px;
+    margin-left: 15px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4caf50;
     color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button#addBtn:hover {
+    background-color: #45a049;
+}
+
+/* --------------------
+   Lista de tarefas
+-------------------- */
+ul#list {
+    list-style: none;
+    width: 100%;
+    max-width: 400px;
+    margin-top: 0;
+}
+
+/* Cada item da lista */
+ul#list li {
+    background-color: #fff;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Texto da tarefa */
+ul#list li span {
+    flex: 1;
+    cursor: pointer;
+    word-break: break-word;
+}
+
+/* Tarefas concluídas */
+ul#list li span.concluded {
+    text-decoration: line-through;
+    color: gray;
+}
+
+/* Botões Editar e Remover */
+ul#list li button {
+    margin-left: 5px;
+    padding: 5px 8px;
+    font-size: 14px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s;
 }
 
-button:hover {
-    background-color: #2980b9;
+/* Botão Editar */
+ul#list li button:first-of-type {
+    background-color: #2196f3;
+    color: white;
 }
 
-/* ===== Listas ===== */
-ul, ol {
-    list-style: none;
-    padding-left: 0;
-    margin-top: 10px;
+ul#list li button:first-of-type:hover {
+    background-color: #1976d2;
 }
 
-li {
-    padding: 8px 12px;
-    background-color: #ecf0f1;
-    margin-bottom: 5px;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
+/* Botão Remover */
+ul#list li button:last-of-type {
+    background-color: #f44336;
+    color: white;
 }
 
-li:hover {
-    background-color: #d0d7de;
+ul#list li button:last-of-type:hover {
+    background-color: #d32f2f;
 }
 
-/* ===== Divs de resultado ===== */
-div[id^="resultado"], #output, #mensagem, #novaMensagem, #validarTexto, #resultadoGerado, #meuElemento, #resultadoDez, #total {
-    padding: 10px 15px;
-    margin: 10px 0;
-    background-color: #fff;
-    border-left: 4px solid #3498db;
-    border-radius: 5px;
-    min-height: 30px;
-}
+/* --------------------
+   Responsivo
+-------------------- */
+@media (max-width: 480px) {
+    input#taskInput {
+        width: 100%;
+        margin-bottom: 10px;
+    }
 
-/* ===== Layout flexível para inputs + botões ===== */
-.input-group {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
+    button#addBtn {
+        width: 100%;
+        margin-left: 0;
+    }
 
-/* Mensagem padrão */
-#mensagem {
-    font-weight: bold;
-    color: #e74c3c; /* vermelho por defeito */
-}
-
-/* Mensagem de tarefas OK */
-#mensagem.sem-tarefas {
-    color: #27ae60; /* verde */
-}
-
-/* ===== Pequenos ajustes ===== */
-body > * {
-    margin-bottom: 15px;
-}
-
-/* ===== Exercicio 6: AULA 2 ===== */
-.concluded {
-    text-decoration: line-through;
-    color: rgb(128, 128, 128);
+    ul#list {
+        width: 100%;
+    }
 }

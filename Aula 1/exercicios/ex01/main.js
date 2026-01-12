@@ -12,6 +12,7 @@ buttonAdd.addEventListener("click", function () {
     list.appendChild(li);
     input.value = "";
 });
+//                                                                                      EXERCICIOS GUIADOS 1
 //EXERCICIO 1
 // Cria uma variável do tipo string
 var mensagem = "Este texto vem do main.ts";

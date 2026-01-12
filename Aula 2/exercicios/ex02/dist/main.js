@@ -1,45 +1,45 @@
+"use strict";
 // Exercício 2 — Classe
-var TaskClass = /** @class */ (function () {
-    function TaskClass(id, title) {
+class TaskClass {
+    constructor(id, title) {
         this.id = id;
         this.title = title;
         this.concluded = false;
     }
-    TaskClass.prototype.markConcluded = function () {
+    markConcluded() {
         this.concluded = true;
-    };
-    return TaskClass;
-}());
+    }
+}
 // Exercício 3 — Array
-var taskList = [];
+let taskList = [];
 taskList.push(new TaskClass(1, "Rever slides aula 2"));
 taskList.push(new TaskClass(2, "Fazer exercícios guiados"));
 taskList.push(new TaskClass(3, "Fazer exercícios autónomos"));
 // Exercício 5 — Renderização
 function renderTasks() {
-    var ul = document.getElementById("list");
+    const ul = document.getElementById("list");
     if (!ul)
         return;
     ul.innerHTML = "";
-    taskList.forEach(function (task) {
-        var li = document.createElement("li");
+    taskList.forEach(task => {
+        const li = document.createElement("li");
         // Texto
-        var span = document.createElement("span");
+        const span = document.createElement("span");
         span.textContent = task.title;
         // Exercício 6
         if (task.concluded) {
             span.classList.add("concluded");
         }
         // Botão Editar
-        var editBtn = document.createElement("button");
+        const editBtn = document.createElement("button");
         editBtn.textContent = "Editar";
-        editBtn.addEventListener("click", function () {
+        editBtn.addEventListener("click", () => {
             editTask(task.id);
         });
         // Botão Remover
-        var removeBtn = document.createElement("button");
+        const removeBtn = document.createElement("button");
         removeBtn.textContent = "Remover";
-        removeBtn.addEventListener("click", function () {
+        removeBtn.addEventListener("click", () => {
             removeTask(task.id);
         });
         li.appendChild(span);
@@ -50,17 +50,17 @@ function renderTasks() {
 }
 // Exercício 7 — Remover tarefa
 function removeTask(id) {
-    taskList = taskList.filter(function (task) { return task.id !== id; });
+    taskList = taskList.filter(task => task.id !== id);
     renderTasks();
 }
 // Exercício 4 — Adicionar tarefa
-var input = document.querySelector("#taskInput");
-var buttonAdd = document.querySelector("#addBtn");
-buttonAdd.addEventListener("click", function () {
-    var title = input.value.trim();
+const input = document.querySelector("#taskInput");
+const buttonAdd = document.querySelector("#addBtn");
+buttonAdd.addEventListener("click", () => {
+    const title = input.value.trim();
     if (title === "")
         return;
-    var newTask = new TaskClass(Date.now(), title);
+    const newTask = new TaskClass(Date.now(), title);
     taskList.push(newTask);
     input.value = "";
     renderTasks();
@@ -72,12 +72,29 @@ taskList[1].markConcluded();
 renderTasks();
 // Exercício 8 — Editar tarefa
 function editTask(id) {
-    var task = taskList.find(function (task) { return task.id === id; });
+    const task = taskList.find(task => task.id === id);
     if (!task)
         return;
-    var newTitle = prompt("Editar título da tarefa:", task.title);
+    const newTitle = prompt("Editar título da tarefa:", task.title);
     if (!newTitle || newTitle.trim() === "")
         return;
     task.title = newTitle.trim();
     renderTasks();
 }
+
+// Exercício 9 — Contador de tarefas pendentes
+function updatePendingCount() {
+    const pendingCountDiv = document.getElementById("pendingCount");
+    if (!pendingCountDiv)
+        return;
+    const pendingTasks = taskList.filter(task => !task.concluded).length;
+    pendingCountDiv.textContent = `Tarefas pendentes: ${pendingTasks}`;
+}
+// Atualizar contador sempre que a lista for renderizada
+const originalRenderTasks = renderTasks;
+renderTasks = function () {
+    originalRenderTasks();
+    updatePendingCount();
+};
+// Chamada inicial para definir o contador corretamente
+updatePendingCount();  
