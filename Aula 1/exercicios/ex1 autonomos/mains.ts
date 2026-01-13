@@ -44,14 +44,14 @@ btnLimpar.addEventListener("click", () => {
 let existemTarefas: boolean = false; // ou false, dependendo do caso
 
 // Seleciona a div para mostrar a mensagem
-const mensagemDiv = document.getElementById("mensagem");
+const mensagemDiv4 = document.getElementById("mensagem");
 
 // Usa if para mostrar mensagem diferente dependendo do valor
-if (mensagemDiv) {
+if (mensagemDiv4) {
     if (existemTarefas) {
-        mensagemDiv.textContent = "Existem tarefas pendentes!";
+        mensagemDiv4.textContent = "Existem tarefas pendentes!";
     } else {
-        mensagemDiv.textContent = "Não há tarefas neste momento.";
+        mensagemDiv4.textContent = "Não há tarefas neste momento.";
     }
 }
 
@@ -107,4 +107,73 @@ if (textoDiv && botaoCor && botaoFonte) {
 }
 
 // EXERCÍCIO 8
+// Seleciona os elementos do DOM
+const inputTarefa = document.getElementById("input") as HTMLInputElement;
+const btnAdd = document.getElementById("btnAdd") as HTMLButtonElement;
+const lista8 = document.getElementById("lista") as HTMLOListElement;
 
+// Função para adicionar tarefa
+function adicionarTarefa(): void {
+    // Lê o valor do input
+    const texto: string = inputTarefa.value.trim();
+
+    // Valida o texto (mínimo 3 caracteres)
+    if (texto.length < 3) {
+        capturaErro("A tarefa deve ter pelo menos 3 caracteres.");
+        return;
+    }
+
+    // Limpa mensagem de erro
+    capturaErro("");
+
+    // Cria um elemento <li> com o texto
+    const li = document.createElement("li");
+    li.textContent = texto;
+
+    // Adiciona o li à lista
+    lista.appendChild(li);
+
+    // Limpa o input
+    inputTarefa.value = "";
+
+    // atualiza a mensagem
+    mostrarMensagemTarefas(); 
+}
+
+// Associa o botão à função
+btnAdd.addEventListener("click", adicionarTarefa);
+
+
+// EXERCÍCIO 9
+// Conta o número de tarefas (por exemplo, o tamanho da lista)
+//Seleciona a div onde vamos mostrar o valor
+const lista = document.getElementById("lista") as HTMLOListElement;
+const mensagemDiv = document.getElementById("mensagemTarefa") as HTMLDivElement;
+
+function mostrarMensagemTarefas(): void {
+    const totalTarefas: number = lista.children.length;
+        if (totalTarefas > 0) {
+            mensagemDiv.textContent = `Tens ${totalTarefas} tarefa(s).`;
+        } else {
+            mensagemDiv.textContent = "Não há tarefas neste momento."
+        }
+        
+}
+
+// EXERCÍCIO 10
+// Cria uma função que recebe texto.
+function criarTarefa(texto: string): HTMLLIElement  {
+    const novaLista = document.createElement("li")
+    // Define o texto do li
+    novaLista.textContent = texto;
+
+    // Retorna o elemento
+    return novaLista;
+}
+
+// Criar uma nova tarefa
+const novaTarefa1 = criarTarefa("Comprar pão");
+const novaTarefa2 = criarTarefa("Comprar leite");
+// Adicionar à lista
+lista.appendChild(novaTarefa1);
+lista.appendChild(novaTarefa2);

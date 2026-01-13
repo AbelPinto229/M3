@@ -98,7 +98,7 @@ body > * {
 }
 
 /* ===== Exercicio 6: AULA 2 ===== */
-.concluded {
+.completed {
     text-decoration: line-through;
     color: rgb(128, 128, 128);
 }

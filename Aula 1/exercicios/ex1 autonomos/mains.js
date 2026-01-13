@@ -40,14 +40,14 @@ btnLimpar.addEventListener("click", function () {
 // Cria uma variável booleana indicando se existem tarefas
 var existemTarefas = false; // ou false, dependendo do caso
 // Seleciona a div para mostrar a mensagem
-var mensagemDiv = document.getElementById("mensagem");
+var mensagemDiv4 = document.getElementById("mensagem");
 // Usa if para mostrar mensagem diferente dependendo do valor
-if (mensagemDiv) {
+if (mensagemDiv4) {
     if (existemTarefas) {
-        mensagemDiv.textContent = "Existem tarefas pendentes!";
+        mensagemDiv4.textContent = "Existem tarefas pendentes!";
     }
     else {
-        mensagemDiv.textContent = "Não há tarefas neste momento.";
+        mensagemDiv4.textContent = "Não há tarefas neste momento.";
     }
 }
 // EXERCÍCIO 5
@@ -93,3 +93,59 @@ if (textoDiv && botaoCor && botaoFonte) {
     });
 }
 // EXERCÍCIO 8
+// Seleciona os elementos do DOM
+var inputTarefa = document.getElementById("input");
+var btnAdd = document.getElementById("btnAdd");
+var lista8 = document.getElementById("lista");
+// Função para adicionar tarefa
+function adicionarTarefa() {
+    // Lê o valor do input
+    var texto = inputTarefa.value.trim();
+    // Valida o texto (mínimo 3 caracteres)
+    if (texto.length < 3) {
+        capturaErro("A tarefa deve ter pelo menos 3 caracteres.");
+        return;
+    }
+    // Limpa mensagem de erro
+    capturaErro("");
+    // Cria um elemento <li> com o texto
+    var li = document.createElement("li");
+    li.textContent = texto;
+    // Adiciona o li à lista
+    lista.appendChild(li);
+    // Limpa o input
+    inputTarefa.value = "";
+    // atualiza a mensagem
+    mostrarMensagemTarefas();
+}
+// Associa o botão à função
+btnAdd.addEventListener("click", adicionarTarefa);
+// EXERCÍCIO 9
+// Conta o número de tarefas (por exemplo, o tamanho da lista)
+//Seleciona a div onde vamos mostrar o valor
+var lista = document.getElementById("lista");
+var mensagemDiv = document.getElementById("mensagemTarefa");
+function mostrarMensagemTarefas() {
+    var totalTarefas = lista.children.length;
+    if (totalTarefas > 0) {
+        mensagemDiv.textContent = "Tens ".concat(totalTarefas, " tarefa(s).");
+    }
+    else {
+        mensagemDiv.textContent = "Não há tarefas neste momento.";
+    }
+}
+// EXERCÍCIO 10
+// Cria uma função que recebe texto.
+function criarTarefa(texto) {
+    var novaLista = document.createElement("li");
+    // Define o texto do li
+    novaLista.textContent = texto;
+    // Retorna o elemento
+    return novaLista;
+}
+// Criar uma nova tarefa
+var novaTarefa1 = criarTarefa("Comprar pão");
+var novaTarefa2 = criarTarefa("Comprar leite");
+// Adicionar à lista
+lista.appendChild(novaTarefa1);
+lista.appendChild(novaTarefa2);

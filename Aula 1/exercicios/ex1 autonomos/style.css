@@ -1,0 +1,108 @@
+/* ===========================
+   Estilo global
+=========================== */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f7f7f7;
+    margin: 20px;
+    color: #333;
+}
+
+h1, h2 {
+    color: #222;
+}
+
+/* ===========================
+   Divs de contador, mensagem e resultados
+=========================== */
+#contador, #mensagem, #mensagemTarefa, #resultado, #verificarNull, #erroMensagem {
+    padding: 10px 15px;
+    margin: 10px 0;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#erroMensagem {
+    color: #d9534f; /* vermelho para erros */
+    font-weight: bold;
+}
+
+/* ===========================
+   Inputs e botões
+=========================== */
+input[type="text"] {
+    padding: 8px;
+    width: 250px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 5px;
+    font-size: 14px;
+}
+
+button {
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* ===========================
+   Lista de tarefas
+=========================== */
+ol#lista {
+    margin-top: 10px;
+    padding-left: 20px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    min-height: 50px;
+}
+
+ol#lista li {
+    padding: 5px 10px;
+    margin: 3px 0;
+    background-color: #e9ecef;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+ol#lista li:hover {
+    background-color: #d4d9de;
+}
+
+/* ===========================
+   Texto manipulável (Exercício 7)
+=========================== */
+#texto {
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* ===========================
+   Responsividade
+=========================== */
+@media (max-width: 500px) {
+    input[type="text"] {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+
+    button {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+}
+
