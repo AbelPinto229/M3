@@ -1,83 +1,70 @@
-// Exercício 2 — Classe
+//Exercício 2 — Criar classe TarefaClass
+//Cria uma classe TarefaClass que implemente a interface Tarefa.
 var TaskClass = /** @class */ (function () {
+    //Crie um constructor que receba o id e o título.
     function TaskClass(id, title) {
         this.id = id;
         this.title = title;
         this.concluded = false;
     }
+    //Adicione um método que mude o estado para true.
     TaskClass.prototype.markConcluded = function () {
         this.concluded = true;
     };
     return TaskClass;
 }());
-// Exercício 3 — Array
+//Exercício 3 — Array de objetos
+//Cria um array chamado listaTarefas que armazene vários objetos do tipo Tarefa.
 var taskList = [];
+//Adicione 2 ou 3 tarefas de exemplo manualmente.
 taskList.push(new TaskClass(1, "Rever slides aula 2"));
-taskList.push(new TaskClass(2, "Fazer exercícios guiados"));
-taskList.push(new TaskClass(3, "Fazer exercícios autónomos"));
-// Exercício 5 — Renderização
-function renderTasks() {
-    var ul = document.getElementById("list");
-    if (!ul)
-        return;
-    ul.innerHTML = "";
-    taskList.forEach(function (task) {
-        var li = document.createElement("li");
-        // Texto
-        var span = document.createElement("span");
-        span.textContent = task.title;
-        // Exercício 6
-        if (task.concluded) {
-            span.classList.add("concluded");
-        }
-        // Botão Editar
-        var editBtn = document.createElement("button");
-        editBtn.textContent = "Editar";
-        editBtn.addEventListener("click", function () {
-            editTask(task.id);
-        });
-        // Botão Remover
-        var removeBtn = document.createElement("button");
-        removeBtn.textContent = "Remover";
-        removeBtn.addEventListener("click", function () {
-            removeTask(task.id);
-        });
-        li.appendChild(span);
-        li.appendChild(editBtn);
-        li.appendChild(removeBtn);
-        ul.appendChild(li);
-    });
-}
-// Exercício 7 — Remover tarefa
-function removeTask(id) {
-    taskList = taskList.filter(function (task) { return task.id !== id; });
-    renderTasks();
-}
-// Exercício 4 — Adicionar tarefa
+taskList.push(new TaskClass(2, "Fazer exercicios guiados"));
+taskList.push(new TaskClass(3, "Fazer exercicios autonomos"));
+renderTasks();
+//Exercício 4 — Adicionar tarefa via input
+//Cria um campo de texto e um botão para adicionar novas tarefas ao array.
 var input = document.querySelector("#taskInput");
 var buttonAdd = document.querySelector("#addBtn");
 buttonAdd.addEventListener("click", function () {
     var title = input.value.trim();
-    if (title === "")
+    if (title === "") {
         return;
+    }
+    //Instancie a classe TarefaClass com um ID único (ex: `Date.now()`) e Use push() para inserir no array.
     var newTask = new TaskClass(Date.now(), title);
     taskList.push(newTask);
     input.value = "";
     renderTasks();
 });
-// Teste Exercício 6
-taskList[0].markConcluded();
-taskList[1].markConcluded();
-// Render inicial
-renderTasks();
-// Exercício 8 — Editar tarefa
-function editTask(id) {
-    var task = taskList.find(function (task) { return task.id === id; });
-    if (!task)
-        return;
-    var newTitle = prompt("Editar título da tarefa:", task.title);
-    if (!newTitle || newTitle.trim() === "")
-        return;
-    task.title = newTitle.trim();
-    renderTasks();
+//Chame uma função para atualizar a visualização no HTML *Exercício 5 — Renderização dinâmica*
+function renderTasks() {
+    var taskContainer = document.querySelector("#list");
+    taskContainer.innerHTML = ""; // Limpa a lista antes de renderizar
+    taskList.forEach(function (task) {
+        var li = document.createElement("li");
+        li.textContent = task.title;
+        // Aplica classe CSS com base no estado
+        if (task.concluded) {
+            li.classList.add("completed");
+        }
+        else {
+            li.classList.remove("completed");
+        }
+        // Evento para alternar concluída
+        li.addEventListener("click", function () {
+            task.concluded = !task.concluded; // Marca ou desmarca
+            renderTasks(); // Atualiza a lista
+        });
+        //Exercício 7 — Remover tarefa
+        //Adiciona um botão "Remover" ao lado de cada tarefa na lista.
+        var removeBtn = document.createElement("button");
+        removeBtn.textContent = "Remover";
+        removeBtn.addEventListener("click", function (event) {
+            event.stopPropagation(); // Evita que o clique no botão dispare o evento do li
+            taskList = taskList.filter(function (t) { return t.id !== task.id; });
+            renderTasks(); // Atualiza a lista
+        });
+        li.appendChild(removeBtn);
+        taskContainer.appendChild(li);
+    });
 }

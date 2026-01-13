@@ -1,18 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ES2015",        // Permite métodos modernos como .find(), .includes(), etc.
-    "module": "ESNext",        // Suporte a import/export moderno
-    "lib": ["ES2015", "DOM"],  // Inclui métodos do ES2015 e APIs do navegador
-    "strict": true,            // Tipagem estrita do TypeScript
-    "outDir": "./dist",        // Onde o JS compilado vai ficar
-    "rootDir": "./",            // Diretório raiz dos TS
-    "esModuleInterop": true,    // Facilita import de módulos comuns
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": [
-    "./**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+    "target": "es2015",
+    "lib": ["dom", "es2015"],
+    "outDir": ".",
+    "strict": true
+  }
 }
