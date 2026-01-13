@@ -1,104 +1,110 @@
-/* ===== Reset básico ===== */
+/* === RESET BASICO === */
 * {
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* ===== Body ===== */
+/* === BODY === */
 body {
-    background-color: #f4f4f9;
+    background-color: #f0f2f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 50px 20px;
+    min-height: 100vh;
+}
+
+/* === TÍTULO === */
+h1 {
+    margin-bottom: 20px;
     color: #333;
-    padding: 20px;
-    line-height: 1.5;
+    font-size: 2rem;
 }
 
-/* ===== Cabeçalhos ===== */
-h1, h2, h3 {
-    margin-bottom: 10px;
-    color: #2c3e50;
-}
-
-/* ===== Inputs e Botões ===== */
-input[type="text"], input[type="number"] {
-    padding: 10px;
-    margin-right: 10px;
+/* === INPUT E BOTÃO === */
+#taskInput {
+    padding: 10px 15px;
+    font-size: 1rem;
     border: 1px solid #ccc;
     border-radius: 5px;
-    width: 200px;
-    font-size: 14px;
+    width: 250px;
+    margin-right: 10px;
+    transition: border-color 0.3s;
 }
 
-button {
-    padding: 10px 15px;
-    background-color: #3498db;
-    color: white;
+#taskInput:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+#addBtn {
+    padding: 10px 20px;
+    font-size: 1rem;
     border: none;
     border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
     cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.3s;
 }
 
-button:hover {
-    background-color: #2980b9;
+#addBtn:hover {
+    background-color: #0056b3;
 }
 
-/* ===== Listas ===== */
-ul, ol {
-    list-style: none;
-    padding-left: 0;
-    margin-top: 10px;
-}
-
-li {
-    padding: 8px 12px;
-    background-color: #ecf0f1;
-    margin-bottom: 5px;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-}
-
-li:hover {
-    background-color: #d0d7de;
-}
-
-/* ===== Divs de resultado ===== */
-div[id^="resultado"], #output, #mensagem, #novaMensagem, #validarTexto, #resultadoGerado, #meuElemento, #resultadoDez, #total {
-    padding: 10px 15px;
-    margin: 10px 0;
-    background-color: #fff;
-    border-left: 4px solid #3498db;
-    border-radius: 5px;
-    min-height: 30px;
-}
-
-/* ===== Layout flexível para inputs + botões ===== */
-.input-group {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-/* Mensagem padrão */
-#mensagem {
+/* === CONTADOR DE TAREFAS PENDENTES === */
+#pending-count {
+    margin: 20px 0;
+    font-size: 1.2rem;
     font-weight: bold;
-    color: #e74c3c; /* vermelho por defeito */
+    color: #555;
 }
 
-/* Mensagem de tarefas OK */
-#mensagem.sem-tarefas {
-    color: #27ae60; /* verde */
+/* === LISTA DE TAREFAS === */
+#list {
+    list-style: none;
+    width: 350px;
 }
 
-/* ===== Pequenos ajustes ===== */
-body > * {
-    margin-bottom: 15px;
+#list li {
+    background-color: #fff;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-/* ===== Exercicio 6: AULA 2 ===== */
-.completed {
+#list li:hover {
+    background-color: #f1f1f1;
+    transform: translateY(-2px);
+}
+
+/* === TAREFA CONCLUÍDA === */
+#list li.completed {
     text-decoration: line-through;
-    color: rgb(128, 128, 128);
+    color: #888;
+    background-color: #e0ffe0;
+}
+
+/* === BOTÃO REMOVER === */
+#list li button {
+    background-color: #ff4d4d;
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+}
+
+#list li button:hover {
+    background-color: #cc0000;
 }

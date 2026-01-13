@@ -56,6 +56,12 @@ renderTasks();
     //Chame uma função para atualizar a visualização no HTML *Exercício 5 — Renderização dinâmica*
    function renderTasks() {
     var taskContainer = document.querySelector("#list");
+    const pendingCountDiv = document.querySelector("#pending-count");
+    
+    // Exercicio 9 - Calcula o número de tarefas pendentes
+    const pendingTasks = taskList.filter(task => !task.concluded);
+    pendingCountDiv.textContent = `Tarefas pendentes: ${pendingTasks.length}`;
+
     taskContainer.innerHTML = ""; // Limpa a lista antes de renderizar
 
     taskList.forEach(function (task) {
@@ -74,7 +80,14 @@ renderTasks();
             task.concluded = !task.concluded; // Marca ou desmarca
             renderTasks(); // Atualiza a lista
         });
-
+        // Exercicio 8 — Editar título da tarefa com duplo clique
+        li.addEventListener("dblclick", function () {
+            const newTitle = prompt("Novo título para a tarefa:", task.title);
+            if (newTitle !== null && newTitle.trim() !== "") {
+                task.title = newTitle.trim();
+                renderTasks(); // Atualiza a lista
+            }
+        });
         //Exercício 7 — Remover tarefa
         //Adiciona um botão "Remover" ao lado de cada tarefa na lista.
         var removeBtn = document.createElement("button");
@@ -88,16 +101,5 @@ renderTasks();
         taskContainer.appendChild(li);
     });
 }
-//Exercício 9 - Altera o nome da tarefa já existente
-//Permite editar o título de uma tarefa já existente na lista
 
-//(Implementação opcional, pode ser feita com duplo clique ou botão de editar)
-        addEventListener("dblclick", function () {
-            var newTitle = prompt("Novo título para a tarefa:", "");
-                if (newTitle !== null && newTitle.trim() !== "") {
-                    task.title = newTitle.trim();
-                    renderTasks(); // Atualiza a lista
-                }       
-        });
-          
     
