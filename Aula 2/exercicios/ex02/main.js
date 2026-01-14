@@ -40,21 +40,21 @@ buttonAdd.addEventListener("click", function () {
 function renderTasks() {
     var taskContainer = document.querySelector("#list");
     var pendingCountDiv = document.querySelector("#pending-count");
-    // Exercicio 9 - Calcula o número de tarefas pendentes
+    // Exercicio 9 - o número de tarefas pendentes
     var pendingTasks = taskList.filter(function (task) { return !task.concluded; });
     pendingCountDiv.textContent = "Tarefas pendentes: ".concat(pendingTasks.length);
     taskContainer.innerHTML = ""; // Limpa a lista antes de renderizar
     taskList.forEach(function (task) {
         var li = document.createElement("li");
         li.textContent = task.title;
-        // Aplica classe CSS com base no estado
+        // *Exercício 6 — Aplica estilo no CSS com base na classe
         if (task.concluded) {
             li.classList.add("completed");
         }
         else {
             li.classList.remove("completed");
         }
-        // Evento para alternar concluída
+        // Evento para alternar concluída (line-through)
         li.addEventListener("click", function () {
             task.concluded = !task.concluded; // Marca ou desmarca
             renderTasks(); // Atualiza a lista
