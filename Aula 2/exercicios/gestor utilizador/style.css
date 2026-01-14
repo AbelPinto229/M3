@@ -1,111 +1,53 @@
-/* === RESET BASICO === */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+/* Container principal que segura todos os cartões */
+#lista-utilizadores {
+    display: flex;          /* Organiza os cartões em linha */
+    flex-wrap: wrap;        /* Quebra linha quando não cabem */
+    gap: 16px;              /* Espaço entre os cartões */
+    padding: 20px;          /* Espaço interno do container */
+    justify-content: flex-start; /* Alinha os cartões à esquerda */
 }
 
-/* === BODY === */
-body {
-    background-color: #f0f2f5;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 50px 20px;
-    min-height: 100vh;
+/* Cada cartão individual */
+.user-card {
+    border: 1px solid #ccc;        /* Borda leve */
+    border-radius: 10px;           /* Cantos arredondados */
+    padding: 15px;                 /* Espaço interno do cartão */
+    width: 220px;                  /* Largura fixa do cartão */
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.1); /* Sombra suave */
+    background-color: #f9f9f9;    /* Fundo claro */
+    transition: transform 0.2s, box-shadow 0.2s; /* Animação ao passar o mouse */
 }
 
-/* === TÍTULO === */
-h1 {
-    margin-bottom: 20px;
+/* Efeito hover (quando o mouse passa por cima) */
+.user-card:hover {
+    transform: translateY(-5px);  /* Eleva o cartão */
+    box-shadow: 4px 4px 15px rgba(0,0,0,0.2); /* Sombra mais intensa */
+}
+
+/* Nome do utilizador */
+.user-card h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.2em;
     color: #333;
-    font-size: 2rem;
 }
 
-/* === INPUT E BOTÃO === */
-#taskInput {
-    padding: 10px 15px;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    width: 250px;
-    margin-right: 10px;
-    transition: border-color 0.3s;
-}
-
-#taskInput:focus {
-    outline: none;
-    border-color: #007bff;
-}
-
-#addBtn {
-    padding: 10px 20px;
-    font-size: 1rem;
-    border: none;
-    border-radius: 5px;
-    background-color: #007bff;
-    color: #fff;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-top: 10px;
-}
-
-#addBtn:hover {
-    background-color: #0056b3;
-}
-
-/* === CONTADOR DE TAREFAS PENDENTES === */
-#pending-count {
-    margin: 20px 0;
-    font-size: 1.2rem;
-    font-weight: bold;
+/* Texto do email e estado */
+.user-card p {
+    margin: 4px 0;
+    font-size: 0.95em;
     color: #555;
 }
 
-/* === LISTA DE TAREFAS === */
-#list {
-    list-style: none;
-    width: 350px;
+/* Estado ativo/inativo com cores diferentes */
+.user-card p:last-child {
+    font-weight: bold;
 }
 
-#list li {
-    background-color: #fff;
-    padding: 12px 15px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+.user-card p:last-child::before {
+    content: "• ";
+    color: green;
 }
 
-#list li:hover {
-    background-color: #f1f1f1;
-    transform: translateY(-2px);
-}
-
-/* === TAREFA CONCLUÍDA === */
-#list li.completed {
-    text-decoration: line-through;
-    color: #888;
-    background-color: #e0ffe0;
-}
-
-/* === BOTÃO REMOVER === */
-#list li button {
-    background-color: #ff4d4d;
-    border: none;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.3s;
-}
-
-#list li button:hover {
-    background-color: #cc0000;
+.user-card p:last-child.inativo::before {
+    color: red;
 }
