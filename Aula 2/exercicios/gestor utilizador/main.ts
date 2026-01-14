@@ -39,13 +39,13 @@ listaUtilizadores.push(new UtilizadorClass(2,"Joel", "jjdszp@hotmail.com"))
 //Exercício 4 — Estrutura HTML (cartões)
 //Cria no HTML um contentor para mostrar os utilizadores. (Foi criado no index.html)
 //- Cria uma div principal para conter a lista. 
-const container = document.getElementById("lista-utilizadores") as HTMLUListElement;
+const container = document.getElementById("lista-utilizadores") as HTMLDivElement;
 
 // - Para cada item do array, cria uma nova div. 
 listaUtilizadores.forEach(utilizador => {
 // - Cada div representa um cartão com os dados do objeto. 
     const userCardDiv = document.createElement("div") as HTMLDivElement;
-    userCardDiv.classList.add("user-card ");
+    userCardDiv.classList.add("user-card");
     userCardDiv.innerHTML = `
         <h3>${utilizador.name}</h3>
         <p>Email: ${utilizador.email}</p>
@@ -54,3 +54,27 @@ listaUtilizadores.forEach(utilizador => {
 // - Adiciona essa div ao contentor principal. 
     container.appendChild(userCardDiv);
 });
+
+// Exercício 5 — Função de renderização
+// Função que cria os cartões de utilizadores
+function renderUtilizadores(lista: Utilizador[]): void {
+    const container = document.getElementById("lista-utilizadores") as HTMLDivElement;
+    container.innerHTML = ""; // Limpa o container antes de renderizar
+
+    lista.forEach(utilizador => {
+        const userCardDiv = document.createElement("div");
+        userCardDiv.classList.add("user-card");
+
+        // Cria o cartão com estado colorido
+        userCardDiv.innerHTML = `
+            <h3>${utilizador.name}</h3>
+            <p>Email: ${utilizador.email}</p>
+            <p class="estado ${utilizador.ativo ? "ativo" : "inativo"}">
+                Estado: ${utilizador.ativo ? "Ativo" : "Inativo"}
+            </p>
+        `;
+
+        container.appendChild(userCardDiv);
+    });
+}
+renderUtilizadores(listaUtilizadores);

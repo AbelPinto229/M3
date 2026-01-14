@@ -28,8 +28,22 @@ var container = document.getElementById("lista-utilizadores");
 listaUtilizadores.forEach(function (utilizador) {
     // - Cada div representa um cartão com os dados do objeto. 
     var userCardDiv = document.createElement("div");
-    userCardDiv.classList.add("user-card ");
+    userCardDiv.classList.add("user-card");
     userCardDiv.innerHTML = "\n        <h3>".concat(utilizador.name, "</h3>\n        <p>Email: ").concat(utilizador.email, "</p>\n        <p>Estado: ").concat(utilizador.ativo ? "Ativo" : "Inativo", "</p>");
     // - Adiciona essa div ao contentor principal. 
     container.appendChild(userCardDiv);
 });
+// Exercício 5 — Função de renderização
+// Função que cria os cartões de utilizadores
+function renderUtilizadores(lista) {
+    var container = document.getElementById("lista-utilizadores");
+    container.innerHTML = ""; // Limpa o container antes de renderizar
+    lista.forEach(function (utilizador) {
+        var userCardDiv = document.createElement("div");
+        userCardDiv.classList.add("user-card");
+        // Cria o cartão com estado colorido
+        userCardDiv.innerHTML = "\n            <h3>".concat(utilizador.name, "</h3>\n            <p>Email: ").concat(utilizador.email, "</p>\n            <p class=\"estado ").concat(utilizador.ativo ? "ativo" : "inativo", "\">\n                Estado: ").concat(utilizador.ativo ? "Ativo" : "Inativo", "\n            </p>\n        ");
+        container.appendChild(userCardDiv);
+    });
+}
+renderUtilizadores(listaUtilizadores);
