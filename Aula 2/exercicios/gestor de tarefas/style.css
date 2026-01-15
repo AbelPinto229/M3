@@ -129,7 +129,7 @@ h1 {
 /* Exercício 11 — Categoria com cores diferentes */
 .task-category {
     font-weight: bold;
-    margin-left: 6px;
+    margin: 10px;
 }
 
 /* classes para cores fixas */
