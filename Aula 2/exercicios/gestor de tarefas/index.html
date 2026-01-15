@@ -1,21 +1,40 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-PT">
 <head>
-  <title>Task Manager</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Tarefas</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h1>Gestor de Tarefas</h1>
- <!-- Exercicio 3 -->
-  <ul id="list"></ul>
+    <h1>Lista de Tarefas</h1>
 
-<!-- Exercicio 4 -->
-  <input id="taskInput" type="text" placeholder="Nova tarefa">
-  <button id="addBtn">Adicionar</button>
-<!-- Exercicio 9 -->
-<div id="pending-count"></div>
+    <!-- === INPUTS E BOTÕES === -->
+    <div id="buttonContainer">
+        <input type="text" id="taskInput" placeholder="Nova tarefa">
+        <select id="categorySelect">
+            <option value="Trabalho">Trabalho</option>
+            <option value="Pessoal">Pessoal</option>
+            <option value="Estudo">Estudo</option>
+        </select>
+        <button id="addBtn">Adicionar</button>
+        <button id="sortBtn">Ordenar A-Z</button>
+        <button id="clearCompletedBtn">Limpar Concluídas</button>
+    </div>
 
-<script src="main.js"></script>
+    <!-- === CONTADOR DE PENDENTES === -->
+    <div id="pending-count">Tarefas pendentes: 0</div>
+
+    <!-- === PESQUISA === -->
+    <input type="text" id="searchInput" placeholder="Pesquisar tarefas...">
+    
+    <!-- === LISTA DE TAREFAS === -->
+    <ul id="list">
+        <!-- Tarefas vão ser inseridas aqui dinamicamente pelo TypeScript -->
+    </ul>
+
+    <script src="main.js"></script> <!-- Teu TypeScript compilado -->
 </body>
 </html>
+

@@ -11,7 +11,7 @@ body {
     background-color: #f0f2f5;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch; /* ocupa toda a largura */
     padding: 50px 20px;
     min-height: 100vh;
 }
@@ -21,39 +21,56 @@ h1 {
     margin-bottom: 20px;
     color: #333;
     font-size: 2rem;
+    text-align: center;
 }
 
-/* === INPUT E BOTÃO === */
-#taskInput {
+/* === CONTAINER DE INPUTS E BOTÕES === */
+#buttonContainer {
+    display: flex;
+    flex-wrap: wrap; /* quebra linha só se necessário */
+    gap: 10px; /* espaço entre elementos */
+    margin-bottom: 20px;
+}
+
+/* === INPUT E SELECT === */
+#taskInput, #categorySelect {
     padding: 10px 15px;
     font-size: 1rem;
     border: 1px solid #ccc;
     border-radius: 5px;
-    width: 250px;
-    margin-right: 10px;
     transition: border-color 0.3s;
 }
 
-#taskInput:focus {
-    outline: none;
-    border-color: #007bff;
+#taskInput {
+    width: 250px; /* maior que select */
 }
 
-#addBtn {
-    padding: 10px 20px;
-    font-size: 1rem;
+#categorySelect {
+    width: 150px;
+}
+
+/* === BOTÕES PEQUENOS E HORIZONTAIS === */
+#addBtn, #sortBtn, #clearCompletedBtn {
+    padding: 6px 12px; /* menores */
+    font-size: 0.9rem;
     border: none;
     border-radius: 5px;
-    background-color: #007bff;
     color: #fff;
     cursor: pointer;
     transition: background-color 0.3s;
-    margin-top: 10px;
+    flex: none; /* não cresce */
+    margin-top: 0; /* sem margem vertical */
 }
 
-#addBtn:hover {
-    background-color: #0056b3;
-}
+/* cores dos botões */
+#addBtn { background-color: #007bff; }
+#addBtn:hover { background-color: #0056b3; }
+
+#sortBtn { background-color: #28a745; }
+#sortBtn:hover { background-color: #1e7e34; }
+
+#clearCompletedBtn { background-color: #dc3545; }
+#clearCompletedBtn:hover { background-color: #a71d2a; }
 
 /* === CONTADOR DE TAREFAS PENDENTES === */
 #pending-count {
@@ -66,13 +83,20 @@ h1 {
 /* === LISTA DE TAREFAS === */
 #list {
     list-style: none;
-    width: 350px;
+    width: 100%;
+    max-width: 1200px;
+    display: flex; /* horizontal */
+    flex-wrap: wrap; /* quebra linha se necessário */
+    gap: 15px;
+    margin-bottom: 20px;
 }
 
 #list li {
+    flex: 1 1 250px; /* mínimo 250px, cresce se houver espaço */
+    min-width: 250px;
+    max-width: 300px;
     background-color: #fff;
     padding: 12px 15px;
-    margin-bottom: 10px;
     border-radius: 8px;
     display: flex;
     justify-content: space-between;
@@ -88,13 +112,33 @@ h1 {
 }
 
 /* === TAREFA CONCLUÍDA === */
-#list li.completed {
+/* Exercício 6 — Título riscado se concluída */
+.task-title.completed {
     text-decoration: line-through;
-    color: #888;
-    background-color: #e0ffe0;
 }
 
+/* Exercício 1 — Data de conclusão */
+.completed-date {
+    text-decoration: none;
+    font-size: 0.85em;
+    color: #666;
+    margin-left: 6px;
+}
+
+/* === CATEGORIAS === */
+/* Exercício 11 — Categoria com cores diferentes */
+.task-category {
+    font-weight: bold;
+    margin-left: 6px;
+}
+
+/* classes para cores fixas */
+.task-category.trabalho { color: #1E90FF; }
+.task-category.pessoal { color: #32CD32; }
+.task-category.estudo { color: #FF8C00; }
+
 /* === BOTÃO REMOVER === */
+/* Exercício 7 — Remover tarefa */
 #list li button {
     background-color: #ff4d4d;
     border: none;
