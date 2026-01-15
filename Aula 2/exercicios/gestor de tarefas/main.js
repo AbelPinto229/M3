@@ -2,7 +2,6 @@
 // EXERCÍCIOS GUIADOS 2 - MAIN.TS
 // ===============================
 // Exercício 2 — Criar classe TarefaClass
-// Cria uma classe TaskClass que implementa a interface Task.
 var TaskClass = /** @class */ (function () {
     // Exercício 2a — Constructor que recebe id, título e categoria
     function TaskClass(id, title, categoria) {
@@ -19,17 +18,15 @@ var TaskClass = /** @class */ (function () {
     return TaskClass;
 }());
 // Exercício 3 — Array de objetos
-// Cria um array chamado taskList que armazena vários objetos TaskClass.
 var taskList = [
     new TaskClass(1, "Rever slides aula 2", "Estudo"),
     new TaskClass(2, "Fazer exercícios guiados", "Estudo"),
     new TaskClass(3, "Fazer exercícios autonomos", "Estudo")
 ];
-// Chamada inicial para renderizar a lista de tarefas
-renderTasks();
+// Variável para pesquisa dinâmica (Exercício 5)
+var searchTerm = "";
 // ===============================
 // Exercício 4 — Adicionar tarefa via input
-// Cria campos para texto e categoria, e botão para adicionar novas tarefas
 var input = document.querySelector("#taskInput");
 var categorySelect = document.querySelector("#categorySelect");
 var buttonAdd = document.querySelector("#addBtn");
@@ -37,41 +34,48 @@ buttonAdd.addEventListener("click", function () {
     var title = input.value.trim();
     if (!title)
         return;
-    // Pega a categoria escolhida pelo usuário
     var categoria = categorySelect.value;
-    // Cria nova tarefa com ID único
     var newTask = new TaskClass(Date.now(), title, categoria);
     taskList.push(newTask);
-    // Limpa input e reset do select
     input.value = "";
     categorySelect.value = "Trabalho";
-    // Atualiza a renderização
     renderTasks();
 });
 // ===============================
 // Exercício 12 — Ordenação Alfabética
-// Adiciona botão para ordenar tarefas pelo título (A-Z)
 var sortBtn = document.querySelector("#sortBtn");
 sortBtn.addEventListener("click", function () {
     taskList.sort(function (a, b) { return a.title.localeCompare(b.title, "pt-PT"); });
     renderTasks();
 });
-// Exercício 5 — Renderização dinâmica
+// ===============================
+// Exercício 14 — Limpar todas as tarefas concluídas
+var clearCompletedBtn = document.querySelector("#clearCompletedBtn");
+clearCompletedBtn.addEventListener("click", function () {
+    taskList = taskList.filter(function (task) { return !task.concluded; });
+    renderTasks();
+});
+// ===============================
+// Exercício 5 — Pesquisa Dinâmica
+var searchInput = document.querySelector("#searchInput");
+searchInput.addEventListener("input", function () {
+    searchTerm = searchInput.value.trim().toLowerCase();
+    renderTasks();
+});
+// ===============================
+// Exercício 5,6,7,8,9,11,13 — Renderização dinâmica
 function renderTasks() {
     var taskContainer = document.querySelector("#list");
     var pendingCountDiv = document.querySelector("#pending-count");
-    // ---------------------------
-    // Exercício 15 — Filtra tarefas pelo texto de pesquisa
+    // Filtra tarefas pelo texto da pesquisa (Exercício 5)
     var filteredTasks = taskList.filter(function (task) {
         return task.title.toLowerCase().includes(searchTerm);
     });
-    // ---------------------------
-    // Exercício 9 — Calcula o número de tarefas pendentes (apenas filtradas)
+    // Calcula tarefas pendentes (Exercício 9)
     var pendingTasks = filteredTasks.filter(function (t) { return !t.concluded; });
     pendingCountDiv.textContent = "Tarefas pendentes: ".concat(pendingTasks.length);
-    // Limpa container antes de renderizar
+    // Limpa container
     taskContainer.innerHTML = "";
-    // ---------------------------
     // Percorre todas as tarefas filtradas
     filteredTasks.forEach(function (task) {
         var li = document.createElement("li");
@@ -139,7 +143,7 @@ function renderTasks() {
         var removeBtn = document.createElement("button");
         removeBtn.textContent = "Remover";
         removeBtn.addEventListener("click", function (e) {
-            e.stopPropagation(); // evita disparar o click do li
+            e.stopPropagation();
             taskList = taskList.filter(function (t) { return t.id !== task.id; });
             renderTasks();
         });
@@ -148,18 +152,5 @@ function renderTasks() {
         taskContainer.appendChild(li);
     });
 }
-// ---------------------------
-// Exercício 14 — Limpar todas as tarefas concluídas
-var clearCompletedBtn = document.querySelector("#clearCompletedBtn");
-clearCompletedBtn.addEventListener("click", function () {
-    taskList = taskList.filter(function (task) { return !task.concluded; }); // mantém apenas as pendentes
-    renderTasks(); // atualiza a lista
-});
-// ---------------------------
-// Exercício 15 — Pesquisa Dinâmica
-var searchInput = document.querySelector("#searchInput");
-var searchTerm = ""; // armazena texto digitado
-searchInput.addEventListener("input", function () {
-    searchTerm = searchInput.value.trim().toLowerCase(); // normaliza para lowercase
-    renderTasks(); // atualiza lista filtrada
-});
+// Chamada inicial
+renderTasks();
