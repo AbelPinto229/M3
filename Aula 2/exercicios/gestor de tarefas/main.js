@@ -64,21 +64,24 @@ searchInput.addEventListener("input", function () {
 });
 // ===============================
 // Exercício 5,6,7,8,9,11,13 — Renderização dinâmica
+// ===============================
+// Exercício 5 — Renderização dinâmica
 function renderTasks() {
     var taskContainer = document.querySelector("#list");
     var pendingCountDiv = document.querySelector("#pending-count");
-    // Filtra tarefas pelo texto da pesquisa (Exercício 5)
-    var filteredTasks = taskList.filter(function (task) {
-        return task.title.toLowerCase().includes(searchTerm);
-    });
-    // Calcula tarefas pendentes (Exercício 9)
-    var pendingTasks = filteredTasks.filter(function (t) { return !t.concluded; });
+    // ===============================
+    // Exercício 9 — Calcula o número de tarefas pendentes
+    var pendingTasks = taskList.filter(function (t) { return !t.concluded; });
     pendingCountDiv.textContent = "Tarefas pendentes: ".concat(pendingTasks.length);
-    // Limpa container
+    // Limpa container antes de renderizar
     taskContainer.innerHTML = "";
-    // Percorre todas as tarefas filtradas
-    filteredTasks.forEach(function (task) {
+    // Percorre todas as tarefas
+    taskList.forEach(function (task) {
         var li = document.createElement("li");
+        // ---------------------------
+        // Wrapper para conteúdo textual
+        var contentDiv = document.createElement("div");
+        contentDiv.classList.add("task-content");
         // ---------------------------
         // Exercício 6 — Título da tarefa
         var titleSpan = document.createElement("span");
@@ -86,9 +89,9 @@ function renderTasks() {
         titleSpan.classList.add("task-title");
         if (task.concluded)
             titleSpan.classList.add("completed");
-        li.appendChild(titleSpan);
+        contentDiv.appendChild(titleSpan);
         // ---------------------------
-        // Exercício 13 — Categoria
+        // Exercício 11 — Categoria
         var categorySpan = document.createElement("span");
         categorySpan.textContent = " [".concat(task.categoria, "]");
         categorySpan.classList.add("task-category");
@@ -103,9 +106,9 @@ function renderTasks() {
                 categorySpan.style.color = "#FF8C00";
                 break;
         }
-        li.appendChild(categorySpan);
+        contentDiv.appendChild(categorySpan);
         // ---------------------------
-        // Exercício 11 — Data de conclusão
+        // Exercício 1 — Data de conclusão
         if (task.concluded && task.dataConclusao) {
             var dataSpan = document.createElement("span");
             var dataFormatada = task.dataConclusao.toLocaleString("pt-PT", {
@@ -116,8 +119,10 @@ function renderTasks() {
             });
             dataSpan.textContent = " (Conclu\u00EDda em: ".concat(dataFormatada, ")");
             dataSpan.classList.add("completed-date");
-            li.appendChild(dataSpan);
+            contentDiv.appendChild(dataSpan);
         }
+        // Adiciona o conteúdo textual ao li
+        li.appendChild(contentDiv);
         // ---------------------------
         // Alternar concluída (click)
         li.addEventListener("click", function () {
@@ -143,10 +148,11 @@ function renderTasks() {
         var removeBtn = document.createElement("button");
         removeBtn.textContent = "Remover";
         removeBtn.addEventListener("click", function (e) {
-            e.stopPropagation();
+            e.stopPropagation(); // evita disparar o click do li
             taskList = taskList.filter(function (t) { return t.id !== task.id; });
             renderTasks();
         });
+        // Adiciona o botão ao li
         li.appendChild(removeBtn);
         // Adiciona tarefa à lista
         taskContainer.appendChild(li);

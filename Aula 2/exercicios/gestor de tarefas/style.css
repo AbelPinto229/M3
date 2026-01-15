@@ -92,18 +92,24 @@ h1 {
 }
 
 #list li {
-    flex: 1 1 250px; /* mínimo 250px, cresce se houver espaço */
-    min-width: 250px;
-    max-width: 300px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; /* permite que o conteúdo quebre linha */
+    flex-direction: row;
     background-color: #fff;
     padding: 12px 15px;
     border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.2s;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    word-break: break-word; /* quebra palavras longas */
+}
+
+.task-content {
+    display: flex;
+    flex-direction: column; /* título, categoria e data ficam empilhados */
+    gap: 4px; /* espaçamento entre linhas de texto */
+    flex: 1; /* ocupa todo o espaço disponível */
 }
 
 #list li:hover {
