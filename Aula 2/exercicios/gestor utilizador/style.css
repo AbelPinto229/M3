@@ -1,69 +1,186 @@
-/* Container principal */
-.utilizadores-container {
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Corpo da página */
+body {
     display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    background: #f0f2f5;
     padding: 20px;
 }
 
-/* Cartão individual do utilizador */
-.user-card {
-    border: 1px solid #ccc;
+/* Formulário */
+form.form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #ffffff;
+    padding: 20px 30px;
     border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    width: 280px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+form.form input {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+form.form button.btn-adicionar {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+form.form button.btn-adicionar:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+/* Botões de filtro centralizados */
+#form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+button.btn-filtrar {
+    padding: 8px 14px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    background-color: #6c757d;
+    color: white;
+    font-size: 13px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+button.btn-filtrar:hover {
+    background-color: #5a6268;
+    transform: scale(1.05);
+}
+
+/* Container dos utilizadores */
+#lista-utilizadores {
+    display: flex;
+    flex-wrap: wrap; /* permite quebrar linha se não couber */
+    justify-content: center; /* centraliza os cartões */
+    gap: 15px; /* espaço entre cartões */
+    width: 100%;
+    max-width: 1200px;
+}
+
+/* Cartões de utilizadores */
+.user-card {
+    background-color: #ffffff;
     padding: 15px;
-    width: 220px;
-    background-color: #f9f9f9;
-    box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    width: 180px; /* menor largura */
+    text-align: center;
+    position: relative;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
 }
 
-/* Efeito hover */
 .user-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 4px 4px 15px rgba(0,0,0,0.2);
+    transform: translateY(-7px) scale(1.03);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
-/* Nome */
 .user-card h3 {
-    margin: 0 0 8px 0;
-    font-size: 1.2em;
+    margin-bottom: 8px;
     color: #333;
+    font-size: 16px;
 }
 
-/* Email e estado */
 .user-card p {
-    margin: 4px 0;
-    font-size: 0.95em;
+    margin-bottom: 6px;
+    font-size: 13px;
     color: #555;
 }
 
-/* Estado ativo/inativo com cores */
-.user-card p.estado {
+/* Estado dos utilizadores */
+.estado {
     font-weight: bold;
 }
 
-.user-card p.estado.ativo::before {
-    content: "• ";
+.estado.ativo {
     color: green;
 }
 
-.user-card p.estado.inativo::before {
-    content: "• ";
+.estado.inativo {
     color: red;
 }
 
-/* Estado do utilizador */
-.user-card p.estado {
-    font-weight: bold;
+/* Botão de ativar/desativar */
+.user-card button {
     margin-top: 8px;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s, transform 0.2s;
 }
 
-/* Verde se ativo */
-.user-card p.estado.ativo {
-    color: green;
+.user-card button.ativo {
+    background-color: green;
+    color: white;
 }
 
-/* Vermelho se inativo */
-.user-card p.estado.inativo {
-    color: red;
+.user-card button.ativo:hover {
+    background-color: darkgreen;
+    transform: scale(1.05);
+}
+
+.user-card button.inativo {
+    background-color: red;
+    color: white;
+}
+
+.user-card button.inativo:hover {
+    background-color: darkred;
+    transform: scale(1.05);
+}
+
+/* Contador de utilizadores */
+#contador-utilizadores {
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+/* Responsividade */
+@media (max-width: 700px) {
+    .user-card {
+        width: 40%; /* dois por linha em tablets */
+    }
+}
+
+@media (max-width: 500px) {
+    .user-card {
+        width: 90%; /* um por linha em telemóveis */
+    }
+
+    form.form {
+        width: 90%;
+    }
 }
