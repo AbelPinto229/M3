@@ -28,7 +28,7 @@ form.form {
     padding: 20px 30px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    width: 400px; /* aumenta para caber lado a lado */
+    width: 400px;
     max-width: 100%;
 }
 
@@ -37,9 +37,10 @@ form.form {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    flex: 1; /* ocupa espaço restante */
+    flex: 1;
 }
 
+/* Inputs */
 form.form input {
     padding: 10px;
     border-radius: 5px;
@@ -47,6 +48,7 @@ form.form input {
     font-size: 14px;
 }
 
+/* Botão de adicionar usuário */
 form.form button.btn-add {
     padding: 10px;
     border: none;
@@ -63,13 +65,23 @@ form.form button.btn-add:hover {
     transform: scale(1.05);
 }
 
+/* Campo de busca */
+#searchInput {
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    width: 100%;
+    margin: 20px;
+}
+
 /* Filters container */
 .filter-buttons {
     display: flex;
-    flex-direction: column; /* botões empilhados na vertical */
+    flex-direction: column; /* botões empilhados */
     gap: 10px;
     justify-content: flex-start;
-    flex-shrink: 0; /* não encolhe */
+    flex-shrink: 0;
 }
 
 /* Filter buttons */
@@ -78,23 +90,23 @@ button.btn-filter {
     border-radius: 5px;
     border: none;
     cursor: pointer;
-    background-color: #a8dadc; /* soft blue */
+    background-color: #a8dadc;
     color: #1d3557;
     font-size: 13px;
     transition: background-color 0.3s, transform 0.2s;
 }
 
 button.btn-filter:hover {
-    background-color: #83c5be; /* darker shade on hover */
+    background-color: #83c5be;
     transform: scale(1.05);
 }
 
 /* Users container */
 #user-list {
     display: flex;
-    flex-wrap: wrap; /* allows cards to wrap to the next line */
-    justify-content: center; /* center the cards */
-    gap: 15px; /* spacing between cards */
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
     width: 100%;
     max-width: 1200px;
     margin: 10px;
@@ -143,24 +155,49 @@ button.btn-filter:hover {
     color: red;
 }
 
-/* Activate / Deactivate button inside user card */
-.user-card button {
-    margin-top: 8px;
+/* Container de botões dentro do card */
+.user-card .card-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+/* Botão Remover */
+.user-card button.remove {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #e74c3c;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.user-card button.remove:hover {
+    background-color: #c0392b;
+    transform: scale(1.05);
+}
+
+/* Botão Ativar/Desativar */
+.user-card button.active,
+.user-card button.inactive {
     padding: 6px 10px;
     border: none;
     border-radius: 5px;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s, transform 0.2s;
+    transition: background-color 0.3s, transform 0.2s;
 }
 
 .user-card button.active {
-    background-color: #00c853; /* green */
+    background-color: #00c853; /* verde */
     color: white;
 }
 
 .user-card button.active:hover {
-    background-color: #6fa36f; /* darker green on hover */
+    background-color: #6fa36f;
     transform: scale(1.05);
 }
 
@@ -170,24 +207,25 @@ button.btn-filter:hover {
 }
 
 .user-card button.inactive:hover {
-    background-color: #cd5c5c; /* darker red on hover */
+    background-color: #cd5c5c;
     transform: scale(1.05);
 }
 
 /* User counter */
 #user-counter {
     font-size: 16px;
+    font-weight: bold;
     margin-bottom: 15px;
 }
 
 /* Responsiveness */
 @media (max-width: 700px) {
     .user-card {
-        width: 40%; /* two cards per row on tablets */
+        width: 40%;
     }
 
     form.form {
-        flex-direction: column; /* empilha verticalmente em telas pequenas */
+        flex-direction: column;
         width: 90%;
     }
 
@@ -196,7 +234,7 @@ button.btn-filter:hover {
     }
 
     .filter-buttons {
-        flex-direction: row; /* botões lado a lado */
+        flex-direction: row;
         justify-content: center;
         flex-wrap: wrap;
         gap: 10px;
@@ -206,6 +244,6 @@ button.btn-filter:hover {
 
 @media (max-width: 500px) {
     .user-card {
-        width: 90%; /* one card per row on mobile */
+        width: 90%;
     }
 }

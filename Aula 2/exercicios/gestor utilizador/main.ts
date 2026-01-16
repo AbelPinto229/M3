@@ -26,9 +26,10 @@ class UserClass implements User {
 }
 
 let userList: UserClass[] = [];
+let nextID: number =1;
 
-userList.push(new UserClass(Date.now(), "Abel", "ajdszp@hotmail.com"));
-userList.push(new UserClass(Date.now(), "Joel", "jjdszp@hotmail.com"));
+userList.push(new UserClass(nextID++, "Abel", "ajdszp@hotmail.com"));
+userList.push(new UserClass(nextID++, "Joel", "jjdszp@hotmail.com"));
 
 const container = document.getElementById("user-list") as HTMLDivElement;
 renderUsers(userList);
@@ -41,30 +42,47 @@ function renderUsers(list: UserClass[]): void {
         const userCardDiv = document.createElement("div");
         userCardDiv.classList.add("user-card");
 
+        // Conteúdo do card
         userCardDiv.innerHTML = `
             <h3>${user.name}</h3>
             <p>Email: ${user.email}</p>
             <p class="status ${user.active ? "active" : "inactive"}">
                 Status: ${user.active ? "Active" : "Inactive"}
             </p>
-            <p class="tasks">0 assigned tasks</p>
+            <p class="tasks">${0} assigned tasks</p> <!-- ajuste: usar 0 ou sua taskList -->
         `;
 
+        // Container para os botões
+        const buttonsDiv = document.createElement("div");
+        buttonsDiv.classList.add("card-buttons");
+
+        // Exercicio 11* Botão Remover
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "Remove";
+        removeBtn.classList.add("remove");
+        removeBtn.addEventListener("click", e => {
+            e.stopPropagation();
+            userList = userList.filter(u => u.id !== user.id);
+            renderUsers(userList);
+        });
+
+        // Botão Ativar / Desativar
         const btnToggle = document.createElement("button");
         btnToggle.textContent = user.active ? "Deactivate" : "Activate";
-
-        if (user.active) {
-            btnToggle.classList.add("inactive"); // red
-        } else {
-            btnToggle.classList.add("active"); // green
-        }
-
+        btnToggle.classList.add(user.active ? "inactive" : "active");
         btnToggle.addEventListener("click", () => {
             user.toggleActive();
             renderUsers(userList);
         });
 
-        userCardDiv.appendChild(btnToggle);
+        // Adiciona os botões no container
+        buttonsDiv.appendChild(removeBtn);
+        buttonsDiv.appendChild(btnToggle);
+
+        // Adiciona o container de botões ao card
+        userCardDiv.appendChild(buttonsDiv);
+
+        // Adiciona o card no container principal
         container.appendChild(userCardDiv);
     });
 
@@ -171,3 +189,22 @@ function updateCounter(): void {
     const counter = document.getElementById("user-counter") as HTMLDivElement;
     counter.textContent = `Total users: ${userList.length}`;
 }
+
+//Exercício 12 — Procurar utilizador por nome
+let searchTerm: string = "";
+const searchInput = document.querySelector("#searchInput") as HTMLInputElement;
+
+searchInput.addEventListener("input", () => {
+    searchTerm = searchInput.value.trim().toLowerCase();
+
+    // Filtra usuários pelo nome
+    const filteredUsers = userList.filter(user => 
+        user.name.toLowerCase().includes(searchTerm)
+    );
+
+    // Renderiza a lista filtrada
+    renderUsers(filteredUsers);
+});
+
+
+//Exercício 13 — Exercício 13 — Contador de utilizadores ativos e inativos

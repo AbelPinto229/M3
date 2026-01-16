@@ -12,8 +12,9 @@ var UserClass = /** @class */ (function () {
     return UserClass;
 }());
 var userList = [];
-userList.push(new UserClass(Date.now(), "Abel", "ajdszp@hotmail.com"));
-userList.push(new UserClass(Date.now(), "Joel", "jjdszp@hotmail.com"));
+var nextID = 1;
+userList.push(new UserClass(nextID++, "Abel", "ajdszp@hotmail.com"));
+userList.push(new UserClass(nextID++, "Joel", "jjdszp@hotmail.com"));
 var container = document.getElementById("user-list");
 renderUsers(userList);
 function renderUsers(list) {
@@ -22,20 +23,34 @@ function renderUsers(list) {
     list.forEach(function (user) {
         var userCardDiv = document.createElement("div");
         userCardDiv.classList.add("user-card");
-        userCardDiv.innerHTML = "\n            <h3>".concat(user.name, "</h3>\n            <p>Email: ").concat(user.email, "</p>\n            <p class=\"status ").concat(user.active ? "active" : "inactive", "\">\n                Status: ").concat(user.active ? "Active" : "Inactive", "\n            </p>\n            <p class=\"tasks\">0 assigned tasks</p>\n        ");
+        // Conteúdo do card
+        userCardDiv.innerHTML = "\n            <h3>".concat(user.name, "</h3>\n            <p>Email: ").concat(user.email, "</p>\n            <p class=\"status ").concat(user.active ? "active" : "inactive", "\">\n                Status: ").concat(user.active ? "Active" : "Inactive", "\n            </p>\n            <p class=\"tasks\">").concat(0, " assigned tasks</p> <!-- ajuste: usar 0 ou sua taskList -->\n        ");
+        // Container para os botões
+        var buttonsDiv = document.createElement("div");
+        buttonsDiv.classList.add("card-buttons");
+        // Exercicio 11* Botão Remover
+        var removeBtn = document.createElement("button");
+        removeBtn.textContent = "Remove";
+        removeBtn.classList.add("remove");
+        removeBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            userList = userList.filter(function (u) { return u.id !== user.id; });
+            renderUsers(userList);
+        });
+        // Botão Ativar / Desativar
         var btnToggle = document.createElement("button");
         btnToggle.textContent = user.active ? "Deactivate" : "Activate";
-        if (user.active) {
-            btnToggle.classList.add("inactive"); // red
-        }
-        else {
-            btnToggle.classList.add("active"); // green
-        }
+        btnToggle.classList.add(user.active ? "inactive" : "active");
         btnToggle.addEventListener("click", function () {
             user.toggleActive();
             renderUsers(userList);
         });
-        userCardDiv.appendChild(btnToggle);
+        // Adiciona os botões no container
+        buttonsDiv.appendChild(removeBtn);
+        buttonsDiv.appendChild(btnToggle);
+        // Adiciona o container de botões ao card
+        userCardDiv.appendChild(buttonsDiv);
+        // Adiciona o card no container principal
         container.appendChild(userCardDiv);
     });
     updateCounter();
@@ -121,3 +136,15 @@ function updateCounter() {
     var counter = document.getElementById("user-counter");
     counter.textContent = "Total users: ".concat(userList.length);
 }
+//Exercício 12 — Procurar utilizador por nome
+var searchTerm = "";
+var searchInput = document.querySelector("#searchInput");
+searchInput.addEventListener("input", function () {
+    searchTerm = searchInput.value.trim().toLowerCase();
+    // Filtra usuários pelo nome
+    var filteredUsers = userList.filter(function (user) {
+        return user.name.toLowerCase().includes(searchTerm);
+    });
+    // Renderiza a lista filtrada
+    renderUsers(filteredUsers);
+});
