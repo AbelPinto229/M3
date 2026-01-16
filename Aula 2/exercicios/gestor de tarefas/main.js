@@ -1,32 +1,32 @@
 // ===============================
-// EXERCÍCIOS GUIADOS 2 - MAIN.TS
+// GUIDED EXERCISES 2 - MAIN.TS
 // ===============================
-// Exercício 2 — Criar classe TarefaClass
+// Exercise 2 — Create TaskClass class
 var TaskClass = /** @class */ (function () {
-    // Exercício 2a — Constructor que recebe id, título e categoria
-    function TaskClass(id, title, categoria) {
+    // Exercise 2a — Constructor receiving id, title and category
+    function TaskClass(id, title, category) {
         this.id = id;
         this.title = title;
         this.concluded = false;
-        this.categoria = categoria;
+        this.category = category;
     }
-    // Exercício 2b — Método que marca tarefa como concluída e define data de conclusão
+    // Exercise 2b — Method to mark task as concluded and set conclusion date
     TaskClass.prototype.markConcluded = function () {
         this.concluded = true;
-        this.dataConclusao = new Date();
+        this.conclusionDate = new Date();
     };
     return TaskClass;
 }());
-// Exercício 3 — Array de objetos
+// Exercise 3 — Array of objects
 var taskList = [
-    new TaskClass(1, "Rever slides aula 2", "Estudo"),
-    new TaskClass(2, "Fazer exercícios guiados", "Estudo"),
-    new TaskClass(3, "Fazer exercícios autonomos", "Estudo")
+    new TaskClass(1, "Review class 2 slides", "Study"),
+    new TaskClass(2, "Do guided exercises", "Study"),
+    new TaskClass(3, "Do autonomous exercises", "Study")
 ];
-// Variável para pesquisa dinâmica (Exercício 5)
+// Variable for dynamic search (Exercise 5)
 var searchTerm = "";
 // ===============================
-// Exercício 4 — Adicionar tarefa via input
+// Exercise 4 — Add task via input
 var input = document.querySelector("#taskInput");
 var categorySelect = document.querySelector("#categorySelect");
 var buttonAdd = document.querySelector("#addBtn");
@@ -34,56 +34,56 @@ buttonAdd.addEventListener("click", function () {
     var title = input.value.trim();
     if (!title)
         return;
-    var categoria = categorySelect.value;
-    var newTask = new TaskClass(Date.now(), title, categoria);
+    var category = categorySelect.value;
+    var newTask = new TaskClass(Date.now(), title, category);
     taskList.push(newTask);
     input.value = "";
-    categorySelect.value = "Trabalho";
+    categorySelect.value = "Work";
     renderTasks();
 });
 // ===============================
-// Exercício 12 — Ordenação Alfabética
+// Exercise 12 — Alphabetical Sorting
 var sortBtn = document.querySelector("#sortBtn");
 sortBtn.addEventListener("click", function () {
     taskList.sort(function (a, b) { return a.title.localeCompare(b.title, "pt-PT"); });
     renderTasks();
 });
 // ===============================
-// Exercício 14 — Limpar todas as tarefas concluídas
+// Exercise 14 — Clear all concluded tasks
 var clearCompletedBtn = document.querySelector("#clearCompletedBtn");
 clearCompletedBtn.addEventListener("click", function () {
     taskList = taskList.filter(function (task) { return !task.concluded; });
     renderTasks();
 });
 // ===============================
-// Exercício 5 — Pesquisa Dinâmica
+// Exercise 5 — Dynamic Search
 var searchInput = document.querySelector("#searchInput");
 searchInput.addEventListener("input", function () {
     searchTerm = searchInput.value.trim().toLowerCase();
     renderTasks();
 });
 // ===============================
-// Exercício 5,6,7,8,9,11,13 — Renderização dinâmica
+// Exercise 5,6,7,8,9,11,13 — Dynamic Rendering
 // ===============================
-// Exercício 5 — Renderização dinâmica
+// Exercise 5 — Dynamic rendering
 function renderTasks() {
     var taskContainer = document.querySelector("#list");
     var pendingCountDiv = document.querySelector("#pending-count");
     // ===============================
-    // Exercício 9 — Calcula o número de tarefas pendentes
+    // Exercise 9 — Calculate number of pending tasks
     var pendingTasks = taskList.filter(function (t) { return !t.concluded; });
-    pendingCountDiv.textContent = "Tarefas pendentes: ".concat(pendingTasks.length);
-    // Limpa container antes de renderizar
+    pendingCountDiv.textContent = "Pending tasks: ".concat(pendingTasks.length);
+    // Clear container before rendering
     taskContainer.innerHTML = "";
-    // Percorre todas as tarefas
+    // Loop through all tasks
     taskList.forEach(function (task) {
         var li = document.createElement("li");
         // ---------------------------
-        // Wrapper para conteúdo textual
+        // Wrapper for textual content
         var contentDiv = document.createElement("div");
         contentDiv.classList.add("task-content");
         // ---------------------------
-        // Exercício 6 — Título da tarefa
+        // Exercise 6 — Task title
         var titleSpan = document.createElement("span");
         titleSpan.textContent = task.title;
         titleSpan.classList.add("task-title");
@@ -91,72 +91,72 @@ function renderTasks() {
             titleSpan.classList.add("completed");
         contentDiv.appendChild(titleSpan);
         // ---------------------------
-        // Exercício 11 — Categoria
+        // Exercise 11 — Category
         var categorySpan = document.createElement("span");
-        categorySpan.textContent = " [".concat(task.categoria, "]");
+        categorySpan.textContent = " [".concat(task.category, "]");
         categorySpan.classList.add("task-category");
-        switch (task.categoria) {
-            case "Trabalho":
+        switch (task.category) {
+            case "Work":
                 categorySpan.style.color = "#1E90FF";
                 break;
-            case "Pessoal":
+            case "Personal":
                 categorySpan.style.color = "#32CD32";
                 break;
-            case "Estudo":
+            case "Study":
                 categorySpan.style.color = "#FF8C00";
                 break;
         }
         contentDiv.appendChild(categorySpan);
         // ---------------------------
-        // Exercício 1 — Data de conclusão
-        if (task.concluded && task.dataConclusao) {
-            var dataSpan = document.createElement("span");
-            var dataFormatada = task.dataConclusao.toLocaleString("pt-PT", {
+        // Exercise 1 — Conclusion date
+        if (task.concluded && task.conclusionDate) {
+            var dateSpan = document.createElement("span");
+            var formattedDate = task.conclusionDate.toLocaleString("en-US", {
                 day: "2-digit",
                 month: "2-digit",
                 hour: "2-digit",
                 minute: "2-digit"
             });
-            dataSpan.textContent = " (Conclu\u00EDda em: ".concat(dataFormatada, ")");
-            dataSpan.classList.add("completed-date");
-            contentDiv.appendChild(dataSpan);
+            dateSpan.textContent = " (Completed on: ".concat(formattedDate, ")");
+            dateSpan.classList.add("completed-date");
+            contentDiv.appendChild(dateSpan);
         }
-        // Adiciona o conteúdo textual ao li
+        // Add textual content to li
         li.appendChild(contentDiv);
         // ---------------------------
-        // Alternar concluída (click)
+        // Toggle concluded (click)
         li.addEventListener("click", function () {
             if (!task.concluded)
                 task.markConcluded();
             else {
                 task.concluded = false;
-                task.dataConclusao = undefined;
+                task.conclusionDate = undefined;
             }
             renderTasks();
         });
         // ---------------------------
-        // Exercício 8 — Editar título (duplo clique)
+        // Exercise 8 — Edit title (double click)
         li.addEventListener("dblclick", function () {
-            var newTitle = prompt("Novo título para a tarefa:", task.title);
+            var newTitle = prompt("New task title:", task.title);
             if (newTitle && newTitle.trim() !== "") {
                 task.title = newTitle.trim();
                 renderTasks();
             }
         });
         // ---------------------------
-        // Exercício 7 — Remover tarefa
+        // Exercise 7 — Remove task
         var removeBtn = document.createElement("button");
-        removeBtn.textContent = "Remover";
+        removeBtn.textContent = "Remove";
         removeBtn.addEventListener("click", function (e) {
-            e.stopPropagation(); // evita disparar o click do li
+            e.stopPropagation(); // prevents triggering li click
             taskList = taskList.filter(function (t) { return t.id !== task.id; });
             renderTasks();
         });
-        // Adiciona o botão ao li
+        // Add button to li
         li.appendChild(removeBtn);
-        // Adiciona tarefa à lista
+        // Add task to list
         taskContainer.appendChild(li);
     });
 }
-// Chamada inicial
+// Initial call
 renderTasks();

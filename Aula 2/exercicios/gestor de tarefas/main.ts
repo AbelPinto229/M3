@@ -1,51 +1,51 @@
 // ===============================
-// EXERCÍCIOS GUIADOS 2 - MAIN.TS
+// GUIDED EXERCISES 2 - MAIN.TS
 // ===============================
 
-// Exercício 1 — Criar interface Tarefa
+// Exercise 1 — Create Task interface
 interface Task {
     id: number;
     title: string;
     concluded: boolean;
-    dataConclusao?: Date;
-    categoria: 'Trabalho' | 'Pessoal' | 'Estudo';
+    conclusionDate?: Date;
+    category: 'Work' | 'Personal' | 'Study';
 }
 
-// Exercício 2 — Criar classe TarefaClass
+// Exercise 2 — Create TaskClass class
 class TaskClass implements Task {
     id: number;
     title: string;
     concluded: boolean;
-    dataConclusao?: Date;
-    categoria: 'Trabalho' | 'Pessoal' | 'Estudo';
+    conclusionDate?: Date;
+    category: 'Work' | 'Personal' | 'Study';
 
-    // Exercício 2a — Constructor que recebe id, título e categoria
-    constructor(id: number, title: string, categoria: 'Trabalho' | 'Pessoal' | 'Estudo') {
+    // Exercise 2a — Constructor receiving id, title and category
+    constructor(id: number, title: string, category: 'Work' | 'Personal' | 'Study') {
         this.id = id;
         this.title = title;
         this.concluded = false;
-        this.categoria = categoria;
+        this.category = category;
     }
 
-    // Exercício 2b — Método que marca tarefa como concluída e define data de conclusão
+    // Exercise 2b — Method to mark task as concluded and set conclusion date
     markConcluded(): void {
         this.concluded = true;
-        this.dataConclusao = new Date();
+        this.conclusionDate = new Date();
     }
 }
 
-// Exercício 3 — Array de objetos
+// Exercise 3 — Array of objects
 let taskList: TaskClass[] = [
-    new TaskClass(1, "Rever slides aula 2", "Estudo"),
-    new TaskClass(2, "Fazer exercícios guiados", "Estudo"),
-    new TaskClass(3, "Fazer exercícios autonomos", "Estudo")
+    new TaskClass(1, "Review class 2 slides", "Study"),
+    new TaskClass(2, "Do guided exercises", "Study"),
+    new TaskClass(3, "Do autonomous exercises", "Study")
 ];
 
-// Variável para pesquisa dinâmica (Exercício 5)
+// Variable for dynamic search (Exercise 5)
 let searchTerm: string = "";
 
 // ===============================
-// Exercício 4 — Adicionar tarefa via input
+// Exercise 4 — Add task via input
 const input = document.querySelector("#taskInput") as HTMLInputElement;
 const categorySelect = document.querySelector("#categorySelect") as HTMLSelectElement;
 const buttonAdd = document.querySelector("#addBtn") as HTMLButtonElement;
@@ -54,19 +54,19 @@ buttonAdd.addEventListener("click", () => {
     const title = input.value.trim();
     if (!title) return;
 
-    const categoria = categorySelect.value as 'Trabalho' | 'Pessoal' | 'Estudo';
+    const category = categorySelect.value as 'Work' | 'Personal' | 'Study';
 
-    const newTask = new TaskClass(Date.now(), title, categoria);
+    const newTask = new TaskClass(Date.now(), title, category);
     taskList.push(newTask);
 
     input.value = "";
-    categorySelect.value = "Trabalho";
+    categorySelect.value = "Work";
 
     renderTasks();
 });
 
 // ===============================
-// Exercício 12 — Ordenação Alfabética
+// Exercise 12 — Alphabetical Sorting
 const sortBtn = document.querySelector("#sortBtn") as HTMLButtonElement;
 sortBtn.addEventListener("click", () => {
     taskList.sort((a, b) => a.title.localeCompare(b.title, "pt-PT"));
@@ -74,7 +74,7 @@ sortBtn.addEventListener("click", () => {
 });
 
 // ===============================
-// Exercício 14 — Limpar todas as tarefas concluídas
+// Exercise 14 — Clear all concluded tasks
 const clearCompletedBtn = document.querySelector("#clearCompletedBtn") as HTMLButtonElement;
 clearCompletedBtn.addEventListener("click", () => {
     taskList = taskList.filter(task => !task.concluded);
@@ -82,7 +82,7 @@ clearCompletedBtn.addEventListener("click", () => {
 });
 
 // ===============================
-// Exercício 5 — Pesquisa Dinâmica
+// Exercise 5 — Dynamic Search
 const searchInput = document.querySelector("#searchInput") as HTMLInputElement;
 searchInput.addEventListener("input", () => {
     searchTerm = searchInput.value.trim().toLowerCase();
@@ -90,32 +90,32 @@ searchInput.addEventListener("input", () => {
 });
 
 // ===============================
-// Exercício 5,6,7,8,9,11,13 — Renderização dinâmica
+// Exercise 5,6,7,8,9,11,13 — Dynamic Rendering
 // ===============================
-// Exercício 5 — Renderização dinâmica
+// Exercise 5 — Dynamic rendering
 function renderTasks() {
     const taskContainer = document.querySelector("#list") as HTMLUListElement;
     const pendingCountDiv = document.querySelector("#pending-count") as HTMLDivElement;
 
     // ===============================
-    // Exercício 9 — Calcula o número de tarefas pendentes
+    // Exercise 9 — Calculate number of pending tasks
     const pendingTasks = taskList.filter(t => !t.concluded);
-    pendingCountDiv.textContent = `Tarefas pendentes: ${pendingTasks.length}`;
+    pendingCountDiv.textContent = `Pending tasks: ${pendingTasks.length}`;
 
-    // Limpa container antes de renderizar
+    // Clear container before rendering
     taskContainer.innerHTML = "";
 
-    // Percorre todas as tarefas
+    // Loop through all tasks
     taskList.forEach(task => {
         const li = document.createElement("li");
 
         // ---------------------------
-        // Wrapper para conteúdo textual
+        // Wrapper for textual content
         const contentDiv = document.createElement("div");
         contentDiv.classList.add("task-content");
 
         // ---------------------------
-        // Exercício 6 — Título da tarefa
+        // Exercise 6 — Task title
         const titleSpan = document.createElement("span");
         titleSpan.textContent = task.title;
         titleSpan.classList.add("task-title");
@@ -123,47 +123,47 @@ function renderTasks() {
         contentDiv.appendChild(titleSpan);
 
         // ---------------------------
-        // Exercício 11 — Categoria
+        // Exercise 11 — Category
         const categorySpan = document.createElement("span");
-        categorySpan.textContent = ` [${task.categoria}]`;
+        categorySpan.textContent = ` [${task.category}]`;
         categorySpan.classList.add("task-category");
-        switch(task.categoria) {
-            case "Trabalho": categorySpan.style.color = "#1E90FF"; break;
-            case "Pessoal": categorySpan.style.color = "#32CD32"; break;
-            case "Estudo": categorySpan.style.color = "#FF8C00"; break;
+        switch(task.category) {
+            case "Work": categorySpan.style.color = "#1E90FF"; break;
+            case "Personal": categorySpan.style.color = "#32CD32"; break;
+            case "Study": categorySpan.style.color = "#FF8C00"; break;
         }
         contentDiv.appendChild(categorySpan);
 
         // ---------------------------
-        // Exercício 1 — Data de conclusão
-        if (task.concluded && task.dataConclusao) {
-            const dataSpan = document.createElement("span");
-            const dataFormatada = task.dataConclusao.toLocaleString("pt-PT", {
+        // Exercise 1 — Conclusion date
+        if (task.concluded && task.conclusionDate) {
+            const dateSpan = document.createElement("span");
+            const formattedDate = task.conclusionDate.toLocaleString("en-US", {
                 day: "2-digit",
                 month: "2-digit",
                 hour: "2-digit",
                 minute: "2-digit"
             });
-            dataSpan.textContent = ` (Concluída em: ${dataFormatada})`;
-            dataSpan.classList.add("completed-date");
-            contentDiv.appendChild(dataSpan);
+            dateSpan.textContent = ` (Completed on: ${formattedDate})`;
+            dateSpan.classList.add("completed-date");
+            contentDiv.appendChild(dateSpan);
         }
 
-        // Adiciona o conteúdo textual ao li
+        // Add textual content to li
         li.appendChild(contentDiv);
 
         // ---------------------------
-        // Alternar concluída (click)
+        // Toggle concluded (click)
         li.addEventListener("click", () => {
             if (!task.concluded) task.markConcluded();
-            else { task.concluded = false; task.dataConclusao = undefined; }
+            else { task.concluded = false; task.conclusionDate = undefined; }
             renderTasks();
         });
 
         // ---------------------------
-        // Exercício 8 — Editar título (duplo clique)
+        // Exercise 8 — Edit title (double click)
         li.addEventListener("dblclick", () => {
-            const newTitle = prompt("Novo título para a tarefa:", task.title);
+            const newTitle = prompt("New task title:", task.title);
             if (newTitle && newTitle.trim() !== "") {
                 task.title = newTitle.trim();
                 renderTasks();
@@ -171,22 +171,23 @@ function renderTasks() {
         });
 
         // ---------------------------
-        // Exercício 7 — Remover tarefa
+        // Exercise 7 — Remove task
         const removeBtn = document.createElement("button");
-        removeBtn.textContent = "Remover";
+        removeBtn.textContent = "Remove";
         removeBtn.addEventListener("click", e => {
-            e.stopPropagation(); // evita disparar o click do li
+            e.stopPropagation(); // prevents triggering li click
             taskList = taskList.filter(t => t.id !== task.id);
             renderTasks();
         });
 
-        // Adiciona o botão ao li
+        // Add button to li
         li.appendChild(removeBtn);
 
-        // Adiciona tarefa à lista
+        // Add task to list
         taskContainer.appendChild(li);
     });
 }
 
-// Chamada inicial
+// Initial call
 renderTasks();
+

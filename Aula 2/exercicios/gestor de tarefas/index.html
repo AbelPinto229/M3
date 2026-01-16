@@ -3,40 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Tarefas</title>
+    <title>Task Manager</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h1>Lista de Tarefas</h1>
+    <h1>Task Manager</h1>
 
-    <!-- === INPUTS E BOTÕES === -->
+    <!-- === INPUTS AND BUTTONS === -->
     <div id="buttonContainer">
-        <input type="text" id="taskInput" placeholder="Nova tarefa">
+        <input type="text" id="taskInput" placeholder="New task">
         <select id="categorySelect">
-            <option value="Trabalho">Trabalho</option>
-            <option value="Pessoal">Pessoal</option>
-            <option value="Estudo">Estudo</option>
+            <option value="Work">Work</option>
+            <option value="Personal">Personal</option>
+            <option value="Study">Study</option>
         </select>
-        <button id="addBtn">Adicionar</button>
-        <button id="sortBtn">Ordenar A-Z</button>
-        <button id="clearCompletedBtn">Limpar Concluídas</button>
+        <button id="addBtn">Add</button>
+        <button id="sortBtn">Sort A-Z</button>
+        <button id="clearCompletedBtn">Clear Completed</button>
     </div>
 
-    <!-- === CONTADOR DE PENDENTES === -->
-    <div id="pending-count">Tarefas pendentes: 0</div>
+    <!-- === PENDING COUNTER === -->
+    <div id="pending-count">Pending Tasks: 0</div>
 
-    <!-- === PESQUISA === -->
+    <!-- === SEARCH === -->
     <div id="searchContainer">
-    <input type="text" id="searchInput" placeholder="Pesquisar tarefas...">
+        <input type="text" id="searchInput" placeholder="Search task...">
     </div>
     
-    <!-- === LISTA DE TAREFAS === -->
+    <!-- === TASK LIST === -->
     <ul id="list">
-        <!-- Tarefas vão ser inseridas aqui dinamicamente pelo TypeScript -->
+        <!-- Tasks will be dynamically inserted here by TypeScript -->
     </ul>
 
-    <script src="main.js"></script> <!-- Teu TypeScript compilado -->
+    <script src="main.js"></script> <!-- Compiled TypeScript -->
 </body>
 </html>
-
