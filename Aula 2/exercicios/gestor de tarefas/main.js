@@ -69,29 +69,26 @@ searchInput.addEventListener("input", function () {
 function renderTasks() {
     var taskContainer = document.querySelector("#list");
     var pendingCountDiv = document.querySelector("#pending-count");
-    // ===============================
-    // Exercise 9 — Calculate number of pending tasks
-    var pendingTasks = taskList.filter(function (t) { return !t.concluded; });
+    // Filter tasks based on searchTerm
+    var filteredTasks = taskList.filter(function (task) {
+        return task.title.toLowerCase().includes(searchTerm);
+    });
+    // Calculate number of pending tasks
+    var pendingTasks = filteredTasks.filter(function (t) { return !t.concluded; });
     pendingCountDiv.textContent = "Pending tasks: ".concat(pendingTasks.length);
-    // Clear container before rendering
+    // Clear container
     taskContainer.innerHTML = "";
-    // Loop through all tasks
-    taskList.forEach(function (task) {
+    // Loop through filtered tasks
+    filteredTasks.forEach(function (task) {
         var li = document.createElement("li");
-        // ---------------------------
-        // Wrapper for textual content
         var contentDiv = document.createElement("div");
         contentDiv.classList.add("task-content");
-        // ---------------------------
-        // Exercise 6 — Task title
         var titleSpan = document.createElement("span");
         titleSpan.textContent = task.title;
         titleSpan.classList.add("task-title");
         if (task.concluded)
             titleSpan.classList.add("completed");
         contentDiv.appendChild(titleSpan);
-        // ---------------------------
-        // Exercise 11 — Category
         var categorySpan = document.createElement("span");
         categorySpan.textContent = " [".concat(task.category, "]");
         categorySpan.classList.add("task-category");
@@ -107,8 +104,6 @@ function renderTasks() {
                 break;
         }
         contentDiv.appendChild(categorySpan);
-        // ---------------------------
-        // Exercise 1 — Conclusion date
         if (task.concluded && task.conclusionDate) {
             var dateSpan = document.createElement("span");
             var formattedDate = task.conclusionDate.toLocaleString("en-US", {
@@ -121,10 +116,7 @@ function renderTasks() {
             dateSpan.classList.add("completed-date");
             contentDiv.appendChild(dateSpan);
         }
-        // Add textual content to li
         li.appendChild(contentDiv);
-        // ---------------------------
-        // Toggle concluded (click)
         li.addEventListener("click", function () {
             if (!task.concluded)
                 task.markConcluded();
@@ -134,8 +126,6 @@ function renderTasks() {
             }
             renderTasks();
         });
-        // ---------------------------
-        // Exercise 8 — Edit title (double click)
         li.addEventListener("dblclick", function () {
             var newTitle = prompt("New task title:", task.title);
             if (newTitle && newTitle.trim() !== "") {
@@ -143,18 +133,14 @@ function renderTasks() {
                 renderTasks();
             }
         });
-        // ---------------------------
-        // Exercise 7 — Remove task
         var removeBtn = document.createElement("button");
         removeBtn.textContent = "Remove";
         removeBtn.addEventListener("click", function (e) {
-            e.stopPropagation(); // prevents triggering li click
+            e.stopPropagation();
             taskList = taskList.filter(function (t) { return t.id !== task.id; });
             renderTasks();
         });
-        // Add button to li
         li.appendChild(removeBtn);
-        // Add task to list
         taskContainer.appendChild(li);
     });
 }
