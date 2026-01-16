@@ -1,151 +1,123 @@
-//                    exercicios guiados 2-1
-// Exercício 1 — Interface Utilizador
-//Cria uma interface chamada Utilizador.
-//Exercício 2 — Classe UtilizadorClass
-//Cria uma classe UtilizadorClass que implemente a interface Utilizador.
-var UtilizadorClass = /** @class */ (function () {
-    function UtilizadorClass(id, name, email) {
+// guided exercises 2-1
+var UserClass = /** @class */ (function () {
+    function UserClass(id, name, email) {
         this.id = id;
         this.name = name;
         this.email = email;
-        this.ativo = true;
+        this.active = true;
     }
-    UtilizadorClass.prototype.desativar = function () {
-        this.ativo = !this.ativo;
+    UserClass.prototype.toggleActive = function () {
+        this.active = !this.active;
     };
-    return UtilizadorClass;
+    return UserClass;
 }());
-//Exercício 3 — Array de utilizadores
-//Cria um array chamado listaUtilizadores.
-var listaUtilizadores = [];
-listaUtilizadores.push(new UtilizadorClass(Date.now(), "Abel", "ajdszp@hotmail.com"));
-listaUtilizadores.push(new UtilizadorClass(Date.now(), "Joel", "jjdszp@hotmail.com"));
-//Exercício 4 — Estrutura HTML (cartões)
-//Cria no HTML um contentor para mostrar os utilizadores. (Foi criado no index.html)
-//- Cria uma div principal para conter a lista. 
-var container = document.getElementById("lista-utilizadores");
-/* substitiu isto por a funcao rendertask pq o botao ativar e desativar só me aparecia depois de criar novo user
-// - Para cada item do array, cria uma nova div.
-listaUtilizadores.forEach(utilizador => {
-// - Cada div representa um cartão com os dados do objeto.
-    const userCardDiv = document.createElement("div") as HTMLDivElement;
-    userCardDiv.classList.add("user-card");
-    userCardDiv.innerHTML = `
-        <h3>${utilizador.name}</h3>
-        <p>Email: ${utilizador.email}</p>
-        <p>Estado: ${utilizador.ativo ? "Ativo" : "Inativo"}</p>`;
-
-// - Adiciona essa div ao contentor principal.
-    container.appendChild(userCardDiv);
-});
-*/
-renderUtilizadores(listaUtilizadores);
-// Exercício 5 — Função de renderização
-// Função que cria os cartões de utilizadores
-function renderUtilizadores(lista) {
-    var container = document.getElementById("lista-utilizadores");
-    container.innerHTML = ""; // Limpa o container antes de renderizar
-    lista.forEach(function (utilizador) {
+var userList = [];
+userList.push(new UserClass(Date.now(), "Abel", "ajdszp@hotmail.com"));
+userList.push(new UserClass(Date.now(), "Joel", "jjdszp@hotmail.com"));
+var container = document.getElementById("user-list");
+renderUsers(userList);
+function renderUsers(list) {
+    var container = document.getElementById("user-list");
+    container.innerHTML = "";
+    list.forEach(function (user) {
         var userCardDiv = document.createElement("div");
         userCardDiv.classList.add("user-card");
-        // Cria o cartão e no CSS eu altero a cor consoante a class p.estado
-        userCardDiv.innerHTML = "\n            <h3>".concat(utilizador.name, "</h3>\n            <p>Email: ").concat(utilizador.email, "</p>\n            <p class=\"estado ").concat(utilizador.ativo ? "ativo" : "inativo", "\">\n                Estado: ").concat(utilizador.ativo ? "Ativo" : "Inativo", "\n            </p>\n            <p class=\"tarefas\">0 tarefas atribu\u00EDdas</p> <!-- NOVO CAMPO -->\n        ");
-        //Exercício 7 — Adiciona um botão "Desativare ativar" em cada cartão.
-        //Adiciona um botão "Desativar" em cada cartão.
-        var btnDesativar = document.createElement("button");
-        btnDesativar.textContent = utilizador.ativo ? "Desativar" : "Ativar";
-        btnDesativar.classList.add("btn-desativar"); // usa CSS para estilo
-        // Evento para alternar estado via método da classe
-        btnDesativar.addEventListener("click", function () {
-            utilizador.desativar(); // chama o método da classe
-            renderUtilizadores(listaUtilizadores); // atualiza os cartões
+        userCardDiv.innerHTML = "\n            <h3>".concat(user.name, "</h3>\n            <p>Email: ").concat(user.email, "</p>\n            <p class=\"status ").concat(user.active ? "active" : "inactive", "\">\n                Status: ").concat(user.active ? "Active" : "Inactive", "\n            </p>\n            <p class=\"tasks\">0 assigned tasks</p>\n        ");
+        var btnToggle = document.createElement("button");
+        btnToggle.textContent = user.active ? "Deactivate" : "Activate";
+        if (user.active) {
+            btnToggle.classList.add("inactive"); // red
+        }
+        else {
+            btnToggle.classList.add("active"); // green
+        }
+        btnToggle.addEventListener("click", function () {
+            user.toggleActive();
+            renderUsers(userList);
         });
-        userCardDiv.appendChild(btnDesativar);
+        userCardDiv.appendChild(btnToggle);
         container.appendChild(userCardDiv);
     });
-    atualizarContador(); // Atualiza o contador após renderizar Exercicio 9
+    updateCounter();
 }
-//Exercício 6 — Adicionar utilizador via formulário
-//Criar uma form para colocar o formulario
+// Create form and inputs/buttons
 var form = document.createElement("form");
 form.classList.add("form");
-//Cria inputs para nome e email e um botão "Adicionar" 
-var nomeInput = document.createElement("input");
-nomeInput.classList.add("nome-input");
-nomeInput.type = "text";
-nomeInput.placeholder = "First and Last name";
-nomeInput.required = true;
+var nameInput = document.createElement("input");
+nameInput.classList.add("name-input");
+nameInput.type = "text";
+nameInput.placeholder = "First and last name";
+nameInput.required = true;
 var emailInput = document.createElement("input");
 emailInput.classList.add("email-input");
 emailInput.type = "email";
 emailInput.placeholder = "example@mail.com";
 emailInput.required = true;
 var btnAdd = document.createElement("button");
-btnAdd.classList.add("btn-adicionar");
-btnAdd.textContent = "Novo utilizador";
-form.appendChild(nomeInput);
-form.appendChild(emailInput);
-form.appendChild(btnAdd);
-var containerForm = document.getElementById("form");
-containerForm.prepend(form);
-//Ligar o botão à lista de utilizadores e cria id automatico
+btnAdd.classList.add("btn-add");
+btnAdd.textContent = "New user";
+// Create filter buttons
+var btnShowAll = document.createElement("button");
+btnShowAll.textContent = "Show all";
+btnShowAll.type = "button";
+btnShowAll.classList.add("btn-filter");
+btnShowAll.addEventListener("click", function () {
+    renderUsers(userList);
+});
+var btnShowActive = document.createElement("button");
+btnShowActive.textContent = "Show active only";
+btnShowActive.type = "button";
+btnShowActive.classList.add("btn-filter");
+btnShowActive.addEventListener("click", function () {
+    var activeUsers = userList.filter(function (u) { return u.active; });
+    renderUsers(activeUsers);
+});
+var btnShowInactive = document.createElement("button");
+btnShowInactive.textContent = "Show inactive only";
+btnShowInactive.type = "button";
+btnShowInactive.classList.add("btn-filter");
+btnShowInactive.addEventListener("click", function () {
+    var inactiveUsers = userList.filter(function (u) { return !u.active; });
+    renderUsers(inactiveUsers);
+});
+// Create containers para inputs e filtros
+var inputContainer = document.createElement("div");
+inputContainer.classList.add("input-container");
+inputContainer.appendChild(nameInput);
+inputContainer.appendChild(emailInput);
+inputContainer.appendChild(btnAdd);
+var filterContainer = document.createElement("div");
+filterContainer.classList.add("filter-buttons");
+filterContainer.appendChild(btnShowAll);
+filterContainer.appendChild(btnShowActive);
+filterContainer.appendChild(btnShowInactive);
+// Append containers lado a lado dentro do form
+form.appendChild(inputContainer);
+form.appendChild(filterContainer);
+// Adicionar form no container
+var formContainer = document.getElementById("form");
+formContainer.prepend(form);
+// Submit do form
 form.addEventListener("submit", function (e) {
-    e.preventDefault(); // evita reload
+    e.preventDefault();
     if (!form.checkValidity()) {
-        alert("Preencha os campos corretamente. O email deve conter '@'.");
+        alert("Please fill in the fields correctly. The email must contain '@'.");
         return;
     }
-    var nome = nomeInput.value.trim();
+    var name = nameInput.value.trim();
     var email = emailInput.value.trim();
-    // Criar nova instância da classe
-    listaUtilizadores.push(new UtilizadorClass(Date.now(), nome, email));
-    renderUtilizadores(listaUtilizadores);
-    // Limpar inputs
-    nomeInput.value = "";
+    userList.push(new UserClass(Date.now(), name, email));
+    renderUsers(userList);
+    nameInput.value = "";
     emailInput.value = "";
 });
-// Exercício 8 — Filtrar utilizadores ativos e desativos
-// Seleciona o container do formulário
-var containerBtn = document.getElementById("form");
-// Botão para mostrar todos
-var btnMostrarTodos = document.createElement("button");
-btnMostrarTodos.textContent = "Mostrar todos";
-btnMostrarTodos.type = "button"; // evita submissão do form
-btnMostrarTodos.classList.add("btn-filtrar");
-containerForm.appendChild(btnMostrarTodos);
-btnMostrarTodos.addEventListener("click", function () {
-    renderUtilizadores(listaUtilizadores);
-});
-// Botão para mostrar apenas ativos
-var btnMostrarAtivos = document.createElement("button");
-btnMostrarAtivos.textContent = "Mostrar apenas ativos";
-btnMostrarAtivos.type = "button";
-btnMostrarAtivos.classList.add("btn-filtrar");
-containerForm.appendChild(btnMostrarAtivos);
-btnMostrarAtivos.addEventListener("click", function () {
-    var ativos = listaUtilizadores.filter(function (u) { return u.ativo; });
-    renderUtilizadores(ativos);
-});
-// Botão para mostrar apenas inativos
-var btnMostrarInativos = document.createElement("button");
-btnMostrarInativos.textContent = "Mostrar apenas inativos";
-btnMostrarInativos.type = "button";
-btnMostrarInativos.classList.add("btn-filtrar");
-containerForm.appendChild(btnMostrarInativos);
-btnMostrarInativos.addEventListener("click", function () {
-    var inativos = listaUtilizadores.filter(function (u) { return !u.ativo; });
-    renderUtilizadores(inativos);
-});
-// Exercício 9 — Contador de utilizadores
-var contadorDiv = document.createElement("div");
-contadorDiv.id = "contador-utilizadores";
-contadorDiv.style.fontWeight = "bold";
-contadorDiv.style.marginBottom = "10px";
-// Coloca no topo do container de utilizadores
-container.prepend(contadorDiv);
-function atualizarContador() {
-    var contador = document.getElementById("contador-utilizadores");
-    contador.textContent = "Total de utilizadores: ".concat(listaUtilizadores.length);
+// User counter
+var counterDiv = document.createElement("div");
+counterDiv.id = "user-counter";
+counterDiv.style.fontWeight = "bold";
+counterDiv.style.marginBottom = "10px";
+container.prepend(counterDiv);
+function updateCounter() {
+    var counter = document.getElementById("user-counter");
+    counter.textContent = "Total users: ".concat(userList.length);
 }
-//Exercício 10 — Preparação para integração futura
-//Adiciona ao cartão do utilizador uma área chamada "Tarefas".
