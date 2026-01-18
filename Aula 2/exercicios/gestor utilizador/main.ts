@@ -1,6 +1,7 @@
 // ---------------------------
-// INTERFACE E CLASSE
+// INTERFACE AND CLASS
 // ---------------------------
+// Exercise 1 — User Interface
 interface User {
     id: number;
     name: string;
@@ -9,6 +10,7 @@ interface User {
     photo?: string;
 }
 
+// Exercise 2 — UserClass
 class UserClass implements User {
     id: number;
     name: string;
@@ -24,6 +26,7 @@ class UserClass implements User {
         this.active = active;
     }
 
+    // Exercise 14 — Toggle Active/Inactive State
     toggleActive(): void {
         this.active = !this.active;
     }
@@ -32,6 +35,7 @@ class UserClass implements User {
 // ---------------------------
 // DATA
 // ---------------------------
+// Exercise 3 — Array of users
 let userList: UserClass[] = [];
 let nextID: number = 1;
 let currentDisplayList: UserClass[] = [];
@@ -43,8 +47,9 @@ const container = document.getElementById("user-list") as HTMLDivElement;
 const formContainer = document.getElementById("form") as HTMLDivElement;
 
 // ---------------------------
-// ESTATÍSTICAS
+// STATISTICS
 // ---------------------------
+// Exercise 13 — Active / Inactive counters
 const totalUsersSpan = document.getElementById("total-users") as HTMLSpanElement;
 const activeUsersSpan = document.getElementById("active-users") as HTMLSpanElement;
 const inactiveUsersSpan = document.getElementById("inactive-users") as HTMLSpanElement;
@@ -63,8 +68,9 @@ function updateStats(list: UserClass[] = userList): void {
 }
 
 // ---------------------------
-// FUNÇÃO: CARREGAR USUÁRIOS INICIAIS
+// FUNCTION: LOAD INITIAL USERS
 // ---------------------------
+// Exercise 19 — Simulate initial user data
 function loadInitialUsers(): void {
     const initialData = [
         { name: "Abel Silva", email: "abel@example.com", active: true },
@@ -84,6 +90,7 @@ function loadInitialUsers(): void {
 // ---------------------------
 // RENDER USERS
 // ---------------------------
+// Exercises 4, 5, 6, 7, 8, 10, 11, 12, 15, 17, 20
 function renderUsers(list: UserClass[]): void {
     container.innerHTML = "";
 
@@ -96,7 +103,7 @@ function renderUsers(list: UserClass[]): void {
     const userModal = document.getElementById("user-modal") as HTMLDivElement;
     const modalClose = document.getElementById("modal-close") as HTMLSpanElement;
 
-    // Modal close events
+    // Modal close events — Exercise 17
     modalClose.onclick = () => { userModal.style.display = "none"; };
     window.onclick = (e: MouseEvent) => { if (e.target === userModal) userModal.style.display = "none"; };
 
@@ -118,8 +125,9 @@ function renderUsers(list: UserClass[]): void {
         const cardButtons = document.createElement("div");
         cardButtons.classList.add("card-buttons");
 
+        // Exercise 14 — Toggle Active/Inactive
         const btnToggle = document.createElement("button");
-        btnToggle.textContent = user.active ? "Desativar" : "Ativar";
+        btnToggle.textContent = user.active ? "Deactivate" : "Activate";
         btnToggle.classList.add(user.active ? "active" : "inactive");
         btnToggle.addEventListener("click", e => {
             e.stopPropagation();
@@ -127,8 +135,9 @@ function renderUsers(list: UserClass[]): void {
             renderUsers(currentDisplayList);
         });
 
+        // Exercise 11 — Remove user
         const btnRemove = document.createElement("button");
-        btnRemove.textContent = "Remover";
+        btnRemove.textContent = "Remove";
         btnRemove.classList.add("remove");
         btnRemove.addEventListener("click", e => {
             e.stopPropagation();
@@ -140,7 +149,7 @@ function renderUsers(list: UserClass[]): void {
         cardButtons.append(btnToggle, btnRemove);
         userCard.appendChild(cardButtons);
 
-        // Modal click
+        // Exercise 17 — Show user details in modal
         userCard.addEventListener("click", () => {
             const statusClass = user.active ? "active" : "inactive";
             const statusText = user.active ? "Active" : "Inactive";
@@ -148,11 +157,11 @@ function renderUsers(list: UserClass[]): void {
             const modalDetails = document.getElementById("modal-details") as HTMLDivElement;
             modalDetails.innerHTML = `
                 <p><strong>ID:</strong> ${user.id}</p>
-                <p><strong>Nome:</strong> ${user.name}</p>
+                <p><strong>Name:</strong> ${user.name}</p>
                 <p><strong>Email:</strong> ${user.email}</p>
                 <p><strong>Status:</strong> <span class="status ${statusClass}">${statusText}</span></p>
-                <p><strong>Tarefas atribuídas:</strong> 0</p>
-                <p><strong>Tarefas concluídas:</strong> 0</p>
+                <p><strong>Assigned tasks:</strong> 0</p>
+                <p><strong>Completed tasks:</strong> 0</p>
             `;
             userModal.style.display = "block";
         });
@@ -160,12 +169,13 @@ function renderUsers(list: UserClass[]): void {
         container.appendChild(userCard);
     });
 
-    updateStats(list);
+    updateStats(list); // Exercise 9 & 13
 }
 
 // ---------------------------
-// FORMULÁRIO
+// FORM
 // ---------------------------
+// Exercise 6 — Add new user via form
 const form = document.createElement("form");
 form.classList.add("form");
 
@@ -180,7 +190,7 @@ emailInput.type = "email";
 emailInput.placeholder = "example@mail.com";
 emailInput.required = true;
 
-// FOTO COM LABEL
+// PHOTO INPUT
 const photoInput = document.createElement("input") as HTMLInputElement;
 photoInput.type = "file";
 photoInput.accept = "image/*";
@@ -188,9 +198,9 @@ photoInput.id = "photoInput";
 
 const photoLabel = document.createElement("label");
 photoLabel.htmlFor = "photoInput";
-photoLabel.textContent = "Foto de perfil:";
+photoLabel.textContent = "Profile photo:";
 
-// BOTÃO ADICIONAR
+// ADD BUTTON
 const btnAdd = document.createElement("button");
 btnAdd.type = "submit";
 btnAdd.textContent = "New user";
@@ -201,17 +211,20 @@ const inputContainer = document.createElement("div");
 inputContainer.classList.add("input-container");
 inputContainer.append(nameInput, emailInput, photoLabel, photoInput, btnAdd);
 
+// ---------------------------
 // FILTER BUTTONS
+// ---------------------------
+// Exercises 8, 15
 let sortAsc = true;
 
 const btnSortByName = document.createElement("button");
 btnSortByName.type = "button";
-btnSortByName.textContent = "Ordenar A-Z";
+btnSortByName.textContent = "Sort A-Z";
 btnSortByName.classList.add("btn-filter");
 btnSortByName.addEventListener("click", () => {
     currentDisplayList.sort((a, b) => sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
     renderUsers(currentDisplayList);
-    btnSortByName.textContent = sortAsc ? "Ordenar Z-A" : "Ordenar A-Z";
+    btnSortByName.textContent = sortAsc ? "Sort Z-A" : "Sort A-Z";
     sortAsc = !sortAsc;
 });
 
@@ -247,11 +260,14 @@ const filterContainer = document.createElement("div");
 filterContainer.classList.add("filter-buttons");
 filterContainer.append(btnShowAll, btnShowActive, btnShowInactive, btnSortByName);
 
-// ADICIONA FORM AO CONTAINER
+// Append form to container
 form.append(inputContainer, filterContainer);
 formContainer.prepend(form);
 
+// ---------------------------
 // FORM SUBMIT
+// ---------------------------
+// Exercise 6, 16 — Add user
 form.addEventListener("submit", e => {
     e.preventDefault();
     const name = nameInput.value.trim();
@@ -260,6 +276,9 @@ form.addEventListener("submit", e => {
     if (photoInput.files && photoInput.files[0]) {
         photoURL = URL.createObjectURL(photoInput.files[0]);
     }
+
+    // Validation — Exercise 16
+    if (!name || !email.includes("@")) return;
 
     userList.push(new UserClass(nextID++, name, email, photoURL));
     currentDisplayList = [...userList];
@@ -270,7 +289,10 @@ form.addEventListener("submit", e => {
     photoInput.value = "";
 });
 
+// ---------------------------
 // SEARCH
+// ---------------------------
+// Exercise 12 — Search by name
 const searchInput = document.querySelector("#searchInput") as HTMLInputElement;
 searchInput.addEventListener("input", () => {
     const term = searchInput.value.trim().toLowerCase();
@@ -279,7 +301,8 @@ searchInput.addEventListener("input", () => {
 });
 
 // ---------------------------
-// INICIALIZAÇÃO
+// INITIALIZATION
 // ---------------------------
+// Exercise 19 — Load initial users
 loadInitialUsers();
 renderUsers(currentDisplayList);

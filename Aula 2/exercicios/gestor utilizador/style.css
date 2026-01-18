@@ -8,13 +8,15 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* PAGE TITLE */
 h1 {
-    margin-bottom: 30px; /* ajusta o valor conforme quiser */
-    color: #1d3557; /* opcional, mantém coerência com cores do layout */
+    margin-bottom: 30px; /* adjust as needed */
+    color: #1d3557; /* optional, consistent with layout colors */
     font-size: 28px;
     text-align: center;
 }
 
+/* PAGE BODY */
 body {
     display: flex;
     flex-direction: column;
@@ -26,7 +28,7 @@ body {
 }
 
 /* ----------------------------- */
-/* CONTAINER PRINCIPAL EM COLUNAS */
+/* MAIN CONTAINER IN COLUMNS */
 /* ----------------------------- */
 #main-container {
     display: flex;
@@ -37,34 +39,34 @@ body {
     max-width: 1200px;
 }
 
-/* COLUNAS */
+/* COLUMNS */
 #left-column, #right-column {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-/* Largura mínima da coluna esquerda */
+/* Left column minimum width */
 #left-column {
     min-width: 300px;
     flex: 0 0 auto;
 }
 
-/* Coluna direita cresce */
+/* Right column grows */
 #right-column {
     flex: 1;
     min-width: 300px;
 }
 
 /* ----------------------------- */
-/* ESTATÍSTICAS ESTILIZADAS */
+/* STYLED STATISTICS */
 /* ----------------------------- */
 #stats-container {
     background-color: #ffffff;
     padding: 20px 30px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    width: 100%; /* ocupa 100% da coluna esquerda */
+    width: 100%; /* takes full left column width */
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -101,7 +103,7 @@ form.form {
     padding: 20px 30px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    width: 100%; /* ocupa 100% da coluna esquerda */
+    width: 100%; /* full left column width */
 }
 
 .input-container {
@@ -185,7 +187,7 @@ button.btn-filter:hover {
 }
 
 /* ----------------------------- */
-/* USER CARD MINIMALISTA */
+/* USER CARD MINIMALIST */
 /* ----------------------------- */
 .user-card {
     background-color: #ffffff;
@@ -252,6 +254,9 @@ button.btn-filter:hover {
     color: #2e7d32;
 }
 
+/* ----------------------------- */
+/* MODAL */
+/* ----------------------------- */
 .modal {
     display: none;
     position: fixed;
@@ -309,6 +314,9 @@ button.btn-filter:hover {
     color: #ff1744;
 }
 
+/* ----------------------------- */
+/* USER CARD BUTTONS */
+/* ----------------------------- */
 .user-card .card-buttons {
     display: flex;
     flex-wrap: wrap;
@@ -340,7 +348,8 @@ button.btn-filter:hover {
     cursor: pointer;
     transition: background-color 0.3s, transform 0.2s;
 }
-/* LABEL FOTO DE PERFIL */
+
+/* PROFILE PHOTO LABEL */
 .input-container label[for="photoInput"] {
     font-weight: bold;
     font-size: 14px;
@@ -349,7 +358,7 @@ button.btn-filter:hover {
     color: #1d3557;
 }
 
-/* INPUT DE FOTO */
+/* PHOTO INPUT */
 #photoInput {
     padding: 8px 12px;
     border-radius: 5px;
@@ -367,7 +376,7 @@ button.btn-filter:hover {
 }
 
 /* ----------------------------- */
-/* RESPONSIVIDADE */
+/* RESPONSIVENESS */
 /* ----------------------------- */
 @media (max-width: 900px) {
     #main-container {
@@ -403,3 +412,4 @@ button.btn-filter:hover {
         width: 90%;
     }
 }
+

@@ -98,7 +98,7 @@ function renderTasks() {
         titleSpan.textContent = task.title;
         titleSpan.classList.add("task-title");
         if (task.concluded)
-            titleSpan.classList.add("completed"); // Ex 6
+            titleSpan.classList.add("completed"); // Exercise 6
         contentDiv.appendChild(titleSpan);
         var categorySpan = document.createElement("span");
         categorySpan.textContent = " [".concat(task.category, "]");

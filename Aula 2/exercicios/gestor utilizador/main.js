@@ -7,6 +7,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
+// Exercise 2 — UserClass
 var UserClass = /** @class */ (function () {
     function UserClass(id, name, email, photo, active) {
         if (active === void 0) { active = true; }
@@ -16,6 +17,7 @@ var UserClass = /** @class */ (function () {
         this.photo = photo;
         this.active = active;
     }
+    // Exercise 14 — Toggle Active/Inactive State
     UserClass.prototype.toggleActive = function () {
         this.active = !this.active;
     };
@@ -24,6 +26,7 @@ var UserClass = /** @class */ (function () {
 // ---------------------------
 // DATA
 // ---------------------------
+// Exercise 3 — Array of users
 var userList = [];
 var nextID = 1;
 var currentDisplayList = [];
@@ -33,8 +36,9 @@ var currentDisplayList = [];
 var container = document.getElementById("user-list");
 var formContainer = document.getElementById("form");
 // ---------------------------
-// ESTATÍSTICAS
+// STATISTICS
 // ---------------------------
+// Exercise 13 — Active / Inactive counters
 var totalUsersSpan = document.getElementById("total-users");
 var activeUsersSpan = document.getElementById("active-users");
 var inactiveUsersSpan = document.getElementById("inactive-users");
@@ -50,8 +54,9 @@ function updateStats(list) {
     inactiveUsersSpan.textContent = "".concat(inactive, " (").concat(inactivePercent, "%)");
 }
 // ---------------------------
-// FUNÇÃO: CARREGAR USUÁRIOS INICIAIS
+// FUNCTION: LOAD INITIAL USERS
 // ---------------------------
+// Exercise 19 — Simulate initial user data
 function loadInitialUsers() {
     var initialData = [
         { name: "Abel Silva", email: "abel@example.com", active: true },
@@ -68,6 +73,7 @@ function loadInitialUsers() {
 // ---------------------------
 // RENDER USERS
 // ---------------------------
+// Exercises 4, 5, 6, 7, 8, 10, 11, 12, 15, 17, 20
 function renderUsers(list) {
     container.innerHTML = "";
     if (list.length === 0) {
@@ -77,7 +83,7 @@ function renderUsers(list) {
     }
     var userModal = document.getElementById("user-modal");
     var modalClose = document.getElementById("modal-close");
-    // Modal close events
+    // Modal close events — Exercise 17
     modalClose.onclick = function () { userModal.style.display = "none"; };
     window.onclick = function (e) { if (e.target === userModal)
         userModal.style.display = "none"; };
@@ -90,16 +96,18 @@ function renderUsers(list) {
         userCard.innerHTML = "\n            ".concat(avatarContent, "\n            <h3>").concat(user.name, "</h3>\n            <p class=\"tasks\">0 tasks</p>\n            <p class=\"tasks-concluded\">0 tasks concluded</p>\n        ");
         var cardButtons = document.createElement("div");
         cardButtons.classList.add("card-buttons");
+        // Exercise 14 — Toggle Active/Inactive
         var btnToggle = document.createElement("button");
-        btnToggle.textContent = user.active ? "Desativar" : "Ativar";
+        btnToggle.textContent = user.active ? "Deactivate" : "Activate";
         btnToggle.classList.add(user.active ? "active" : "inactive");
         btnToggle.addEventListener("click", function (e) {
             e.stopPropagation();
             user.toggleActive();
             renderUsers(currentDisplayList);
         });
+        // Exercise 11 — Remove user
         var btnRemove = document.createElement("button");
-        btnRemove.textContent = "Remover";
+        btnRemove.textContent = "Remove";
         btnRemove.classList.add("remove");
         btnRemove.addEventListener("click", function (e) {
             e.stopPropagation();
@@ -109,21 +117,22 @@ function renderUsers(list) {
         });
         cardButtons.append(btnToggle, btnRemove);
         userCard.appendChild(cardButtons);
-        // Modal click
+        // Exercise 17 — Show user details in modal
         userCard.addEventListener("click", function () {
             var statusClass = user.active ? "active" : "inactive";
             var statusText = user.active ? "Active" : "Inactive";
             var modalDetails = document.getElementById("modal-details");
-            modalDetails.innerHTML = "\n                <p><strong>ID:</strong> ".concat(user.id, "</p>\n                <p><strong>Nome:</strong> ").concat(user.name, "</p>\n                <p><strong>Email:</strong> ").concat(user.email, "</p>\n                <p><strong>Status:</strong> <span class=\"status ").concat(statusClass, "\">").concat(statusText, "</span></p>\n                <p><strong>Tarefas atribu\u00EDdas:</strong> 0</p>\n                <p><strong>Tarefas conclu\u00EDdas:</strong> 0</p>\n            ");
+            modalDetails.innerHTML = "\n                <p><strong>ID:</strong> ".concat(user.id, "</p>\n                <p><strong>Name:</strong> ").concat(user.name, "</p>\n                <p><strong>Email:</strong> ").concat(user.email, "</p>\n                <p><strong>Status:</strong> <span class=\"status ").concat(statusClass, "\">").concat(statusText, "</span></p>\n                <p><strong>Assigned tasks:</strong> 0</p>\n                <p><strong>Completed tasks:</strong> 0</p>\n            ");
             userModal.style.display = "block";
         });
         container.appendChild(userCard);
     });
-    updateStats(list);
+    updateStats(list); // Exercise 9 & 13
 }
 // ---------------------------
-// FORMULÁRIO
+// FORM
 // ---------------------------
+// Exercise 6 — Add new user via form
 var form = document.createElement("form");
 form.classList.add("form");
 // INPUTS
@@ -135,15 +144,15 @@ var emailInput = document.createElement("input");
 emailInput.type = "email";
 emailInput.placeholder = "example@mail.com";
 emailInput.required = true;
-// FOTO COM LABEL
+// PHOTO INPUT
 var photoInput = document.createElement("input");
 photoInput.type = "file";
 photoInput.accept = "image/*";
 photoInput.id = "photoInput";
 var photoLabel = document.createElement("label");
 photoLabel.htmlFor = "photoInput";
-photoLabel.textContent = "Foto de perfil:";
-// BOTÃO ADICIONAR
+photoLabel.textContent = "Profile photo:";
+// ADD BUTTON
 var btnAdd = document.createElement("button");
 btnAdd.type = "submit";
 btnAdd.textContent = "New user";
@@ -152,16 +161,19 @@ btnAdd.classList.add("btn-add");
 var inputContainer = document.createElement("div");
 inputContainer.classList.add("input-container");
 inputContainer.append(nameInput, emailInput, photoLabel, photoInput, btnAdd);
+// ---------------------------
 // FILTER BUTTONS
+// ---------------------------
+// Exercises 8, 15
 var sortAsc = true;
 var btnSortByName = document.createElement("button");
 btnSortByName.type = "button";
-btnSortByName.textContent = "Ordenar A-Z";
+btnSortByName.textContent = "Sort A-Z";
 btnSortByName.classList.add("btn-filter");
 btnSortByName.addEventListener("click", function () {
     currentDisplayList.sort(function (a, b) { return sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name); });
     renderUsers(currentDisplayList);
-    btnSortByName.textContent = sortAsc ? "Ordenar Z-A" : "Ordenar A-Z";
+    btnSortByName.textContent = sortAsc ? "Sort Z-A" : "Sort A-Z";
     sortAsc = !sortAsc;
 });
 var btnShowAll = document.createElement("button");
@@ -192,10 +204,13 @@ btnShowInactive.addEventListener("click", function () {
 var filterContainer = document.createElement("div");
 filterContainer.classList.add("filter-buttons");
 filterContainer.append(btnShowAll, btnShowActive, btnShowInactive, btnSortByName);
-// ADICIONA FORM AO CONTAINER
+// Append form to container
 form.append(inputContainer, filterContainer);
 formContainer.prepend(form);
+// ---------------------------
 // FORM SUBMIT
+// ---------------------------
+// Exercise 6, 16 — Add user
 form.addEventListener("submit", function (e) {
     e.preventDefault();
     var name = nameInput.value.trim();
@@ -204,6 +219,9 @@ form.addEventListener("submit", function (e) {
     if (photoInput.files && photoInput.files[0]) {
         photoURL = URL.createObjectURL(photoInput.files[0]);
     }
+    // Validation — Exercise 16
+    if (!name || !email.includes("@"))
+        return;
     userList.push(new UserClass(nextID++, name, email, photoURL));
     currentDisplayList = __spreadArray([], userList, true);
     renderUsers(currentDisplayList);
@@ -211,7 +229,10 @@ form.addEventListener("submit", function (e) {
     emailInput.value = "";
     photoInput.value = "";
 });
+// ---------------------------
 // SEARCH
+// ---------------------------
+// Exercise 12 — Search by name
 var searchInput = document.querySelector("#searchInput");
 searchInput.addEventListener("input", function () {
     var term = searchInput.value.trim().toLowerCase();
@@ -219,7 +240,8 @@ searchInput.addEventListener("input", function () {
     renderUsers(currentDisplayList);
 });
 // ---------------------------
-// INICIALIZAÇÃO
+// INITIALIZATION
 // ---------------------------
+// Exercise 19 — Load initial users
 loadInitialUsers();
 renderUsers(currentDisplayList);
