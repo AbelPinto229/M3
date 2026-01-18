@@ -1,4 +1,6 @@
-/* === BASIC RESET === */
+/* ===============================
+   RESET & BASE STYLES
+=============================== */
 * {
     margin: 0;
     padding: 0;
@@ -6,7 +8,6 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* === PAGE BODY === */
 body {
     background: #f0f2f5;
     min-height: 100vh;
@@ -16,14 +17,15 @@ body {
     align-items: center;
 }
 
-/* === TITLE === */
 h1 {
     margin-bottom: 25px;
     color: #333;
     text-align: center;
 }
 
-/* === MAIN LAYOUT === */
+/* ===============================
+   MAIN LAYOUT
+=============================== */
 #appLayout {
     display: grid;
     grid-template-columns: 1fr 2fr;
@@ -32,26 +34,28 @@ h1 {
     max-width: 1200px;
 }
 
-/* === LEFT SIDE === */
 #leftSide {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-/* === RIGHT SIDE === */
 #rightSide {
     display: flex;
     flex-direction: column;
 }
 
-/* === PENDING COUNTER === */
+/* ===============================
+   PENDING TASK COUNTER
+=============================== */
 #pending-count {
     font-size: 16px;
     font-weight: bold;
 }
 
-/* === INPUTS / BUTTONS CONTAINER === */
+/* ===============================
+   INPUTS AND BUTTONS
+=============================== */
 #buttonContainer {
     display: flex;
     flex-wrap: wrap;
@@ -62,7 +66,6 @@ h1 {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-/* === INPUT & SELECT === */
 #taskInput,
 #categorySelect,
 #searchInput {
@@ -72,7 +75,7 @@ h1 {
     border: 1px solid #ccc;
 }
 
-/* === BUTTONS === */
+/* BUTTON STYLES */
 #addBtn,
 #sortBtn,
 #clearCompletedBtn {
@@ -110,12 +113,16 @@ h1 {
     transform: scale(1.05);
 }
 
-/* === SEARCH BAR (RIGHT) === */
+/* ===============================
+   SEARCH BAR
+=============================== */
 #searchContainer {
     margin-bottom: 20px;
 }
 
-/* === TASK LIST === */
+/* ===============================
+   TASK LIST
+=============================== */
 #list {
     list-style: none;
     display: flex;
@@ -123,7 +130,6 @@ h1 {
     gap: 15px;
 }
 
-/* === TASK CARD === */
 #list li {
     background-color: #ffffff;
     padding: 15px;
@@ -142,59 +148,32 @@ h1 {
     box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
-/* === TASK CONTENT === */
+/* ===============================
+   TASK CONTENT
+=============================== */
 .task-content {
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-/* === COMPLETED TASK === */
 .task-title.completed {
     text-decoration: line-through;
     color: #999;
 }
 
-/* === COMPLETION DATE === */
 .completed-date {
     font-size: 12px;
     color: #666;
 }
 
-/* === CATEGORY === */
 .task-category {
     font-weight: bold;
 }
 
-/* === REMOVE BUTTON === */
-#list li button {
-    margin-top: 10px;
-    padding: 6px 10px;
-    border-radius: 5px;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-    background-color: #ff4d4d;
-    color: white;
-    transition: background-color 0.3s, transform 0.2s;
-}
-
-#list li button:hover {
-    background-color: #cc0000;
-    transform: scale(1.05);
-}
-
-/* === RESPONSIVE === */
-@media (max-width: 900px) {
-    #appLayout {
-        grid-template-columns: 1fr;
-    }
-
-    #list li {
-        width: 100%;
-    }
-}
-
+/* ===============================
+   TASK BUTTONS (EDIT / REMOVE)
+=============================== */
 #list li div:last-child {
     display: flex;
     justify-content: flex-end;
@@ -212,16 +191,31 @@ h1 {
     transition: background-color 0.3s, transform 0.2s;
 }
 
+/* EDIT BUTTON */
 #list li div:last-child button:first-child {
-    background-color: #ffc107; /* Edit = amarelo */
+    background-color: #ffc107;
 }
 #list li div:last-child button:first-child:hover {
     background-color: #e0a800;
 }
 
+/* REMOVE BUTTON */
 #list li div:last-child button:last-child {
-    background-color: #ff4d4d; /* Remove = vermelho */
+    background-color: #ff4d4d;
 }
 #list li div:last-child button:last-child:hover {
     background-color: #cc0000;
+}
+
+/* ===============================
+   RESPONSIVE DESIGN
+=============================== */
+@media (max-width: 900px) {
+    #appLayout {
+        grid-template-columns: 1fr;
+    }
+
+    #list li {
+        width: 100%;
+    }
 }

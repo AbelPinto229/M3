@@ -1,35 +1,42 @@
 // ===============================
-// GUIDED EXERCISES 2 - MAIN.TS
+// TASK MANAGER - MAIN.TS
 // ===============================
-// Exercise 2 — Create TaskClass class
+// Exercise 2 — Create TaskClass implementing Task
 var TaskClass = /** @class */ (function () {
-    // Exercise 2a — Constructor receiving id, title and category
     function TaskClass(id, title, category) {
         this.id = id;
         this.title = title;
         this.concluded = false;
-        this.category = category;
+        this.category = category; //Exercise 13 — category assignment
     }
-    // Exercise 2b — Method to mark task as concluded and set conclusion date
+    //Exercise 2 — Array of objects
     TaskClass.prototype.markConcluded = function () {
         this.concluded = true;
         this.conclusionDate = new Date();
     };
     return TaskClass;
 }());
-// Exercise 3 — Array of objects
+//Exercise 3 — Array of objects
 var taskList = [
     new TaskClass(1, "Review class 2 slides", "Study"),
     new TaskClass(2, "Do guided exercises", "Study"),
     new TaskClass(3, "Do autonomous exercises", "Study")
 ];
-// Variable for dynamic search (Exercise 5)
+// Dynamic search term (Exercise 5 — Array of objects — Dynamic Search)
 var searchTerm = "";
+// Sort state (Exercise 12 — Array of objects2 — Alphabetical Sorting)
+var sortAsc = true;
 // ===============================
-// Exercise 4 — Add task via input
+// ELEMENTS
+// ===============================
 var input = document.querySelector("#taskInput");
 var categorySelect = document.querySelector("#categorySelect");
 var buttonAdd = document.querySelector("#addBtn");
+var sortBtn = document.querySelector("#sortBtn");
+var clearCompletedBtn = document.querySelector("#clearCompletedBtn");
+var searchInput = document.querySelector("#searchInput");
+// ===============================
+//Exercise 4 — Add Task via Input
 buttonAdd.addEventListener("click", function () {
     var title = input.value.trim();
     if (!title)
@@ -37,60 +44,61 @@ buttonAdd.addEventListener("click", function () {
     var category = categorySelect.value;
     var newTask = new TaskClass(Date.now(), title, category);
     taskList.push(newTask);
+    // Reset input and search
     input.value = "";
     categorySelect.value = "Work";
-    // 🔥 CORREÇÃO DO BUG
     searchTerm = "";
     searchInput.value = "";
     renderTasks();
 });
 // ===============================
-// Exercise 12 — Alphabetical Sorting
-var sortBtn = document.querySelector("#sortBtn");
+// Exercise 12 — Alphabetical Sorting / toggle A-Z / Z-A
 sortBtn.addEventListener("click", function () {
-    taskList.sort(function (a, b) { return a.title.localeCompare(b.title, "pt-PT"); });
+    taskList.sort(function (a, b) {
+        return sortAsc
+            ? a.title.localeCompare(b.title, "en-US")
+            : b.title.localeCompare(a.title, "en-US");
+    });
+    sortBtn.textContent = sortAsc ? "Sort Z→A" : "Sort A→Z";
+    sortAsc = !sortAsc;
     renderTasks();
 });
 // ===============================
-// Exercise 14 — Clear all concluded tasks
-var clearCompletedBtn = document.querySelector("#clearCompletedBtn");
+// Exercise 14 — Clear all completed tasks
 clearCompletedBtn.addEventListener("click", function () {
     taskList = taskList.filter(function (task) { return !task.concluded; });
     renderTasks();
 });
 // ===============================
-// Exercise 5 — Dynamic Search
-var searchInput = document.querySelector("#searchInput");
+// Exercise 15— Dynamic Search
 searchInput.addEventListener("input", function () {
     searchTerm = searchInput.value.trim().toLowerCase();
     renderTasks();
 });
 // ===============================
-// Exercise 5,6,7,8,9,11,13 — Dynamic Rendering
-// ===============================
-// Exercise 5 — Dynamic rendering
+//Exercise 5,6,7,8,9,11 — Dynamic Rendering, Styling, Edit/Remove, Pending Counter, Conclusion Date
 function renderTasks() {
     var taskContainer = document.querySelector("#list");
     var pendingCountDiv = document.querySelector("#pending-count");
-    // Filter tasks based on searchTerm
+    //Filter tasks by search
     var filteredTasks = taskList.filter(function (task) {
         return task.title.toLowerCase().includes(searchTerm);
     });
-    // Calculate number of pending tasks
+    //Exercise 9 Pending tasks counter
     var pendingTasks = filteredTasks.filter(function (t) { return !t.concluded; });
     pendingCountDiv.textContent = "Pending tasks: ".concat(pendingTasks.length);
-    // Clear container
+    // Clear current list (Exercise 5 — render)
     taskContainer.innerHTML = "";
-    // Loop through filtered tasks
     filteredTasks.forEach(function (task) {
         var li = document.createElement("li");
+        // Task content (Exercise 6 — Styling by state)
         var contentDiv = document.createElement("div");
         contentDiv.classList.add("task-content");
         var titleSpan = document.createElement("span");
         titleSpan.textContent = task.title;
         titleSpan.classList.add("task-title");
         if (task.concluded)
-            titleSpan.classList.add("completed");
+            titleSpan.classList.add("completed"); // Ex 6
         contentDiv.appendChild(titleSpan);
         var categorySpan = document.createElement("span");
         categorySpan.textContent = " [".concat(task.category, "]");
@@ -107,6 +115,7 @@ function renderTasks() {
                 break;
         }
         contentDiv.appendChild(categorySpan);
+        //Exercise 11 — Show conclusion date if completed
         if (task.concluded && task.conclusionDate) {
             var dateSpan = document.createElement("span");
             var formattedDate = task.conclusionDate.toLocaleString("en-US", {
@@ -120,6 +129,7 @@ function renderTasks() {
             contentDiv.appendChild(dateSpan);
         }
         li.appendChild(contentDiv);
+        // Exercise 1, 6 — Mark concluded on click
         li.addEventListener("click", function () {
             if (!task.concluded)
                 task.markConcluded();
@@ -129,15 +139,11 @@ function renderTasks() {
             }
             renderTasks();
         });
-        // === CREATE REMOVE BUTTON ===
-        var removeBtn = document.createElement("button");
-        removeBtn.textContent = "Remove";
-        removeBtn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            taskList = taskList.filter(function (t) { return t.id !== task.id; });
-            renderTasks();
-        });
-        // === CREATE EDIT BUTTON ===
+        //Exercise 7, 8 — Buttons container: Edit & Remove
+        var buttonContainer = document.createElement("div");
+        buttonContainer.style.display = "flex";
+        buttonContainer.style.gap = "10px";
+        // Edit button
         var editBtn = document.createElement("button");
         editBtn.textContent = "Edit";
         editBtn.addEventListener("click", function (e) {
@@ -148,15 +154,19 @@ function renderTasks() {
                 renderTasks();
             }
         });
-        // === ADD BUTTONS TO LI ===
-        var buttonContainer = document.createElement("div");
-        buttonContainer.style.display = "flex";
-        buttonContainer.style.gap = "10px";
+        // Remove button
+        var removeBtn = document.createElement("button");
+        removeBtn.textContent = "Remove";
+        removeBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            taskList = taskList.filter(function (t) { return t.id !== task.id; });
+            renderTasks();
+        });
         buttonContainer.appendChild(editBtn);
         buttonContainer.appendChild(removeBtn);
         li.appendChild(buttonContainer);
         taskContainer.appendChild(li);
     });
 }
-// Initial call
+// Initial render
 renderTasks();
