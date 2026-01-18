@@ -51,17 +51,9 @@ body {
 }
 
 /* cores individuais */
-#total-users {
-    color: #000000; /* Preto */
-}
-
-#active-users {
-    color: #00c853; /* Verde */
-}
-
-#inactive-users {
-    color: #ff1744; /* Vermelho */
-}
+#total-users { color: #000000; }
+#active-users { color: #00c853; }
+#inactive-users { color: #ff1744; }
 
 /* ----------------------------- */
 /* FORM STYLING */
@@ -209,9 +201,28 @@ button.btn-filter:hover {
     color: #333;
 }
 
-.user-card .tasks {
+/* ----------------------------- */
+/* TASKS NO CARD */
+/* ----------------------------- */
+.user-card .tasks,
+.user-card .tasks-concluded {
     font-size: 13px;
-    color: #555;
+    margin: 2px 0;
+    padding: 4px 8px;
+    border-radius: 12px;
+    width: fit-content;
+}
+
+/* Tasks atribuídas */
+.user-card .tasks {
+    background-color: #e0f7fa; /* azul claro */
+    color: #007b7f;
+}
+
+/* Tasks concluídas */
+.user-card .tasks-concluded {
+    background-color: #e8f5e9; /* verde claro */
+    color: #2e7d32;
 }
 
 /* ----------------------------- */

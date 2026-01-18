@@ -1,3 +1,6 @@
+// ---------------------------
+// INTERFACE E CLASSE
+// ---------------------------
 interface User {
     id: number;
     name: string;
@@ -13,12 +16,12 @@ class UserClass implements User {
     active: boolean;
     photo?: string;
 
-    constructor(id: number, name: string, email: string, photo?: string) {
+    constructor(id: number, name: string, email: string, photo?: string, active: boolean = true) {
         this.id = id;
         this.name = name;
         this.email = email;
-        this.active = true;
         this.photo = photo;
+        this.active = active;
     }
 
     toggleActive(): void {
@@ -31,10 +34,7 @@ class UserClass implements User {
 // ---------------------------
 let userList: UserClass[] = [];
 let nextID: number = 1;
-
-// Usuários iniciais
-userList.push(new UserClass(nextID++, "Abel", "ajdszp@hotmail.com"));
-userList.push(new UserClass(nextID++, "Joel", "jjdszp@hotmail.com"));
+let currentDisplayList: UserClass[] = [];
 
 // ---------------------------
 // CONTAINERS
@@ -63,9 +63,23 @@ function updateStats(list: UserClass[] = userList): void {
 }
 
 // ---------------------------
-// LISTA ATUAL VISÍVEL
+// FUNÇÃO: CARREGAR USUÁRIOS INICIAIS
 // ---------------------------
-let currentDisplayList: UserClass[] = [...userList];
+function loadInitialUsers(): void {
+    const initialData = [
+        { name: "Abel Silva", email: "abel@example.com", active: true },
+        { name: "Joel Santos", email: "joel@example.com", active: false },
+        { name: "Maria Oliveira", email: "maria@example.com", active: true },
+        { name: "Ana Costa", email: "ana@example.com", active: false },
+        { name: "Carlos Pereira", email: "carlos@example.com", active: true }
+    ];
+
+    initialData.forEach(data => {
+        userList.push(new UserClass(nextID++, data.name, data.email, undefined, data.active));
+    });
+
+    currentDisplayList = [...userList];
+}
 
 // ---------------------------
 // RENDER USERS
@@ -83,73 +97,78 @@ function renderUsers(list: UserClass[]): void {
     const modalDetails = document.getElementById("modal-details") as HTMLDivElement;
     const modalClose = document.getElementById("modal-close") as HTMLSpanElement;
 
+    // Modal close events
     modalClose.onclick = () => { userModal.style.display = "none"; };
     window.onclick = (e: MouseEvent) => { if (e.target === userModal) userModal.style.display = "none"; };
 
     list.forEach(user => {
-        const userCard = document.createElement("div");
-        userCard.classList.add("user-card");
+    const userCard = document.createElement("div");
+    userCard.classList.add("user-card");
 
-        const avatarContent = user.photo
-            ? `<img src="${user.photo}" class="user-photo" alt="${user.name}">`
-            : `<div class="user-avatar">${user.name.charAt(0).toUpperCase()}</div>`;
+    const avatarContent = user.photo
+        ? `<img src="${user.photo}" class="user-photo" alt="${user.name}">`
+        : `<div class="user-avatar">${user.name.charAt(0).toUpperCase()}</div>`;
 
-        userCard.innerHTML = `
-            ${avatarContent}
-            <h3>${user.name}</h3>
-            <p class="tasks">${0} tasks</p>
-        `;
+    // Cartão sem ID visível, com contagem de tarefas
+    userCard.innerHTML = `
+        ${avatarContent}
+        <h3>${user.name}</h3>
+        <p class="tasks">0 tasks</p>
+        <p class="tasks-concluded">0 tasks concluded</p>
+    `;
 
-        // BOTÕES CARD
-        const cardButtons = document.createElement("div");
-        cardButtons.classList.add("card-buttons");
+    // Botões do card
+    const cardButtons = document.createElement("div");
+    cardButtons.classList.add("card-buttons");
 
-        const btnToggle = document.createElement("button");
-        btnToggle.textContent = user.active ? "Desativar" : "Ativar";
-        btnToggle.classList.add(user.active ? "active" : "inactive");
-        btnToggle.addEventListener("click", e => {
-            e.stopPropagation();
-            user.toggleActive();
-            currentDisplayList = currentDisplayList.map(u => u.id === user.id ? user : u);
-            renderUsers(currentDisplayList);
-        });
-
-        const btnRemove = document.createElement("button");
-        btnRemove.textContent = "Remover";
-        btnRemove.classList.add("remove");
-        btnRemove.addEventListener("click", e => {
-            e.stopPropagation();
-            userList = userList.filter(u => u.id !== user.id);
-            currentDisplayList = currentDisplayList.filter(u => u.id !== user.id);
-            renderUsers(currentDisplayList);
-        });
-
-        cardButtons.append(btnToggle, btnRemove);
-        userCard.appendChild(cardButtons);
-
-        // MODAL
-        userCard.addEventListener("click", () => {
-            const statusClass = user.active ? "active" : "inactive";
-            const statusText = user.active ? "Active" : "Inactive";
-
-            modalDetails.innerHTML = `
-                <p><strong>ID:</strong> ${user.id}</p>
-                <p><strong>Nome:</strong> ${user.name}</p>
-                <p><strong>Email:</strong> ${user.email}</p>
-                <p><strong>Status:</strong> <span class="status ${statusClass}">${statusText}</span></p>
-                <p><strong>Tarefas atribuídas:</strong> ${0}</p>
-            `;
-            userModal.style.display = "block";
-        });
-
-        container.appendChild(userCard);
+    const btnToggle = document.createElement("button");
+    btnToggle.textContent = user.active ? "Desativar" : "Ativar";
+    btnToggle.classList.add(user.active ? "active" : "inactive");
+    btnToggle.addEventListener("click", e => {
+        e.stopPropagation();
+        user.toggleActive();
+        renderUsers(currentDisplayList);
     });
+
+    const btnRemove = document.createElement("button");
+    btnRemove.textContent = "Remover";
+    btnRemove.classList.add("remove");
+    btnRemove.addEventListener("click", e => {
+        e.stopPropagation();
+        userList = userList.filter(u => u.id !== user.id);
+        currentDisplayList = currentDisplayList.filter(u => u.id !== user.id);
+        renderUsers(currentDisplayList);
+    });
+
+    cardButtons.append(btnToggle, btnRemove);
+    userCard.appendChild(cardButtons);
+
+    // Modal click (mostra ID apenas no modal, não no cartão)
+    userCard.addEventListener("click", () => {
+        const statusClass = user.active ? "active" : "inactive";
+        const statusText = user.active ? "Active" : "Inactive";
+
+        const modalDetails = document.getElementById("modal-details") as HTMLDivElement;
+        modalDetails.innerHTML = `
+            <p><strong>ID:</strong> ${user.id}</p>
+            <p><strong>Nome:</strong> ${user.name}</p>
+            <p><strong>Email:</strong> ${user.email}</p>
+            <p><strong>Status:</strong> <span class="status ${statusClass}">${statusText}</span></p>
+            <p><strong>Tarefas atribuídas:</strong> 0</p>
+            <p><strong>Tarefas concluídas:</strong> 0</p>
+        `;
+        const userModal = document.getElementById("user-modal") as HTMLDivElement;
+        userModal.style.display = "block";
+    });
+
+    container.appendChild(userCard);
+});
 
     updateStats(list);
 }
 
 // ---------------------------
-// FORM
+// FORMULÁRIO
 // ---------------------------
 const form = document.createElement("form");
 form.classList.add("form");
@@ -173,18 +192,15 @@ btnAdd.type = "submit";
 btnAdd.textContent = "New user";
 btnAdd.classList.add("btn-add");
 
-// BOTÕES FILTRO/SORT
-let sortAsc: boolean = true;
+// Filtros e ordenação
+let sortAsc = true;
 
 const btnSortByName = document.createElement("button");
 btnSortByName.type = "button";
 btnSortByName.textContent = "Ordenar A-Z";
 btnSortByName.classList.add("btn-filter");
-
 btnSortByName.addEventListener("click", () => {
-    currentDisplayList.sort((a, b) =>
-        sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
-    );
+    currentDisplayList.sort((a, b) => sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
     renderUsers(currentDisplayList);
     btnSortByName.textContent = sortAsc ? "Ordenar Z-A" : "Ordenar A-Z";
     sortAsc = !sortAsc;
@@ -217,7 +233,7 @@ btnShowInactive.addEventListener("click", () => {
     renderUsers(currentDisplayList);
 });
 
-// APPEND FORM
+// Append form
 const inputContainer = document.createElement("div");
 inputContainer.classList.add("input-container");
 inputContainer.append(nameInput, emailInput, photoInput, btnAdd);
@@ -229,7 +245,7 @@ filterContainer.append(btnShowAll, btnShowActive, btnShowInactive, btnSortByName
 form.append(inputContainer, filterContainer);
 formContainer.prepend(form);
 
-// EVENTOS FORM
+// Evento do form
 form.addEventListener("submit", e => {
     e.preventDefault();
     const name = nameInput.value.trim();
@@ -239,7 +255,7 @@ form.addEventListener("submit", e => {
         photoURL = URL.createObjectURL(photoInput.files[0]);
     }
 
-    userList.push(new UserClass(Date.now(), name, email, photoURL));
+    userList.push(new UserClass(nextID++, name, email, photoURL));
     currentDisplayList = [...userList];
     renderUsers(currentDisplayList);
 
@@ -248,7 +264,7 @@ form.addEventListener("submit", e => {
     photoInput.value = "";
 });
 
-// SEARCH
+// Search
 const searchInput = document.querySelector("#searchInput") as HTMLInputElement;
 searchInput.addEventListener("input", () => {
     const term = searchInput.value.trim().toLowerCase();
@@ -256,5 +272,8 @@ searchInput.addEventListener("input", () => {
     renderUsers(currentDisplayList);
 });
 
-// INITIAL RENDER
+// ---------------------------
+// INICIALIZAÇÃO
+// ---------------------------
+loadInitialUsers();
 renderUsers(currentDisplayList);

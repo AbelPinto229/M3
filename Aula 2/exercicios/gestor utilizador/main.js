@@ -8,12 +8,13 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 var UserClass = /** @class */ (function () {
-    function UserClass(id, name, email, photo) {
+    function UserClass(id, name, email, photo, active) {
+        if (active === void 0) { active = true; }
         this.id = id;
         this.name = name;
         this.email = email;
-        this.active = true;
         this.photo = photo;
+        this.active = active;
     }
     UserClass.prototype.toggleActive = function () {
         this.active = !this.active;
@@ -25,9 +26,7 @@ var UserClass = /** @class */ (function () {
 // ---------------------------
 var userList = [];
 var nextID = 1;
-// Usuários iniciais
-userList.push(new UserClass(nextID++, "Abel", "ajdszp@hotmail.com"));
-userList.push(new UserClass(nextID++, "Joel", "jjdszp@hotmail.com"));
+var currentDisplayList = [];
 // ---------------------------
 // CONTAINERS
 // ---------------------------
@@ -51,9 +50,21 @@ function updateStats(list) {
     inactiveUsersSpan.textContent = "".concat(inactive, " (").concat(inactivePercent, "%)");
 }
 // ---------------------------
-// LISTA ATUAL VISÍVEL
+// FUNÇÃO: CARREGAR USUÁRIOS INICIAIS
 // ---------------------------
-var currentDisplayList = __spreadArray([], userList, true);
+function loadInitialUsers() {
+    var initialData = [
+        { name: "Abel Silva", email: "abel@example.com", active: true },
+        { name: "Joel Santos", email: "joel@example.com", active: false },
+        { name: "Maria Oliveira", email: "maria@example.com", active: true },
+        { name: "Ana Costa", email: "ana@example.com", active: false },
+        { name: "Carlos Pereira", email: "carlos@example.com", active: true }
+    ];
+    initialData.forEach(function (data) {
+        userList.push(new UserClass(nextID++, data.name, data.email, undefined, data.active));
+    });
+    currentDisplayList = __spreadArray([], userList, true);
+}
 // ---------------------------
 // RENDER USERS
 // ---------------------------
@@ -67,6 +78,7 @@ function renderUsers(list) {
     var userModal = document.getElementById("user-modal");
     var modalDetails = document.getElementById("modal-details");
     var modalClose = document.getElementById("modal-close");
+    // Modal close events
     modalClose.onclick = function () { userModal.style.display = "none"; };
     window.onclick = function (e) { if (e.target === userModal)
         userModal.style.display = "none"; };
@@ -76,8 +88,9 @@ function renderUsers(list) {
         var avatarContent = user.photo
             ? "<img src=\"".concat(user.photo, "\" class=\"user-photo\" alt=\"").concat(user.name, "\">")
             : "<div class=\"user-avatar\">".concat(user.name.charAt(0).toUpperCase(), "</div>");
-        userCard.innerHTML = "\n            ".concat(avatarContent, "\n            <h3>").concat(user.name, "</h3>\n            <p class=\"tasks\">").concat(0, " tasks</p>\n        ");
-        // BOTÕES CARD
+        // Cartão sem ID visível, com contagem de tarefas
+        userCard.innerHTML = "\n        ".concat(avatarContent, "\n        <h3>").concat(user.name, "</h3>\n        <p class=\"tasks\">0 tasks</p>\n        <p class=\"tasks-concluded\">0 tasks concluded</p>\n    ");
+        // Botões do card
         var cardButtons = document.createElement("div");
         cardButtons.classList.add("card-buttons");
         var btnToggle = document.createElement("button");
@@ -86,7 +99,6 @@ function renderUsers(list) {
         btnToggle.addEventListener("click", function (e) {
             e.stopPropagation();
             user.toggleActive();
-            currentDisplayList = currentDisplayList.map(function (u) { return u.id === user.id ? user : u; });
             renderUsers(currentDisplayList);
         });
         var btnRemove = document.createElement("button");
@@ -100,11 +112,13 @@ function renderUsers(list) {
         });
         cardButtons.append(btnToggle, btnRemove);
         userCard.appendChild(cardButtons);
-        // MODAL
+        // Modal click (mostra ID apenas no modal, não no cartão)
         userCard.addEventListener("click", function () {
             var statusClass = user.active ? "active" : "inactive";
             var statusText = user.active ? "Active" : "Inactive";
-            modalDetails.innerHTML = "\n                <p><strong>ID:</strong> ".concat(user.id, "</p>\n                <p><strong>Nome:</strong> ").concat(user.name, "</p>\n                <p><strong>Email:</strong> ").concat(user.email, "</p>\n                <p><strong>Status:</strong> <span class=\"status ").concat(statusClass, "\">").concat(statusText, "</span></p>\n                <p><strong>Tarefas atribu\u00EDdas:</strong> ").concat(0, "</p>\n            ");
+            var modalDetails = document.getElementById("modal-details");
+            modalDetails.innerHTML = "\n            <p><strong>ID:</strong> ".concat(user.id, "</p>\n            <p><strong>Nome:</strong> ").concat(user.name, "</p>\n            <p><strong>Email:</strong> ").concat(user.email, "</p>\n            <p><strong>Status:</strong> <span class=\"status ").concat(statusClass, "\">").concat(statusText, "</span></p>\n            <p><strong>Tarefas atribu\u00EDdas:</strong> 0</p>\n            <p><strong>Tarefas conclu\u00EDdas:</strong> 0</p>\n        ");
+            var userModal = document.getElementById("user-modal");
             userModal.style.display = "block";
         });
         container.appendChild(userCard);
@@ -112,7 +126,7 @@ function renderUsers(list) {
     updateStats(list);
 }
 // ---------------------------
-// FORM
+// FORMULÁRIO
 // ---------------------------
 var form = document.createElement("form");
 form.classList.add("form");
@@ -131,16 +145,14 @@ var btnAdd = document.createElement("button");
 btnAdd.type = "submit";
 btnAdd.textContent = "New user";
 btnAdd.classList.add("btn-add");
-// BOTÕES FILTRO/SORT
+// Filtros e ordenação
 var sortAsc = true;
 var btnSortByName = document.createElement("button");
 btnSortByName.type = "button";
 btnSortByName.textContent = "Ordenar A-Z";
 btnSortByName.classList.add("btn-filter");
 btnSortByName.addEventListener("click", function () {
-    currentDisplayList.sort(function (a, b) {
-        return sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
-    });
+    currentDisplayList.sort(function (a, b) { return sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name); });
     renderUsers(currentDisplayList);
     btnSortByName.textContent = sortAsc ? "Ordenar Z-A" : "Ordenar A-Z";
     sortAsc = !sortAsc;
@@ -169,7 +181,7 @@ btnShowInactive.addEventListener("click", function () {
     currentDisplayList = userList.filter(function (u) { return !u.active; });
     renderUsers(currentDisplayList);
 });
-// APPEND FORM
+// Append form
 var inputContainer = document.createElement("div");
 inputContainer.classList.add("input-container");
 inputContainer.append(nameInput, emailInput, photoInput, btnAdd);
@@ -178,7 +190,7 @@ filterContainer.classList.add("filter-buttons");
 filterContainer.append(btnShowAll, btnShowActive, btnShowInactive, btnSortByName);
 form.append(inputContainer, filterContainer);
 formContainer.prepend(form);
-// EVENTOS FORM
+// Evento do form
 form.addEventListener("submit", function (e) {
     e.preventDefault();
     var name = nameInput.value.trim();
@@ -187,19 +199,22 @@ form.addEventListener("submit", function (e) {
     if (photoInput.files && photoInput.files[0]) {
         photoURL = URL.createObjectURL(photoInput.files[0]);
     }
-    userList.push(new UserClass(Date.now(), name, email, photoURL));
+    userList.push(new UserClass(nextID++, name, email, photoURL));
     currentDisplayList = __spreadArray([], userList, true);
     renderUsers(currentDisplayList);
     nameInput.value = "";
     emailInput.value = "";
     photoInput.value = "";
 });
-// SEARCH
+// Search
 var searchInput = document.querySelector("#searchInput");
 searchInput.addEventListener("input", function () {
     var term = searchInput.value.trim().toLowerCase();
     currentDisplayList = userList.filter(function (u) { return u.name.toLowerCase().includes(term); });
     renderUsers(currentDisplayList);
 });
-// INITIAL RENDER
+// ---------------------------
+// INICIALIZAÇÃO
+// ---------------------------
+loadInitialUsers();
 renderUsers(currentDisplayList);
