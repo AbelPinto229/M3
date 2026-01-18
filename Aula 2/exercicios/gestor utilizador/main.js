@@ -1,150 +1,205 @@
-// guided exercises 2-1
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var UserClass = /** @class */ (function () {
-    function UserClass(id, name, email) {
+    function UserClass(id, name, email, photo) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.active = true;
+        this.photo = photo;
     }
     UserClass.prototype.toggleActive = function () {
         this.active = !this.active;
     };
     return UserClass;
 }());
+// ---------------------------
+// DATA
+// ---------------------------
 var userList = [];
 var nextID = 1;
+// Usuários iniciais
 userList.push(new UserClass(nextID++, "Abel", "ajdszp@hotmail.com"));
 userList.push(new UserClass(nextID++, "Joel", "jjdszp@hotmail.com"));
+// ---------------------------
+// CONTAINERS
+// ---------------------------
 var container = document.getElementById("user-list");
-renderUsers(userList);
+var formContainer = document.getElementById("form");
+// ---------------------------
+// ESTATÍSTICAS
+// ---------------------------
+var totalUsersSpan = document.getElementById("total-users");
+var activeUsersSpan = document.getElementById("active-users");
+var inactiveUsersSpan = document.getElementById("inactive-users");
+function updateStats(list) {
+    if (list === void 0) { list = userList; }
+    var total = list.length;
+    var active = list.filter(function (u) { return u.active; }).length;
+    var inactive = total - active;
+    var activePercent = total === 0 ? 0 : Math.round((active / total) * 100);
+    var inactivePercent = total === 0 ? 0 : Math.round((inactive / total) * 100);
+    totalUsersSpan.textContent = "".concat(total);
+    activeUsersSpan.textContent = "".concat(active, " (").concat(activePercent, "%)");
+    inactiveUsersSpan.textContent = "".concat(inactive, " (").concat(inactivePercent, "%)");
+}
+// ---------------------------
+// LISTA ATUAL VISÍVEL
+// ---------------------------
+var currentDisplayList = __spreadArray([], userList, true);
+// ---------------------------
+// RENDER USERS
+// ---------------------------
 function renderUsers(list) {
-    var container = document.getElementById("user-list");
     container.innerHTML = "";
+    if (list.length === 0) {
+        container.innerHTML = "<p>No users found.</p>";
+        updateStats(list);
+        return;
+    }
+    var userModal = document.getElementById("user-modal");
+    var modalDetails = document.getElementById("modal-details");
+    var modalClose = document.getElementById("modal-close");
+    modalClose.onclick = function () { userModal.style.display = "none"; };
+    window.onclick = function (e) { if (e.target === userModal)
+        userModal.style.display = "none"; };
     list.forEach(function (user) {
-        var userCardDiv = document.createElement("div");
-        userCardDiv.classList.add("user-card");
-        // Conteúdo do card
-        userCardDiv.innerHTML = "\n            <h3>".concat(user.name, "</h3>\n            <p>Email: ").concat(user.email, "</p>\n            <p class=\"status ").concat(user.active ? "active" : "inactive", "\">\n                Status: ").concat(user.active ? "Active" : "Inactive", "\n            </p>\n            <p class=\"tasks\">").concat(0, " assigned tasks</p> <!-- ajuste: usar 0 ou sua taskList -->\n        ");
-        // Container para os botões
-        var buttonsDiv = document.createElement("div");
-        buttonsDiv.classList.add("card-buttons");
-        // Exercicio 11* Botão Remover
-        var removeBtn = document.createElement("button");
-        removeBtn.textContent = "Remove";
-        removeBtn.classList.add("remove");
-        removeBtn.addEventListener("click", function (e) {
+        var userCard = document.createElement("div");
+        userCard.classList.add("user-card");
+        var avatarContent = user.photo
+            ? "<img src=\"".concat(user.photo, "\" class=\"user-photo\" alt=\"").concat(user.name, "\">")
+            : "<div class=\"user-avatar\">".concat(user.name.charAt(0).toUpperCase(), "</div>");
+        userCard.innerHTML = "\n            ".concat(avatarContent, "\n            <h3>").concat(user.name, "</h3>\n            <p class=\"tasks\">").concat(0, " tasks</p>\n        ");
+        // BOTÕES CARD
+        var cardButtons = document.createElement("div");
+        cardButtons.classList.add("card-buttons");
+        var btnToggle = document.createElement("button");
+        btnToggle.textContent = user.active ? "Desativar" : "Ativar";
+        btnToggle.classList.add(user.active ? "active" : "inactive");
+        btnToggle.addEventListener("click", function (e) {
+            e.stopPropagation();
+            user.toggleActive();
+            currentDisplayList = currentDisplayList.map(function (u) { return u.id === user.id ? user : u; });
+            renderUsers(currentDisplayList);
+        });
+        var btnRemove = document.createElement("button");
+        btnRemove.textContent = "Remover";
+        btnRemove.classList.add("remove");
+        btnRemove.addEventListener("click", function (e) {
             e.stopPropagation();
             userList = userList.filter(function (u) { return u.id !== user.id; });
-            renderUsers(userList);
+            currentDisplayList = currentDisplayList.filter(function (u) { return u.id !== user.id; });
+            renderUsers(currentDisplayList);
         });
-        // Botão Ativar / Desativar
-        var btnToggle = document.createElement("button");
-        btnToggle.textContent = user.active ? "Deactivate" : "Activate";
-        btnToggle.classList.add(user.active ? "inactive" : "active");
-        btnToggle.addEventListener("click", function () {
-            user.toggleActive();
-            renderUsers(userList);
+        cardButtons.append(btnToggle, btnRemove);
+        userCard.appendChild(cardButtons);
+        // MODAL
+        userCard.addEventListener("click", function () {
+            var statusClass = user.active ? "active" : "inactive";
+            var statusText = user.active ? "Active" : "Inactive";
+            modalDetails.innerHTML = "\n                <p><strong>ID:</strong> ".concat(user.id, "</p>\n                <p><strong>Nome:</strong> ").concat(user.name, "</p>\n                <p><strong>Email:</strong> ").concat(user.email, "</p>\n                <p><strong>Status:</strong> <span class=\"status ").concat(statusClass, "\">").concat(statusText, "</span></p>\n                <p><strong>Tarefas atribu\u00EDdas:</strong> ").concat(0, "</p>\n            ");
+            userModal.style.display = "block";
         });
-        // Adiciona os botões no container
-        buttonsDiv.appendChild(removeBtn);
-        buttonsDiv.appendChild(btnToggle);
-        // Adiciona o container de botões ao card
-        userCardDiv.appendChild(buttonsDiv);
-        // Adiciona o card no container principal
-        container.appendChild(userCardDiv);
+        container.appendChild(userCard);
     });
-    updateCounter();
+    updateStats(list);
 }
-// Create form and inputs/buttons
+// ---------------------------
+// FORM
+// ---------------------------
 var form = document.createElement("form");
 form.classList.add("form");
 var nameInput = document.createElement("input");
-nameInput.classList.add("name-input");
 nameInput.type = "text";
 nameInput.placeholder = "First and last name";
 nameInput.required = true;
 var emailInput = document.createElement("input");
-emailInput.classList.add("email-input");
 emailInput.type = "email";
 emailInput.placeholder = "example@mail.com";
 emailInput.required = true;
+var photoInput = document.createElement("input");
+photoInput.type = "file";
+photoInput.accept = "image/*";
 var btnAdd = document.createElement("button");
-btnAdd.classList.add("btn-add");
+btnAdd.type = "submit";
 btnAdd.textContent = "New user";
-// Create filter buttons
+btnAdd.classList.add("btn-add");
+// BOTÕES FILTRO/SORT
+var sortAsc = true;
+var btnSortByName = document.createElement("button");
+btnSortByName.type = "button";
+btnSortByName.textContent = "Ordenar A-Z";
+btnSortByName.classList.add("btn-filter");
+btnSortByName.addEventListener("click", function () {
+    currentDisplayList.sort(function (a, b) {
+        return sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+    });
+    renderUsers(currentDisplayList);
+    btnSortByName.textContent = sortAsc ? "Ordenar Z-A" : "Ordenar A-Z";
+    sortAsc = !sortAsc;
+});
 var btnShowAll = document.createElement("button");
-btnShowAll.textContent = "Show all";
 btnShowAll.type = "button";
+btnShowAll.textContent = "Show all";
 btnShowAll.classList.add("btn-filter");
 btnShowAll.addEventListener("click", function () {
-    renderUsers(userList);
+    currentDisplayList = __spreadArray([], userList, true);
+    renderUsers(currentDisplayList);
 });
 var btnShowActive = document.createElement("button");
-btnShowActive.textContent = "Show active only";
 btnShowActive.type = "button";
+btnShowActive.textContent = "Show active only";
 btnShowActive.classList.add("btn-filter");
 btnShowActive.addEventListener("click", function () {
-    var activeUsers = userList.filter(function (u) { return u.active; });
-    renderUsers(activeUsers);
+    currentDisplayList = userList.filter(function (u) { return u.active; });
+    renderUsers(currentDisplayList);
 });
 var btnShowInactive = document.createElement("button");
-btnShowInactive.textContent = "Show inactive only";
 btnShowInactive.type = "button";
+btnShowInactive.textContent = "Show inactive only";
 btnShowInactive.classList.add("btn-filter");
 btnShowInactive.addEventListener("click", function () {
-    var inactiveUsers = userList.filter(function (u) { return !u.active; });
-    renderUsers(inactiveUsers);
+    currentDisplayList = userList.filter(function (u) { return !u.active; });
+    renderUsers(currentDisplayList);
 });
-// Create containers para inputs e filtros
+// APPEND FORM
 var inputContainer = document.createElement("div");
 inputContainer.classList.add("input-container");
-inputContainer.appendChild(nameInput);
-inputContainer.appendChild(emailInput);
-inputContainer.appendChild(btnAdd);
+inputContainer.append(nameInput, emailInput, photoInput, btnAdd);
 var filterContainer = document.createElement("div");
 filterContainer.classList.add("filter-buttons");
-filterContainer.appendChild(btnShowAll);
-filterContainer.appendChild(btnShowActive);
-filterContainer.appendChild(btnShowInactive);
-// Append containers lado a lado dentro do form
-form.appendChild(inputContainer);
-form.appendChild(filterContainer);
-// Adicionar form no container
-var formContainer = document.getElementById("form");
+filterContainer.append(btnShowAll, btnShowActive, btnShowInactive, btnSortByName);
+form.append(inputContainer, filterContainer);
 formContainer.prepend(form);
-// Submit do form
+// EVENTOS FORM
 form.addEventListener("submit", function (e) {
     e.preventDefault();
-    if (!form.checkValidity()) {
-        alert("Please fill in the fields correctly. The email must contain '@'.");
-        return;
-    }
     var name = nameInput.value.trim();
     var email = emailInput.value.trim();
-    userList.push(new UserClass(Date.now(), name, email));
-    renderUsers(userList);
+    var photoURL;
+    if (photoInput.files && photoInput.files[0]) {
+        photoURL = URL.createObjectURL(photoInput.files[0]);
+    }
+    userList.push(new UserClass(Date.now(), name, email, photoURL));
+    currentDisplayList = __spreadArray([], userList, true);
+    renderUsers(currentDisplayList);
     nameInput.value = "";
     emailInput.value = "";
+    photoInput.value = "";
 });
-// User counter
-var counterDiv = document.createElement("div");
-counterDiv.id = "user-counter";
-counterDiv.style.fontWeight = "bold";
-counterDiv.style.marginBottom = "10px";
-container.prepend(counterDiv);
-function updateCounter() {
-    var counter = document.getElementById("user-counter");
-    counter.textContent = "Total users: ".concat(userList.length);
-}
-//Exercício 12 — Procurar utilizador por nome
-var searchTerm = "";
+// SEARCH
 var searchInput = document.querySelector("#searchInput");
 searchInput.addEventListener("input", function () {
-    searchTerm = searchInput.value.trim().toLowerCase();
-    // Filtra usuários pelo nome
-    var filteredUsers = userList.filter(function (user) {
-        return user.name.toLowerCase().includes(searchTerm);
-    });
-    // Renderiza a lista filtrada
-    renderUsers(filteredUsers);
+    var term = searchInput.value.trim().toLowerCase();
+    currentDisplayList = userList.filter(function (u) { return u.name.toLowerCase().includes(term); });
+    renderUsers(currentDisplayList);
 });
+// INITIAL RENDER
+renderUsers(currentDisplayList);

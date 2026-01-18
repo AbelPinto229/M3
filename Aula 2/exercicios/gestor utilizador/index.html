@@ -9,20 +9,37 @@
 
   <h1>User Manager</h1>
 
-  <!-- User counter -->
-  <div id="user-counter"></div>
+  <!-- ESTATÍSTICAS -->
+  <div id="stats-container">
+    <h2>Estatísticas</h2>
+    <p>
+        Total users: <span id="total-users">0</span> |
+        Active users: <span id="active-users" class="active">0 (0%)</span> |
+        Inactive users: <span id="inactive-users" class="inactive">0 (0%)</span>
+    </p>
+</div>
 
-  <!-- Form container -->
-  <div id="form" class="form-container"></div>
+  <!-- Formulário -->
+  <div id="form"></div>
 
-  <!-- === SEARCH === -->
-    <div id="searchContainer">
-        <input type="text" id="searchInput" placeholder="Search task...">
+  <!-- Pesquisa -->
+  <div id="searchContainer">
+      <input type="text" id="searchInput" placeholder="Search user...">
+  </div>
+
+  <!-- Lista de usuários -->
+  <div id="user-list"></div>
+
+  <!-- Modal de detalhes do utilizador -->
+  <div id="user-modal" class="modal">
+    <div class="modal-content">
+      <span id="modal-close" class="close">&times;</span>
+      <div id="modal-details">
+        <!-- Detalhes do usuário vão aparecer aqui -->
+      </div>
     </div>
-    
-   <!-- Users list -->
-  <div id="user-list" class="users-container"></div>
-  
+  </div>
+
   <script src="main.js"></script>
 </body>
 </html>

@@ -1,21 +1,22 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 //Exercício 2 — Criar classe TarefaClass
 //Cria uma classe TarefaClass que implemente a interface Tarefa.
-var TaskClass = /** @class */ (function () {
+class TaskClass {
     //Crie um constructor que receba o id e o título.
-    function TaskClass(id, title) {
+    constructor(id, title) {
         this.id = id;
         this.title = title;
         this.concluded = false;
     }
     //Adicione um método que mude o estado para true.
-    TaskClass.prototype.markConcluded = function () {
+    markConcluded() {
         this.concluded = true;
-    };
-    return TaskClass;
-}());
+    }
+}
 //Exercício 3 — Array de objetos
 //Cria um array chamado listaTarefas que armazene vários objetos do tipo Tarefa.
-var taskList = [];
+let taskList = [];
 //Adicione 2 ou 3 tarefas de exemplo manualmente.
 taskList.push(new TaskClass(1, "Rever slides aula 2"));
 taskList.push(new TaskClass(2, "Fazer exercicios guiados"));
@@ -23,15 +24,15 @@ taskList.push(new TaskClass(3, "Fazer exercicios autonomos"));
 renderTasks();
 //Exercício 4 — Adicionar tarefa via input
 //Cria um campo de texto e um botão para adicionar novas tarefas ao array.
-var input = document.querySelector("#taskInput");
-var buttonAdd = document.querySelector("#addBtn");
-buttonAdd.addEventListener("click", function () {
-    var title = input.value.trim();
+const input = document.querySelector("#taskInput");
+const buttonAdd = document.querySelector("#addBtn");
+buttonAdd.addEventListener("click", () => {
+    const title = input.value.trim();
     if (title === "") {
         return;
     }
     //Instancie a classe TarefaClass com um ID único (ex: `Date.now()`) e Use push() para inserir no array.
-    var newTask = new TaskClass(Date.now(), title);
+    const newTask = new TaskClass(Date.now(), title);
     taskList.push(newTask);
     input.value = "";
     renderTasks();
@@ -39,10 +40,10 @@ buttonAdd.addEventListener("click", function () {
 //Chame uma função para atualizar a visualização no HTML *Exercício 5 — Renderização dinâmica*
 function renderTasks() {
     var taskContainer = document.querySelector("#list");
-    var pendingCountDiv = document.querySelector("#pending-count");
+    const pendingCountDiv = document.querySelector("#pending-count");
     // Exercicio 9 - o número de tarefas pendentes
-    var pendingTasks = taskList.filter(function (task) { return !task.concluded; });
-    pendingCountDiv.textContent = "Tarefas pendentes: ".concat(pendingTasks.length);
+    const pendingTasks = taskList.filter(task => !task.concluded);
+    pendingCountDiv.textContent = `Tarefas pendentes: ${pendingTasks.length}`;
     taskContainer.innerHTML = ""; // Limpa a lista antes de renderizar
     taskList.forEach(function (task) {
         var li = document.createElement("li");
@@ -61,7 +62,7 @@ function renderTasks() {
         });
         // Exercicio 8 — Editar título da tarefa com duplo clique
         li.addEventListener("dblclick", function () {
-            var newTitle = prompt("Novo título para a tarefa:", task.title);
+            const newTitle = prompt("Novo título para a tarefa:", task.title);
             if (newTitle !== null && newTitle.trim() !== "") {
                 task.title = newTitle.trim();
                 renderTasks(); // Atualiza a lista
@@ -73,10 +74,11 @@ function renderTasks() {
         removeBtn.textContent = "Remover";
         removeBtn.addEventListener("click", function (event) {
             event.stopPropagation(); // Evita que o clique no botão dispare o evento do li
-            taskList = taskList.filter(function (t) { return t.id !== task.id; });
+            taskList = taskList.filter(t => t.id !== task.id);
             renderTasks(); // Atualiza a lista
         });
         li.appendChild(removeBtn);
         taskContainer.appendChild(li);
     });
 }
+//# sourceMappingURL=main.js.map

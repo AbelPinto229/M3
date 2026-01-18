@@ -1,4 +1,6 @@
-/* Basic reset */
+/* ----------------------------- */
+/* BASIC RESET */
+/* ----------------------------- */
 * {
     margin: 0;
     padding: 0;
@@ -6,7 +8,6 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Page body */
 body {
     display: flex;
     flex-direction: column;
@@ -17,13 +18,58 @@ body {
     padding: 20px;
 }
 
-/* Form styling */
+/* ----------------------------- */
+/* ESTATÍSTICAS ESTILIZADAS */
+/* ----------------------------- */
+#stats-container {
+    background-color: #ffffff;
+    padding: 20px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    width: 400px;
+    max-width: 100%;
+    margin-bottom: 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#stats-container h2 {
+    margin-bottom: 10px;
+    color: #1d3557;
+    font-size: 18px;
+}
+
+#stats-container p {
+    font-size: 14px;
+    margin: 0;
+}
+
+#stats-container p span {
+    font-weight: bold;
+}
+
+/* cores individuais */
+#total-users {
+    color: #000000; /* Preto */
+}
+
+#active-users {
+    color: #00c853; /* Verde */
+}
+
+#inactive-users {
+    color: #ff1744; /* Vermelho */
+}
+
+/* ----------------------------- */
+/* FORM STYLING */
+/* ----------------------------- */
 form.form {
     display: flex;
-    flex-direction: row; /* Lado a lado */
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 20px;
+    flex-direction: column;
+    gap: 15px;
     background: #ffffff;
     padding: 20px 30px;
     border-radius: 10px;
@@ -32,15 +78,12 @@ form.form {
     max-width: 100%;
 }
 
-/* Container para inputs dentro do form */
 .input-container {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    flex: 1;
 }
 
-/* Inputs */
 form.form input {
     padding: 10px;
     border-radius: 5px;
@@ -48,7 +91,6 @@ form.form input {
     font-size: 14px;
 }
 
-/* Botão de adicionar usuário */
 form.form button.btn-add {
     padding: 10px;
     border: none;
@@ -65,26 +107,17 @@ form.form button.btn-add:hover {
     transform: scale(1.05);
 }
 
-/* Campo de busca */
-#searchInput {
-    padding: 8px 12px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    font-size: 14px;
-    width: 100%;
-    margin: 20px;
-}
-
-/* Filters container */
+/* ----------------------------- */
+/* FILTER BUTTONS */
+/* ----------------------------- */
 .filter-buttons {
     display: flex;
-    flex-direction: column; /* botões empilhados */
+    flex-wrap: wrap;
     gap: 10px;
     justify-content: flex-start;
-    flex-shrink: 0;
+    margin-top: 5px;
 }
 
-/* Filter buttons */
 button.btn-filter {
     padding: 8px 14px;
     border-radius: 5px;
@@ -93,6 +126,7 @@ button.btn-filter {
     background-color: #a8dadc;
     color: #1d3557;
     font-size: 13px;
+    font-weight: bold;
     transition: background-color 0.3s, transform 0.2s;
 }
 
@@ -101,7 +135,21 @@ button.btn-filter:hover {
     transform: scale(1.05);
 }
 
-/* Users container */
+/* ----------------------------- */
+/* SEARCH INPUT */
+/* ----------------------------- */
+#searchInput {
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    width: 100%;
+    margin: 20px 0;
+}
+
+/* ----------------------------- */
+/* USERS CONTAINER */
+/* ----------------------------- */
 #user-list {
     display: flex;
     flex-wrap: wrap;
@@ -109,81 +157,149 @@ button.btn-filter:hover {
     gap: 15px;
     width: 100%;
     max-width: 1200px;
-    margin: 10px;
+    margin: 10px 0;
 }
 
-/* User cards */
+/* ----------------------------- */
+/* USER CARD MINIMALISTA */
+/* ----------------------------- */
 .user-card {
     background-color: #ffffff;
     padding: 15px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    width: 180px;
+    width: 150px;
     text-align: center;
-    position: relative;
-    transition: transform 0.3s, box-shadow 0.3s;
     cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
 }
 
 .user-card:hover {
-    transform: translateY(-7px) scale(1.03);
+    transform: translateY(-5px) scale(1.02);
     box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
-.user-card h3 {
-    margin-bottom: 8px;
-    color: #333;
-    font-size: 16px;
+.user-avatar {
+    width: 60px;
+    height: 60px;
+    background-color: #a8dadc;
+    color: #1d3557;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
 }
 
-.user-card p {
-    margin-bottom: 6px;
+.user-photo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #a8dadc;
+}
+
+.user-card h3 {
+    font-size: 16px;
+    color: #333;
+}
+
+.user-card .tasks {
     font-size: 13px;
     color: #555;
 }
 
-/* User status */
-.status {
+/* ----------------------------- */
+/* MODAL */
+/* ----------------------------- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: #ffffff;
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: transform 0.3s ease;
+}
+
+.modal-content:hover {
+    transform: translateY(-5px) scale(1.02);
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
     font-weight: bold;
+    cursor: pointer;
+    color: #333;
+    transition: color 0.2s;
 }
 
-.status.active {
-    color: green;
+.close:hover {
+    color: #e74c3c;
 }
 
-.status.inactive {
-    color: red;
+#modal-details p {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 10px;
 }
 
-/* Container de botões dentro do card */
+#modal-details .status.active {
+    color: #00c853;
+}
+
+#modal-details .status.inactive {
+    color: #ff1744;
+}
+
+/* BOTÕES DENTRO DOS CARDS */
 .user-card .card-buttons {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
     margin-top: 10px;
 }
 
-/* Botão Remover */
-.user-card button.remove {
-    padding: 6px 10px;
-    border: none;
-    border-radius: 5px;
-    background-color: #e74c3c;
+.user-card .card-buttons button.active {
+    background-color: #00c853;
     color: white;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
 }
 
-.user-card button.remove:hover {
-    background-color: #c0392b;
-    transform: scale(1.05);
+.user-card .card-buttons button.inactive {
+    background-color: #ff1744;
+    color: white;
 }
 
-/* Botão Ativar/Desativar */
-.user-card button.active,
-.user-card button.inactive {
-    padding: 6px 10px;
+.user-card .card-buttons button.remove {
+    background-color: #6c757d !important;
+    color: white !important;
+}
+
+.user-card .card-buttons button {
+    padding: 6px 12px;
     border: none;
     border-radius: 5px;
     font-weight: bold;
@@ -191,53 +307,20 @@ button.btn-filter:hover {
     transition: background-color 0.3s, transform 0.2s;
 }
 
-.user-card button.active {
-    background-color: #00c853; /* verde */
-    color: white;
-}
-
-.user-card button.active:hover {
-    background-color: #6fa36f;
-    transform: scale(1.05);
-}
-
-.user-card button.inactive {
-    background-color: #ff1744; /* vermelho vivo */
-    color: white;
-}
-
-.user-card button.inactive:hover {
-    background-color: #cd5c5c;
-    transform: scale(1.05);
-}
-
-/* User counter */
-#user-counter {
-    font-size: 16px;
-    font-weight: bold;
-    margin-bottom: 15px;
-}
-
-/* Responsiveness */
+/* RESPONSIVENESS */
 @media (max-width: 700px) {
     .user-card {
         width: 40%;
     }
 
     form.form {
-        flex-direction: column;
         width: 90%;
-    }
-
-    .input-container {
-        width: 100%;
+        padding: 15px;
     }
 
     .filter-buttons {
-        flex-direction: row;
         justify-content: center;
         flex-wrap: wrap;
-        gap: 10px;
         width: 100%;
     }
 }
