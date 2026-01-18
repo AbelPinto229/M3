@@ -117,7 +117,13 @@ h1 {
    SEARCH BAR
 =============================== */
 #searchContainer {
+    width: 100%;       /* ocupa toda a largura do container */
     margin-bottom: 20px;
+}
+
+#searchContainer input {
+    width: 100%;       /* input ocupa 100% do #searchContainer */
+    box-sizing: border-box; /* inclui padding na largura */
 }
 
 /* ===============================
