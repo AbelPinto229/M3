@@ -9,34 +9,39 @@
 
   <h1>User Manager</h1>
 
-  <!-- ESTATÍSTICAS -->
-  <div id="stats-container">
-    <h2>Estatísticas</h2>
-    <p>
-        Total users: <span id="total-users">0</span> |
-        Active users: <span id="active-users" class="active">0 (0%)</span> |
-        Inactive users: <span id="inactive-users" class="inactive">0 (0%)</span>
-    </p>
-</div>
+  <!-- CONTAINER PRINCIPAL EM COLUNAS -->
+  <div id="main-container">
 
-  <!-- Formulário -->
-  <div id="form"></div>
+    <!-- COLUNA ESQUERDA: ESTATÍSTICAS + FORM -->
+    <div id="left-column">
+      <div id="stats-container">
+        <h2>Estatísticas</h2>
+        <p>
+            Total users: <span id="total-users">0</span> |
+            Active users: <span id="active-users" class="active">0 (0%)</span> |
+            Inactive users: <span id="inactive-users" class="inactive">0 (0%)</span>
+        </p>
+      </div>
 
-  <!-- Pesquisa -->
-  <div id="searchContainer">
-      <input type="text" id="searchInput" placeholder="Search user...">
+      <div id="form"></div>
+    </div>
+    
+    <!-- COLUNA DIREITA: PESQUISA + LISTA DE USUÁRIOS -->
+    <div id="right-column">
+      <div id="searchContainer">
+          <input type="text" id="searchInput" placeholder="Search user...">
+      </div>
+
+      <div id="user-list"></div>
+    </div>
+
   </div>
 
-  <!-- Lista de usuários -->
-  <div id="user-list"></div>
-
-  <!-- Modal de detalhes do utilizador -->
+  <!-- MODAL -->
   <div id="user-modal" class="modal">
     <div class="modal-content">
       <span id="modal-close" class="close">&times;</span>
-      <div id="modal-details">
-        <!-- Detalhes do usuário vão aparecer aqui -->
-      </div>
+      <div id="modal-details"></div>
     </div>
   </div>
 

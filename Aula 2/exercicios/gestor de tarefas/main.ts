@@ -62,6 +62,10 @@ buttonAdd.addEventListener("click", () => {
     input.value = "";
     categorySelect.value = "Work";
 
+    // 🔥 CORREÇÃO DO BUG
+    searchTerm = "";
+    searchInput.value = "";
+
     renderTasks();
 });
 
@@ -153,22 +157,35 @@ function renderTasks() {
             renderTasks();
         });
 
-        li.addEventListener("dblclick", () => {
-            const newTitle = prompt("New task title:", task.title);
-            if (newTitle && newTitle.trim() !== "") {
-                task.title = newTitle.trim();
-                renderTasks();
-            }
-        });
+        // === CREATE REMOVE BUTTON ===
+const removeBtn = document.createElement("button");
+removeBtn.textContent = "Remove";
+removeBtn.addEventListener("click", e => {
+    e.stopPropagation();
+    taskList = taskList.filter(t => t.id !== task.id);
+    renderTasks();
+});
 
-        const removeBtn = document.createElement("button");
-        removeBtn.textContent = "Remove";
-        removeBtn.addEventListener("click", e => {
-            e.stopPropagation();
-            taskList = taskList.filter(t => t.id !== task.id);
-            renderTasks();
-        });
-        li.appendChild(removeBtn);
+// === CREATE EDIT BUTTON ===
+const editBtn = document.createElement("button");
+editBtn.textContent = "Edit";
+editBtn.addEventListener("click", e => {
+    e.stopPropagation();
+    const newTitle = prompt("New task title:", task.title);
+    if (newTitle && newTitle.trim() !== "") {
+        task.title = newTitle.trim();
+        renderTasks();
+    }
+});
+
+// === ADD BUTTONS TO LI ===
+const buttonContainer = document.createElement("div");
+buttonContainer.style.display = "flex";
+buttonContainer.style.gap = "10px";
+buttonContainer.appendChild(editBtn);
+buttonContainer.appendChild(removeBtn);
+
+li.appendChild(buttonContainer);
 
         taskContainer.appendChild(li);
     });

@@ -18,12 +18,40 @@ body {
 
 /* === TITLE === */
 h1 {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     color: #333;
     text-align: center;
 }
 
-/* === INPUTS / BUTTONS CONTAINER (LIKE FORM CARD) === */
+/* === MAIN LAYOUT === */
+#appLayout {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 30px;
+    width: 100%;
+    max-width: 1200px;
+}
+
+/* === LEFT SIDE === */
+#leftSide {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* === RIGHT SIDE === */
+#rightSide {
+    display: flex;
+    flex-direction: column;
+}
+
+/* === PENDING COUNTER === */
+#pending-count {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* === INPUTS / BUTTONS CONTAINER === */
 #buttonContainer {
     display: flex;
     flex-wrap: wrap;
@@ -32,14 +60,10 @@ h1 {
     padding: 20px 25px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-    justify-content: center;
-    max-width: 600px;
-    width: 100%;
 }
 
 /* === INPUT & SELECT === */
-#taskInput, 
+#taskInput,
 #categorySelect,
 #searchInput {
     padding: 10px;
@@ -86,29 +110,17 @@ h1 {
     transform: scale(1.05);
 }
 
-/* === SEARCH BAR === */
+/* === SEARCH BAR (RIGHT) === */
 #searchContainer {
-    width: 100%;
-    max-width: 600px;
     margin-bottom: 20px;
 }
 
-/* === PENDING COUNTER === */
-#pending-count {
-    font-size: 16px;
-    font-weight: bold;
-    margin-bottom: 15px;
-}
-
-/* === TASK LIST (LIKE USER CARDS) === */
+/* === TASK LIST === */
 #list {
     list-style: none;
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
     gap: 15px;
-    width: 100%;
-    max-width: 1200px;
 }
 
 /* === TASK CARD === */
@@ -117,7 +129,7 @@ h1 {
     padding: 15px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    width: 220px;
+    width: calc(50% - 10px);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -126,7 +138,7 @@ h1 {
 }
 
 #list li:hover {
-    transform: translateY(-7px) scale(1.03);
+    transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
@@ -173,19 +185,43 @@ h1 {
 }
 
 /* === RESPONSIVE === */
-@media (max-width: 700px) {
+@media (max-width: 900px) {
+    #appLayout {
+        grid-template-columns: 1fr;
+    }
+
     #list li {
-        width: 45%;
+        width: 100%;
     }
 }
 
-@media (max-width: 500px) {
-    #list li {
-        width: 90%;
-    }
+#list li div:last-child {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
 
-    #buttonContainer,
-    #searchContainer {
-        width: 90%;
-    }
+#list li div:last-child button {
+    padding: 6px 10px;
+    border-radius: 5px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+#list li div:last-child button:first-child {
+    background-color: #ffc107; /* Edit = amarelo */
+}
+#list li div:last-child button:first-child:hover {
+    background-color: #e0a800;
+}
+
+#list li div:last-child button:last-child {
+    background-color: #ff4d4d; /* Remove = vermelho */
+}
+#list li div:last-child button:last-child:hover {
+    background-color: #cc0000;
 }

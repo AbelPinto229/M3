@@ -94,7 +94,6 @@ function renderUsers(list: UserClass[]): void {
     }
 
     const userModal = document.getElementById("user-modal") as HTMLDivElement;
-    const modalDetails = document.getElementById("modal-details") as HTMLDivElement;
     const modalClose = document.getElementById("modal-close") as HTMLSpanElement;
 
     // Modal close events
@@ -102,67 +101,64 @@ function renderUsers(list: UserClass[]): void {
     window.onclick = (e: MouseEvent) => { if (e.target === userModal) userModal.style.display = "none"; };
 
     list.forEach(user => {
-    const userCard = document.createElement("div");
-    userCard.classList.add("user-card");
+        const userCard = document.createElement("div");
+        userCard.classList.add("user-card");
 
-    const avatarContent = user.photo
-        ? `<img src="${user.photo}" class="user-photo" alt="${user.name}">`
-        : `<div class="user-avatar">${user.name.charAt(0).toUpperCase()}</div>`;
+        const avatarContent = user.photo
+            ? `<img src="${user.photo}" class="user-photo" alt="${user.name}">`
+            : `<div class="user-avatar">${user.name.charAt(0).toUpperCase()}</div>`;
 
-    // Cartão sem ID visível, com contagem de tarefas
-    userCard.innerHTML = `
-        ${avatarContent}
-        <h3>${user.name}</h3>
-        <p class="tasks">0 tasks</p>
-        <p class="tasks-concluded">0 tasks concluded</p>
-    `;
-
-    // Botões do card
-    const cardButtons = document.createElement("div");
-    cardButtons.classList.add("card-buttons");
-
-    const btnToggle = document.createElement("button");
-    btnToggle.textContent = user.active ? "Desativar" : "Ativar";
-    btnToggle.classList.add(user.active ? "active" : "inactive");
-    btnToggle.addEventListener("click", e => {
-        e.stopPropagation();
-        user.toggleActive();
-        renderUsers(currentDisplayList);
-    });
-
-    const btnRemove = document.createElement("button");
-    btnRemove.textContent = "Remover";
-    btnRemove.classList.add("remove");
-    btnRemove.addEventListener("click", e => {
-        e.stopPropagation();
-        userList = userList.filter(u => u.id !== user.id);
-        currentDisplayList = currentDisplayList.filter(u => u.id !== user.id);
-        renderUsers(currentDisplayList);
-    });
-
-    cardButtons.append(btnToggle, btnRemove);
-    userCard.appendChild(cardButtons);
-
-    // Modal click (mostra ID apenas no modal, não no cartão)
-    userCard.addEventListener("click", () => {
-        const statusClass = user.active ? "active" : "inactive";
-        const statusText = user.active ? "Active" : "Inactive";
-
-        const modalDetails = document.getElementById("modal-details") as HTMLDivElement;
-        modalDetails.innerHTML = `
-            <p><strong>ID:</strong> ${user.id}</p>
-            <p><strong>Nome:</strong> ${user.name}</p>
-            <p><strong>Email:</strong> ${user.email}</p>
-            <p><strong>Status:</strong> <span class="status ${statusClass}">${statusText}</span></p>
-            <p><strong>Tarefas atribuídas:</strong> 0</p>
-            <p><strong>Tarefas concluídas:</strong> 0</p>
+        userCard.innerHTML = `
+            ${avatarContent}
+            <h3>${user.name}</h3>
+            <p class="tasks">0 tasks</p>
+            <p class="tasks-concluded">0 tasks concluded</p>
         `;
-        const userModal = document.getElementById("user-modal") as HTMLDivElement;
-        userModal.style.display = "block";
-    });
 
-    container.appendChild(userCard);
-});
+        const cardButtons = document.createElement("div");
+        cardButtons.classList.add("card-buttons");
+
+        const btnToggle = document.createElement("button");
+        btnToggle.textContent = user.active ? "Desativar" : "Ativar";
+        btnToggle.classList.add(user.active ? "active" : "inactive");
+        btnToggle.addEventListener("click", e => {
+            e.stopPropagation();
+            user.toggleActive();
+            renderUsers(currentDisplayList);
+        });
+
+        const btnRemove = document.createElement("button");
+        btnRemove.textContent = "Remover";
+        btnRemove.classList.add("remove");
+        btnRemove.addEventListener("click", e => {
+            e.stopPropagation();
+            userList = userList.filter(u => u.id !== user.id);
+            currentDisplayList = currentDisplayList.filter(u => u.id !== user.id);
+            renderUsers(currentDisplayList);
+        });
+
+        cardButtons.append(btnToggle, btnRemove);
+        userCard.appendChild(cardButtons);
+
+        // Modal click
+        userCard.addEventListener("click", () => {
+            const statusClass = user.active ? "active" : "inactive";
+            const statusText = user.active ? "Active" : "Inactive";
+
+            const modalDetails = document.getElementById("modal-details") as HTMLDivElement;
+            modalDetails.innerHTML = `
+                <p><strong>ID:</strong> ${user.id}</p>
+                <p><strong>Nome:</strong> ${user.name}</p>
+                <p><strong>Email:</strong> ${user.email}</p>
+                <p><strong>Status:</strong> <span class="status ${statusClass}">${statusText}</span></p>
+                <p><strong>Tarefas atribuídas:</strong> 0</p>
+                <p><strong>Tarefas concluídas:</strong> 0</p>
+            `;
+            userModal.style.display = "block";
+        });
+
+        container.appendChild(userCard);
+    });
 
     updateStats(list);
 }
@@ -173,6 +169,7 @@ function renderUsers(list: UserClass[]): void {
 const form = document.createElement("form");
 form.classList.add("form");
 
+// INPUTS
 const nameInput = document.createElement("input") as HTMLInputElement;
 nameInput.type = "text";
 nameInput.placeholder = "First and last name";
@@ -183,16 +180,28 @@ emailInput.type = "email";
 emailInput.placeholder = "example@mail.com";
 emailInput.required = true;
 
+// FOTO COM LABEL
 const photoInput = document.createElement("input") as HTMLInputElement;
 photoInput.type = "file";
 photoInput.accept = "image/*";
+photoInput.id = "photoInput";
 
+const photoLabel = document.createElement("label");
+photoLabel.htmlFor = "photoInput";
+photoLabel.textContent = "Foto de perfil:";
+
+// BOTÃO ADICIONAR
 const btnAdd = document.createElement("button");
 btnAdd.type = "submit";
 btnAdd.textContent = "New user";
 btnAdd.classList.add("btn-add");
 
-// Filtros e ordenação
+// INPUT CONTAINER
+const inputContainer = document.createElement("div");
+inputContainer.classList.add("input-container");
+inputContainer.append(nameInput, emailInput, photoLabel, photoInput, btnAdd);
+
+// FILTER BUTTONS
 let sortAsc = true;
 
 const btnSortByName = document.createElement("button");
@@ -233,19 +242,16 @@ btnShowInactive.addEventListener("click", () => {
     renderUsers(currentDisplayList);
 });
 
-// Append form
-const inputContainer = document.createElement("div");
-inputContainer.classList.add("input-container");
-inputContainer.append(nameInput, emailInput, photoInput, btnAdd);
-
+// FILTER CONTAINER
 const filterContainer = document.createElement("div");
 filterContainer.classList.add("filter-buttons");
 filterContainer.append(btnShowAll, btnShowActive, btnShowInactive, btnSortByName);
 
+// ADICIONA FORM AO CONTAINER
 form.append(inputContainer, filterContainer);
 formContainer.prepend(form);
 
-// Evento do form
+// FORM SUBMIT
 form.addEventListener("submit", e => {
     e.preventDefault();
     const name = nameInput.value.trim();
@@ -264,7 +270,7 @@ form.addEventListener("submit", e => {
     photoInput.value = "";
 });
 
-// Search
+// SEARCH
 const searchInput = document.querySelector("#searchInput") as HTMLInputElement;
 searchInput.addEventListener("input", () => {
     const term = searchInput.value.trim().toLowerCase();

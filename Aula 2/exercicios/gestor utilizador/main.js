@@ -76,7 +76,6 @@ function renderUsers(list) {
         return;
     }
     var userModal = document.getElementById("user-modal");
-    var modalDetails = document.getElementById("modal-details");
     var modalClose = document.getElementById("modal-close");
     // Modal close events
     modalClose.onclick = function () { userModal.style.display = "none"; };
@@ -88,9 +87,7 @@ function renderUsers(list) {
         var avatarContent = user.photo
             ? "<img src=\"".concat(user.photo, "\" class=\"user-photo\" alt=\"").concat(user.name, "\">")
             : "<div class=\"user-avatar\">".concat(user.name.charAt(0).toUpperCase(), "</div>");
-        // Cartão sem ID visível, com contagem de tarefas
-        userCard.innerHTML = "\n        ".concat(avatarContent, "\n        <h3>").concat(user.name, "</h3>\n        <p class=\"tasks\">0 tasks</p>\n        <p class=\"tasks-concluded\">0 tasks concluded</p>\n    ");
-        // Botões do card
+        userCard.innerHTML = "\n            ".concat(avatarContent, "\n            <h3>").concat(user.name, "</h3>\n            <p class=\"tasks\">0 tasks</p>\n            <p class=\"tasks-concluded\">0 tasks concluded</p>\n        ");
         var cardButtons = document.createElement("div");
         cardButtons.classList.add("card-buttons");
         var btnToggle = document.createElement("button");
@@ -112,13 +109,12 @@ function renderUsers(list) {
         });
         cardButtons.append(btnToggle, btnRemove);
         userCard.appendChild(cardButtons);
-        // Modal click (mostra ID apenas no modal, não no cartão)
+        // Modal click
         userCard.addEventListener("click", function () {
             var statusClass = user.active ? "active" : "inactive";
             var statusText = user.active ? "Active" : "Inactive";
             var modalDetails = document.getElementById("modal-details");
-            modalDetails.innerHTML = "\n            <p><strong>ID:</strong> ".concat(user.id, "</p>\n            <p><strong>Nome:</strong> ").concat(user.name, "</p>\n            <p><strong>Email:</strong> ").concat(user.email, "</p>\n            <p><strong>Status:</strong> <span class=\"status ").concat(statusClass, "\">").concat(statusText, "</span></p>\n            <p><strong>Tarefas atribu\u00EDdas:</strong> 0</p>\n            <p><strong>Tarefas conclu\u00EDdas:</strong> 0</p>\n        ");
-            var userModal = document.getElementById("user-modal");
+            modalDetails.innerHTML = "\n                <p><strong>ID:</strong> ".concat(user.id, "</p>\n                <p><strong>Nome:</strong> ").concat(user.name, "</p>\n                <p><strong>Email:</strong> ").concat(user.email, "</p>\n                <p><strong>Status:</strong> <span class=\"status ").concat(statusClass, "\">").concat(statusText, "</span></p>\n                <p><strong>Tarefas atribu\u00EDdas:</strong> 0</p>\n                <p><strong>Tarefas conclu\u00EDdas:</strong> 0</p>\n            ");
             userModal.style.display = "block";
         });
         container.appendChild(userCard);
@@ -130,6 +126,7 @@ function renderUsers(list) {
 // ---------------------------
 var form = document.createElement("form");
 form.classList.add("form");
+// INPUTS
 var nameInput = document.createElement("input");
 nameInput.type = "text";
 nameInput.placeholder = "First and last name";
@@ -138,14 +135,24 @@ var emailInput = document.createElement("input");
 emailInput.type = "email";
 emailInput.placeholder = "example@mail.com";
 emailInput.required = true;
+// FOTO COM LABEL
 var photoInput = document.createElement("input");
 photoInput.type = "file";
 photoInput.accept = "image/*";
+photoInput.id = "photoInput";
+var photoLabel = document.createElement("label");
+photoLabel.htmlFor = "photoInput";
+photoLabel.textContent = "Foto de perfil:";
+// BOTÃO ADICIONAR
 var btnAdd = document.createElement("button");
 btnAdd.type = "submit";
 btnAdd.textContent = "New user";
 btnAdd.classList.add("btn-add");
-// Filtros e ordenação
+// INPUT CONTAINER
+var inputContainer = document.createElement("div");
+inputContainer.classList.add("input-container");
+inputContainer.append(nameInput, emailInput, photoLabel, photoInput, btnAdd);
+// FILTER BUTTONS
 var sortAsc = true;
 var btnSortByName = document.createElement("button");
 btnSortByName.type = "button";
@@ -181,16 +188,14 @@ btnShowInactive.addEventListener("click", function () {
     currentDisplayList = userList.filter(function (u) { return !u.active; });
     renderUsers(currentDisplayList);
 });
-// Append form
-var inputContainer = document.createElement("div");
-inputContainer.classList.add("input-container");
-inputContainer.append(nameInput, emailInput, photoInput, btnAdd);
+// FILTER CONTAINER
 var filterContainer = document.createElement("div");
 filterContainer.classList.add("filter-buttons");
 filterContainer.append(btnShowAll, btnShowActive, btnShowInactive, btnSortByName);
+// ADICIONA FORM AO CONTAINER
 form.append(inputContainer, filterContainer);
 formContainer.prepend(form);
-// Evento do form
+// FORM SUBMIT
 form.addEventListener("submit", function (e) {
     e.preventDefault();
     var name = nameInput.value.trim();
@@ -206,7 +211,7 @@ form.addEventListener("submit", function (e) {
     emailInput.value = "";
     photoInput.value = "";
 });
-// Search
+// SEARCH
 var searchInput = document.querySelector("#searchInput");
 searchInput.addEventListener("input", function () {
     var term = searchInput.value.trim().toLowerCase();

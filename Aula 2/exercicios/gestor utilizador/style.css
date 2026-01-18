@@ -8,6 +8,13 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+h1 {
+    margin-bottom: 30px; /* ajusta o valor conforme quiser */
+    color: #1d3557; /* opcional, mantém coerência com cores do layout */
+    font-size: 28px;
+    text-align: center;
+}
+
 body {
     display: flex;
     flex-direction: column;
@@ -19,6 +26,37 @@ body {
 }
 
 /* ----------------------------- */
+/* CONTAINER PRINCIPAL EM COLUNAS */
+/* ----------------------------- */
+#main-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 1200px;
+}
+
+/* COLUNAS */
+#left-column, #right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Largura mínima da coluna esquerda */
+#left-column {
+    min-width: 300px;
+    flex: 0 0 auto;
+}
+
+/* Coluna direita cresce */
+#right-column {
+    flex: 1;
+    min-width: 300px;
+}
+
+/* ----------------------------- */
 /* ESTATÍSTICAS ESTILIZADAS */
 /* ----------------------------- */
 #stats-container {
@@ -26,9 +64,7 @@ body {
     padding: 20px 30px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    width: 400px;
-    max-width: 100%;
-    margin-bottom: 20px;
+    width: 100%; /* ocupa 100% da coluna esquerda */
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -50,7 +86,6 @@ body {
     font-weight: bold;
 }
 
-/* cores individuais */
 #total-users { color: #000000; }
 #active-users { color: #00c853; }
 #inactive-users { color: #ff1744; }
@@ -66,8 +101,7 @@ form.form {
     padding: 20px 30px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    width: 400px;
-    max-width: 100%;
+    width: 100%; /* ocupa 100% da coluna esquerda */
 }
 
 .input-container {
@@ -136,7 +170,7 @@ button.btn-filter:hover {
     border: 1px solid #ccc;
     font-size: 14px;
     width: 100%;
-    margin: 20px 0;
+    margin: 0 0 10px 0;
 }
 
 /* ----------------------------- */
@@ -145,11 +179,9 @@ button.btn-filter:hover {
 #user-list {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 15px;
     width: 100%;
-    max-width: 1200px;
-    margin: 10px 0;
 }
 
 /* ----------------------------- */
@@ -201,9 +233,6 @@ button.btn-filter:hover {
     color: #333;
 }
 
-/* ----------------------------- */
-/* TASKS NO CARD */
-/* ----------------------------- */
 .user-card .tasks,
 .user-card .tasks-concluded {
     font-size: 13px;
@@ -213,21 +242,16 @@ button.btn-filter:hover {
     width: fit-content;
 }
 
-/* Tasks atribuídas */
 .user-card .tasks {
-    background-color: #e0f7fa; /* azul claro */
+    background-color: #e0f7fa;
     color: #007b7f;
 }
 
-/* Tasks concluídas */
 .user-card .tasks-concluded {
-    background-color: #e8f5e9; /* verde claro */
+    background-color: #e8f5e9;
     color: #2e7d32;
 }
 
-/* ----------------------------- */
-/* MODAL */
-/* ----------------------------- */
 .modal {
     display: none;
     position: fixed;
@@ -285,7 +309,6 @@ button.btn-filter:hover {
     color: #ff1744;
 }
 
-/* BOTÕES DENTRO DOS CARDS */
 .user-card .card-buttons {
     display: flex;
     flex-wrap: wrap;
@@ -317,8 +340,47 @@ button.btn-filter:hover {
     cursor: pointer;
     transition: background-color 0.3s, transform 0.2s;
 }
+/* LABEL FOTO DE PERFIL */
+.input-container label[for="photoInput"] {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 5px;
+    display: block;
+    color: #1d3557;
+}
 
-/* RESPONSIVENESS */
+/* INPUT DE FOTO */
+#photoInput {
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    width: 100%;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+#photoInput:hover {
+    background-color: #f0f0f0;
+    border-color: #007bff;
+}
+
+/* ----------------------------- */
+/* RESPONSIVIDADE */
+/* ----------------------------- */
+@media (max-width: 900px) {
+    #main-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #left-column, #right-column {
+        width: 100%;
+        min-width: unset;
+    }
+}
+
 @media (max-width: 700px) {
     .user-card {
         width: 40%;
