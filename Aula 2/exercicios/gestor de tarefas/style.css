@@ -199,10 +199,10 @@ h1 {
 
 /* EDIT BUTTON */
 #list li div:last-child button:first-child {
-    background-color: #ffc107;
+    background-color: #555;
 }
 #list li div:last-child button:first-child:hover {
-    background-color: #e0a800;
+    background-color: #999;
 }
 
 /* REMOVE BUTTON */
