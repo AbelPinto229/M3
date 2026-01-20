@@ -73,11 +73,11 @@ function updateStats(list: UserClass[] = userList): void {
 // Exercise 19 — Simulate initial user data
 function loadInitialUsers(): void {
     const initialData = [
-        { name: "Abel Silva", email: "abel@example.com", active: true },
-        { name: "Joel Santos", email: "joel@example.com", active: false },
-        { name: "Maria Oliveira", email: "maria@example.com", active: true },
-        { name: "Ana Costa", email: "ana@example.com", active: false },
-        { name: "Carlos Pereira", email: "carlos@example.com", active: true }
+        { name: "Abel Pinto", email: "abel@example.com", active: true },
+        { name: "Joel Pinto", email: "joel@example.com", active: false },
+        { name: "Lionel Pinto", email: "Lionel@example.com", active: true },
+        { name: "Isabel Pinto" , email: "Isabel@example.com", active: false },
+        { name: "Ezequiel Pinto", email: "Ezequiel@example.com", active: true }
     ];
 
     initialData.forEach(data => {
