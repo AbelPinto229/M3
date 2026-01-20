@@ -57,14 +57,14 @@ const searchInput = document.querySelector("#searchInput") as HTMLInputElement;
 // ===============================
 // MODAL ELEMENTS
 // ===============================
-const modalOverlay = document.createElement("div");
-const modal = document.createElement("div");
-const modalTitle = document.createElement("h2");
+const modalOverlay = document.createElement("div") as HTMLDivElement;
+const modal = document.createElement("div") as HTMLDivElement;
+const modalTitle = document.createElement("h2") as HTMLHeadingElement;
 
-const modalInput = document.createElement("input");
+const modalInput = document.createElement("input") as HTMLInputElement;
 modalInput.type = "text";
 
-const modalCategorySelect = document.createElement("select");
+const modalCategorySelect = document.createElement("select") as HTMLSelectElement;
 (["Work", "Personal", "Study"] as const).forEach(cat => {
     const option = document.createElement("option");
     option.value = cat;
@@ -72,8 +72,8 @@ const modalCategorySelect = document.createElement("select");
     modalCategorySelect.appendChild(option);
 });
 
-const modalSaveBtn = document.createElement("button");
-const modalCancelBtn = document.createElement("button");
+const modalSaveBtn = document.createElement("button") as HTMLButtonElement;
+const modalCancelBtn = document.createElement("button") as HTMLButtonElement;
 
 modalOverlay.id = "modal-overlay";
 modal.id = "modal";
@@ -200,40 +200,37 @@ function renderTasks() {
     taskContainer.innerHTML = "";
 
     filteredTasks.forEach(task => {
-        const li = document.createElement("li");
+        const li = document.createElement("li") as HTMLLIElement;
 
         // ===============================
         // TASK CONTENT
         // ===============================
-        const contentDiv = document.createElement("div");
+        const contentDiv = document.createElement("div") as HTMLDivElement;
         contentDiv.classList.add("task-content");
 
-        const titleSpan = document.createElement("span");
+        const titleSpan = document.createElement("span") as HTMLSpanElement;
         titleSpan.textContent = task.title;
         titleSpan.classList.add("task-title");
         if (task.concluded) titleSpan.classList.add("completed");
         contentDiv.appendChild(titleSpan);
 
-        const categorySpan = document.createElement("span");
+        const categorySpan = document.createElement("span") as HTMLSpanElement;
         categorySpan.textContent = ` [${task.category}]`;
         categorySpan.classList.add("task-category");
 
         switch (task.category) {
             case "Work":
-                categorySpan.style.color = "#1E90FF"; // azul
                 break;
             case "Personal":
-                categorySpan.style.color = "#32CD32"; // verde
                 break;
             case "Study":
-                categorySpan.style.color = "#FF8C00"; // laranja
                 break;
         }
 
         contentDiv.appendChild(categorySpan);
 
         if (task.concluded && task.conclusionDate) {
-            const dateSpan = document.createElement("span");
+            const dateSpan = document.createElement("span") as HTMLSpanElement;
             dateSpan.textContent = ` (Completed on: ${task.conclusionDate.toLocaleString()})`;
             dateSpan.classList.add("completed-date");
             contentDiv.appendChild(dateSpan);
@@ -257,16 +254,16 @@ function renderTasks() {
         // ===============================
         // BUTTONS
         // ===============================
-        const buttonContainer = document.createElement("div");
+        const buttonContainer = document.createElement("div") as HTMLDivElement;
 
-        const editBtn = document.createElement("button");
+        const editBtn = document.createElement("button") as HTMLButtonElement;
         editBtn.textContent = "Edit";
         editBtn.addEventListener("click", e => {
             e.stopPropagation();
             openModal(task);
         });
 
-        const removeBtn = document.createElement("button");
+        const removeBtn = document.createElement("button") as HTMLButtonElement;
         removeBtn.textContent = "Remove";
         removeBtn.addEventListener("click", e => {
             e.stopPropagation();

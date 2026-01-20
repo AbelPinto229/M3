@@ -176,6 +176,23 @@ h1 {
 .task-category {
     font-weight: bold;
 }
+.task-category {
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.task-category.work {
+    color: #1E90FF; /* azul */
+}
+
+.task-category.personal {
+    color: #32CD32; /* verde */
+}
+
+.task-category.study {
+    color: #FF8C00; /* laranja */
+}
+
 
 /* ===============================
    TASK BUTTONS (EDIT / REMOVE)
