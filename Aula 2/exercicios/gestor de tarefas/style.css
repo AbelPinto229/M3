@@ -117,13 +117,13 @@ h1 {
    SEARCH BAR
 =============================== */
 #searchContainer {
-    width: 100%;       /* ocupa toda a largura do container */
+    width: 100%;
     margin-bottom: 20px;
 }
 
 #searchContainer input {
-    width: 100%;       /* input ocupa 100% do #searchContainer */
-    box-sizing: border-box; /* inclui padding na largura */
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* ===============================
@@ -223,5 +223,93 @@ h1 {
 
     #list li {
         width: 100%;
+    }
+}
+
+/* ===============================
+   MODAL (EDIT TASK)
+=============================== */
+#modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+#modal {
+    background: #ffffff;
+    padding: 25px 30px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    animation: modalFadeIn 0.3s ease;
+}
+
+#modal h2 {
+    color: #333;
+    text-align: center;
+}
+
+#modal input {
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* MODAL BUTTONS */
+#modal button {
+    padding: 8px 14px;
+    border-radius: 5px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+    transition: background-color 0.3s, transform 0.2s;
+}
+#modal select {
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* SAVE BUTTON */
+#modal button:first-of-type {
+    background-color: #007bff;
+}
+#modal button:first-of-type:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+/* CANCEL BUTTON */
+#modal button:last-of-type {
+    background-color: #6c757d;
+}
+#modal button:last-of-type:hover {
+    background-color: #5a6268;
+    transform: scale(1.05);
+}
+
+/* MODAL ANIMATION */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
     }
 }
