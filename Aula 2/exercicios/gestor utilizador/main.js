@@ -219,8 +219,10 @@ form.addEventListener("submit", function (e) {
     if (photoInput.files && photoInput.files[0]) {
         photoURL = URL.createObjectURL(photoInput.files[0]);
     }
-    // Validation — Exercise 16
-    if (!name || !email.includes("@"))
+    var isValidEmail = email.includes("@") &&
+        email.includes(".") &&
+        email.indexOf(".") > email.indexOf("@");
+    if (!name || !isValidEmail)
         return;
     userList.push(new UserClass(nextID++, name, email, photoURL));
     currentDisplayList = __spreadArray([], userList, true);

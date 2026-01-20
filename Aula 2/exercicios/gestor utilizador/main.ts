@@ -270,15 +270,21 @@ formContainer.prepend(form);
 // Exercise 6, 16 — Add user
 form.addEventListener("submit", e => {
     e.preventDefault();
+
     const name = nameInput.value.trim();
     const email = emailInput.value.trim();
     let photoURL: string | undefined;
+
     if (photoInput.files && photoInput.files[0]) {
         photoURL = URL.createObjectURL(photoInput.files[0]);
     }
 
-    // Validation — Exercise 16
-    if (!name || !email.includes("@")) return;
+    const isValidEmail =
+        email.includes("@") &&
+        email.includes(".") &&
+        email.indexOf(".") > email.indexOf("@");
+
+    if (!name || !isValidEmail) return;
 
     userList.push(new UserClass(nextID++, name, email, photoURL));
     currentDisplayList = [...userList];
