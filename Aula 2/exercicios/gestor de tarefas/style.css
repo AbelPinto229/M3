@@ -134,31 +134,45 @@ h1 {
 }
 
 /* ===============================
-   TASK LIST
+   TASK LIST 
 =============================== */
 #list {
     list-style: none;
     display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
+    flex-direction: column;
+    gap: 10px; /* menos espaço entre os itens */
+    padding: 0;
+    margin: 0;
 }
 
 #list li {
-    background-color: #ffffff;
-    padding: 15px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    width: calc(50% - 10px);
+    width: 100%;
     display: flex;
-    flex-direction: column;
     justify-content: space-between;
+    align-items: center; /* deixa o conteúdo centralizado verticalmente */
     cursor: pointer;
-    transition: transform 0.3s, box-shadow 0.3s;
+    transition: transform 0.2s, box-shadow 0.2s;
+    background-color: #ffffff;
+    padding: 8px 12px; /* padding menor, deixa mais “fininho” */
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1); /* sombra leve */
+    font-size: 14px;
 }
 
+/* hover sutil */
 #list li:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* mantém a organização dos botões na direita */
+#list li div:last-child {
+    display: flex;
+    gap: 5px;
+}
+#list li div:last-child button {
+    padding: 4px 8px; /* botões menores também */
+    font-size: 12px;
 }
 
 /* ===============================
