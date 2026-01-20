@@ -38,23 +38,17 @@ Aplicação **front-end** em TypeScript para gerenciar tarefas e usuários, com 
 - Navegador moderno (Chrome, Edge, Firefox, Safari)
 
 ---
+## Como usar?
+1. **Clonar o repositório**
+$git clone https://github.com/AbelPinto229/M3.git
 
-## 1. **Clonar o repositório**
-```bash
-git clone https://github.com/AbelPinto229/M3.git
-cd M3
-
-## 2.**Instalar TypeScript (se necessário)**
-bash
-Copiar código
+2. **Instalar TypeScript (se necessário)**
+Terminal: bash
 npm install -g typescript
 
-## 3. **Compilar o TypeScript**
-bash
-Copiar código
-tsc main.ts
-Isso gera main.js, que deve ser incluído no index.html.
+3. **Compilar o TypeScript**
+Terminal: bash
+tsc main.ts (Isso gera main.js, que deve ser incluído no index.html.)
 
-## 4. **Abrir no navegador**
-Abra index.html no navegador.
-Ou use um servidor local (recomendado):
+4. **Abrir no navegador**
+Abra index.html no navegador ou no Live Preview no VS.
