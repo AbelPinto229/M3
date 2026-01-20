@@ -108,7 +108,7 @@ function renderUsers(list: UserClass[]): void {
     window.onclick = (e: MouseEvent) => { if (e.target === userModal) userModal.style.display = "none"; };
 
     list.forEach(user => {
-        const userCard = document.createElement("div");
+        const userCard = document.createElement("div") as HTMLDivElement;
         userCard.classList.add("user-card");
 
         const avatarContent = user.photo
@@ -122,11 +122,11 @@ function renderUsers(list: UserClass[]): void {
             <p class="tasks-concluded">0 tasks concluded</p>
         `;
 
-        const cardButtons = document.createElement("div");
+        const cardButtons = document.createElement("div") as HTMLDivElement;
         cardButtons.classList.add("card-buttons");
 
         // Exercise 14 — Toggle Active/Inactive
-        const btnToggle = document.createElement("button");
+        const btnToggle = document.createElement("button") as HTMLButtonElement;
         btnToggle.textContent = user.active ? "Deactivate" : "Activate";
         btnToggle.classList.add(user.active ? "active" : "inactive");
         btnToggle.addEventListener("click", e => {
@@ -136,7 +136,7 @@ function renderUsers(list: UserClass[]): void {
         });
 
         // Exercise 11 — Remove user
-        const btnRemove = document.createElement("button");
+        const btnRemove = document.createElement("button") as HTMLButtonElement;
         btnRemove.textContent = "Remove";
         btnRemove.classList.add("remove");
         btnRemove.addEventListener("click", e => {
@@ -196,18 +196,18 @@ photoInput.type = "file";
 photoInput.accept = "image/*";
 photoInput.id = "photoInput";
 
-const photoLabel = document.createElement("label");
+const photoLabel = document.createElement("label") as HTMLLabelElement;
 photoLabel.htmlFor = "photoInput";
 photoLabel.textContent = "Profile photo:";
 
 // ADD BUTTON
-const btnAdd = document.createElement("button");
+const btnAdd = document.createElement("button") as HTMLButtonElement;
 btnAdd.type = "submit";
 btnAdd.textContent = "New user";
 btnAdd.classList.add("btn-add");
 
 // INPUT CONTAINER
-const inputContainer = document.createElement("div");
+const inputContainer = document.createElement("div") as HTMLDivElement;
 inputContainer.classList.add("input-container");
 inputContainer.append(nameInput, emailInput, photoLabel, photoInput, btnAdd);
 
@@ -217,7 +217,7 @@ inputContainer.append(nameInput, emailInput, photoLabel, photoInput, btnAdd);
 // Exercises 8, 15
 let sortAsc = true;
 
-const btnSortByName = document.createElement("button");
+const btnSortByName = document.createElement("button") as HTMLButtonElement;
 btnSortByName.type = "button";
 btnSortByName.textContent = "Sort A-Z";
 btnSortByName.classList.add("btn-filter");
@@ -228,7 +228,7 @@ btnSortByName.addEventListener("click", () => {
     sortAsc = !sortAsc;
 });
 
-const btnShowAll = document.createElement("button");
+const btnShowAll = document.createElement("button") as HTMLButtonElement;
 btnShowAll.type = "button";
 btnShowAll.textContent = "Show all";
 btnShowAll.classList.add("btn-filter");
@@ -237,7 +237,7 @@ btnShowAll.addEventListener("click", () => {
     renderUsers(currentDisplayList);
 });
 
-const btnShowActive = document.createElement("button");
+const btnShowActive = document.createElement("button") as HTMLButtonElement;
 btnShowActive.type = "button";
 btnShowActive.textContent = "Show active only";
 btnShowActive.classList.add("btn-filter");
@@ -246,7 +246,7 @@ btnShowActive.addEventListener("click", () => {
     renderUsers(currentDisplayList);
 });
 
-const btnShowInactive = document.createElement("button");
+const btnShowInactive = document.createElement("button") as HTMLButtonElement;
 btnShowInactive.type = "button";
 btnShowInactive.textContent = "Show inactive only";
 btnShowInactive.classList.add("btn-filter");
@@ -256,7 +256,7 @@ btnShowInactive.addEventListener("click", () => {
 });
 
 // FILTER CONTAINER
-const filterContainer = document.createElement("div");
+const filterContainer = document.createElement("div") as HTMLDivElement;
 filterContainer.classList.add("filter-buttons");
 filterContainer.append(btnShowAll, btnShowActive, btnShowInactive, btnSortByName);
 
