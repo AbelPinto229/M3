@@ -1,23 +1,46 @@
-import { TaskClass } from "../models/task.js";
+import { TaskClass, TaskCategory } from "../models/task.js";
 
-let taskList: TaskClass[] = [];
+// ===============================
+// STATE
+// ===============================
+export let taskList: TaskClass[] = [];
+let nextTaskID = 1;
 
-export const addTask = (title: string, category: 'Work' | 'Personal' | 'Study') => {
-    const id = Date.now();
-    const task = new TaskClass(id, title, category);
+// ===============================
+// NEXT ID
+// ===============================
+export function getNextTaskID(): number {
+    return nextTaskID++;
+}
+
+// ===============================
+// CRUD
+// ===============================
+export function addTask(task: TaskClass): void {
     taskList.push(task);
-};
+}
 
-export const removeTask = (id: number) => {
+export function removeTask(id: number): void {
     taskList = taskList.filter(t => t.id !== id);
-};
+}
 
-export const getAllTasks = () => [...taskList];
+export function getAllTasks(): TaskClass[] {
+    return [...taskList];
+}
 
-export const clearCompletedTasks = () => {
-    taskList = taskList.filter(t => !t.concluded);
-};
+// ===============================
+// LOAD INITIAL TASKS
+// ===============================
+export function loadInitialTasks(): TaskClass[] {  // ← export agora está consistente
+    const initialData: { title: string; category: TaskCategory }[] = [
+        { title: "Review class 2 slides", category: "Study" },
+        { title: "Do guided exercises", category: "Study" },
+        { title: "Do autonomous exercises", category: "Study" }
+    ];
 
-export const searchTasks = (term: string) => {
-    return taskList.filter(t => t.title.toLowerCase().includes(term.toLowerCase()));
-};
+    initialData.forEach(data => {
+        taskList.push(new TaskClass(nextTaskID++, data.title, data.category));
+    });
+
+    return [...taskList];  // retorna lista inicial
+}

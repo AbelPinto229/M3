@@ -1,9 +1,14 @@
+// ===============================
+// Task Model
+// ===============================
+export type TaskCategory = 'Work' | 'Personal' | 'Study';
+
 export interface Task {
     id: number;
     title: string;
     concluded: boolean;
     conclusionDate?: Date;
-    category: 'Work' | 'Personal' | 'Study';
+    category: TaskCategory;
 }
 
 export class TaskClass implements Task {
@@ -11,9 +16,9 @@ export class TaskClass implements Task {
     title: string;
     concluded: boolean;
     conclusionDate?: Date;
-    category: 'Work' | 'Personal' | 'Study';
+    category: TaskCategory;
 
-    constructor(id: number, title: string, category: 'Work' | 'Personal' | 'Study') {
+    constructor(id: number, title: string, category: TaskCategory) {
         this.id = id;
         this.title = title;
         this.concluded = false;

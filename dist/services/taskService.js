@@ -1,17 +1,38 @@
 import { TaskClass } from "../models/task.js";
-let taskList = [];
-export const addTask = (title, category) => {
-    const id = Date.now();
-    const task = new TaskClass(id, title, category);
+// ===============================
+// STATE
+// ===============================
+export let taskList = [];
+let nextTaskID = 1;
+// ===============================
+// NEXT ID
+// ===============================
+export function getNextTaskID() {
+    return nextTaskID++;
+}
+// ===============================
+// CRUD
+// ===============================
+export function addTask(task) {
     taskList.push(task);
-};
-export const removeTask = (id) => {
+}
+export function removeTask(id) {
     taskList = taskList.filter(t => t.id !== id);
-};
-export const getAllTasks = () => [...taskList];
-export const clearCompletedTasks = () => {
-    taskList = taskList.filter(t => !t.concluded);
-};
-export const searchTasks = (term) => {
-    return taskList.filter(t => t.title.toLowerCase().includes(term.toLowerCase()));
-};
+}
+export function getAllTasks() {
+    return [...taskList];
+}
+// ===============================
+// LOAD INITIAL TASKS
+// ===============================
+export function loadInitialTasks() {
+    const initialData = [
+        { title: "Review class 2 slides", category: "Study" },
+        { title: "Do guided exercises", category: "Study" },
+        { title: "Do autonomous exercises", category: "Study" }
+    ];
+    initialData.forEach(data => {
+        taskList.push(new TaskClass(nextTaskID++, data.title, data.category));
+    });
+    return [...taskList]; // retorna lista inicial
+}
