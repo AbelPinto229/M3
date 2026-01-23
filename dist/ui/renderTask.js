@@ -56,12 +56,14 @@ modalSaveBtn.addEventListener("click", () => {
         return;
     taskBeingEdited.title = newTitle;
     taskBeingEdited.category = newCategory;
-    renderTasks(getAllTasks()); // ← agora envia lista
+    renderTasks(getAllTasks());
     closeModal();
 });
 modalCancelBtn.addEventListener("click", closeModal);
-modalOverlay.addEventListener("click", e => { if (e.target === modalOverlay)
-    closeModal(); });
+modalOverlay.addEventListener("click", e => {
+    if (e.target === modalOverlay)
+        closeModal();
+});
 // ===============================
 // RENDER TASKS
 // ===============================
@@ -69,7 +71,8 @@ export const renderTasks = (tasks) => {
     const taskContainer = document.querySelector("#list");
     const pendingCountDiv = document.querySelector("#pending-count");
     const filteredTasks = tasks.filter(task => task.title.toLowerCase().includes(searchTerm));
-    pendingCountDiv.textContent = `Pending tasks: ${filteredTasks.filter(t => !t.concluded).length}`;
+    pendingCountDiv.textContent =
+        `Pending tasks: ${filteredTasks.filter(t => !t.concluded).length}`;
     taskContainer.innerHTML = "";
     filteredTasks.forEach(task => {
         const li = document.createElement("li");
@@ -83,17 +86,20 @@ export const renderTasks = (tasks) => {
         contentDiv.appendChild(titleSpan);
         const categorySpan = document.createElement("span");
         categorySpan.textContent = ` [${task.category}]`;
-        categorySpan.classList.add("task-category");
+        categorySpan.classList.add("task-category", task.category.toLowerCase());
         contentDiv.appendChild(categorySpan);
         if (task.concluded && task.conclusionDate) {
             const dateSpan = document.createElement("span");
-            dateSpan.textContent = ` (Completed on: ${task.conclusionDate.toLocaleString()})`;
+            dateSpan.textContent =
+                ` (Completed on: ${task.conclusionDate.toLocaleString()})`;
             dateSpan.classList.add("completed-date");
             contentDiv.appendChild(dateSpan);
         }
         li.appendChild(contentDiv);
-        // toggle concluded
-        li.addEventListener("click", () => {
+        // ✅ TOGGLE CONCLUDED (ignora cliques em botões)
+        li.addEventListener("click", e => {
+            if (e.target.tagName === "BUTTON")
+                return;
             if (!task.concluded)
                 task.markConcluded();
             else {
@@ -102,7 +108,7 @@ export const renderTasks = (tasks) => {
             }
             renderTasks(getAllTasks());
         });
-        // buttons
+        // BUTTONS
         const btnDiv = document.createElement("div");
         const editBtn = document.createElement("button");
         editBtn.textContent = "Edit";
@@ -148,15 +154,19 @@ export const renderTaskForm = () => {
     // SORT
     let sortAsc = true;
     sortBtn.addEventListener("click", () => {
-        const sorted = getAllTasks().sort((a, b) => sortAsc ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title));
+        const sorted = getAllTasks().sort((a, b) => sortAsc
+            ? a.title.localeCompare(b.title)
+            : b.title.localeCompare(a.title));
         sortAsc = !sortAsc;
         sortBtn.textContent = sortAsc ? "Sort Z→A" : "Sort A→Z";
         renderTasks(sorted);
     });
     // CLEAR COMPLETED
     clearCompletedBtn.addEventListener("click", () => {
-        getAllTasks().forEach(t => { if (t.concluded)
-            removeTask(t.id); });
+        getAllTasks().forEach(t => {
+            if (t.concluded)
+                removeTask(t.id);
+        });
         renderTasks(getAllTasks());
     });
     // SEARCH

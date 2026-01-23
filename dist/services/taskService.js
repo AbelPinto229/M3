@@ -34,5 +34,5 @@ export function loadInitialTasks() {
     initialData.forEach(data => {
         taskList.push(new TaskClass(nextTaskID++, data.title, data.category));
     });
-    return [...taskList]; // retorna lista inicial
+    return [...taskList];
 }

@@ -31,7 +31,7 @@ export function getAllTasks(): TaskClass[] {
 // ===============================
 // LOAD INITIAL TASKS
 // ===============================
-export function loadInitialTasks(): TaskClass[] {  // ← export agora está consistente
+export function loadInitialTasks(): TaskClass[] {  
     const initialData: { title: string; category: TaskCategory }[] = [
         { title: "Review class 2 slides", category: "Study" },
         { title: "Do guided exercises", category: "Study" },
@@ -42,5 +42,5 @@ export function loadInitialTasks(): TaskClass[] {  // ← export agora está con
         taskList.push(new TaskClass(nextTaskID++, data.title, data.category));
     });
 
-    return [...taskList];  // retorna lista inicial
+    return [...taskList];  
 }
