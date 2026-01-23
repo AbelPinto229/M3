@@ -1,12 +1,21 @@
 import { UserClass } from "../models/user.js";
 
+// ---------------------------
+// STATE
+// ---------------------------
 export let userList: UserClass[] = [];
-let nextID = 1;
+let nextID: number = 1;
 
+// ---------------------------
+// GET NEXT ID
+// ---------------------------
 export function getNextID(): number {
     return nextID++;
 }
 
+// ---------------------------
+// CRUD
+// ---------------------------
 export function addUser(user: UserClass): void {
     userList.push(user);
 }
@@ -19,6 +28,9 @@ export function getAllUsers(): UserClass[] {
     return [...userList];
 }
 
+// ---------------------------
+// LOAD INITIAL USERS
+// ---------------------------
 export function loadInitialUsers(): void {
     const initialData = [
         { name: "Abel Pinto", email: "abel@example.com", active: true },

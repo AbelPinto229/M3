@@ -28,3 +28,4 @@ export class UserClass implements User {
         this.active = !this.active;
     }
 }
+

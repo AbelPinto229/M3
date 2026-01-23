@@ -6,8 +6,11 @@ import { renderUsers, renderUserForm } from "./ui/renderUser.js";
 
 window.addEventListener("DOMContentLoaded", () => {
     loadInitialUsers();
+
+    // Adicionar usuário extra
     addUser(new UserClass(999, "Alice Extra", "alice@example.com"));
 
     renderUserForm();
     renderUsers(getAllUsers());
 });
+
