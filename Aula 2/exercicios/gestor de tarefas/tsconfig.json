@@ -1,8 +1,0 @@
-{
-  "compilerOptions": {
-    "target": "es6",       // ou "es2015"
-    "lib": ["dom", "es6"], // garante métodos como includes
-    "strict": true,
-    "outDir": "./dist"
-  }
-}

@@ -1,8 +1,0 @@
-{
-  "compilerOptions": {
-    "target": "es2015",
-    "lib": ["dom", "es2015"],
-    "outDir": ".",
-    "strict": true
-  }
-}
