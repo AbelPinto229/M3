@@ -1,68 +1,16 @@
 {
   "compilerOptions": {
-    // ------------------------------
-    // Estrutura de Pastas
-    // ------------------------------
-    "rootDir": "./src",           // pasta fonte
-    "outDir": "./dist",           // pasta de output
-
-    // ------------------------------
-    // Ambiente / Target
-    // ------------------------------
-    "module": "nodenext",         // suporte a módulos ES + Node.js
-    "target": "es2022",           // ESNext / ES2022 features
-    "lib": ["es2022"],            // bibliotecas disponíveis
+    "rootDir": "./src",            // pasta de origem
+    "outDir": "./dist",            // pasta de saída compilada
+    "module": "nodenext",          // módulos ES para Node moderno
     "moduleResolution": "nodenext",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-
-    // ------------------------------
-    // Tipos
-    // ------------------------------
-    "allowJs": false,             // apenas TS
-    "checkJs": false,
-
-    // ------------------------------
-    // Saída e DevTools
-    // ------------------------------
-    "sourceMap": true,            // gera mapas para debug
-    "declaration": true,          // gera arquivos .d.ts
-    "declarationMap": true,       // mapas para d.ts
-
-    // ------------------------------
-    // Strict Typechecking
-    // ------------------------------
-    "strict": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-
-    // ------------------------------
-    // Segurança / Best Practices
-    // ------------------------------
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "isolatedModules": true,
-    "verbatimModuleSyntax": true,
-    "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force",
-    "skipLibCheck": true,
-
-    // ------------------------------
-    // JSX (caso uses React)
-    // ------------------------------
-    "jsx": "react-jsx",
-
-    // ------------------------------
-    // Opcional para Node.js moderno
-    // ------------------------------
-    "incremental": true,          // compilações incrementais mais rápidas
-    "tsBuildInfoFile": "./dist/.tsbuildinfo"
+    "target": "es2022",            // JS moderno
+    "strict": true,                // ativa todas as verificações estritas
+    "esModuleInterop": true,       // compatibilidade com import/export CommonJS
+    "forceConsistentCasingInFileNames": true, // evita problemas de maiúsculas/minúsculas
+    "skipLibCheck": true,          // ignora checagem de libs
+    "declaration": true,           // gera .d.ts
+    "sourceMap": true              // gera .map para debug
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

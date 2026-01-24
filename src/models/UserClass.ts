@@ -1,21 +1,36 @@
 import { BaseEntity } from './BaseEntity';
 import { UserRole } from '../security/UserRole';
 
+/**
+ * Classe que representa um usuário do sistema
+ * Herda de BaseEntity para id e createdAt
+ * Encapsula propriedades com getters/setters
+ */
 export class UserClass extends BaseEntity {
-    private _email: string;
-    private _active: boolean;
-    private _role: UserRole;
+    private _email!: string;       // email do usuário
+    private _active!: boolean;     // ativo ou inativo
+    private _role!: UserRole;      // perfil do usuário
 
     constructor(id: number, email: string, role: UserRole) {
-        super(id);
-        this.email = email;   // usa setter para validar
-        this._role = role;
-        this._active = true;  // padrão ativo
+        super(id);                 // inicializa id e createdAt da BaseEntity
+        this.email = email;        // usa setter para validação
+        this._role = role;         // role inicial
+        this._active = true;       // usuário começa ativo
     }
 
-    // GETTERS
+    // ===========================
+    // GETTERS E SETTERS
+    // ===========================
+
     get email(): string {
         return this._email;
+    }
+
+    set email(value: string) {
+        if (!this.validateEmail(value)) {
+            throw new Error(`Email inválido: ${value}`);
+        }
+        this._email = value;
     }
 
     get active(): boolean {
@@ -26,33 +41,29 @@ export class UserClass extends BaseEntity {
         return this._role;
     }
 
-    // SETTERS
-    set email(value: string) {
-        if (!this.validateEmail(value)) {
-            throw new Error('Email inválido');
-        }
-        this._email = value;
-    }
-
-    set active(value: boolean) {
-        this._active = value;
-    }
-
     set role(value: UserRole) {
-        if (!value) {
+        if (value === undefined || value === null) {
             throw new Error('Role inválido');
         }
         this._role = value;
     }
 
-    // Método privado de validação de email
+    // ===========================
+    // MÉTODOS DE NEGÓCIO
+    // ===========================
+
+    /**
+     * Ativa ou desativa o usuário
+     */
+    toggleActive(): void {
+        this._active = !this._active;
+    }
+
+    /**
+     * Validação simples de email
+     */
     private validateEmail(email: string): boolean {
         const re = /\S+@\S+\.\S+/;
         return re.test(email);
-    }
-
-    // Método de conveniência para alternar ativo/inativo
-    toggleActive(): void {
-        this._active = !this._active;
     }
 }
