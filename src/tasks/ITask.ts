@@ -1,5 +1,5 @@
 // src/tasks/ITask.ts
-import { TaskStatus } from './TaskStatus';
+import { TaskStatus } from './TaskStatus.js';
 
 export interface ITask {
     id: number;               // ID único da tarefa

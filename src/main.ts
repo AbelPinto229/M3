@@ -1,11 +1,11 @@
-import { UserClass } from './models/UserClass';
-import { UserRole } from './security/UserRole';
-import { canCreateTask } from './security/Permissions';
-import { BugTask } from './tasks/BugTask';
-import { processTask } from './tasks/TaskUtils';
-import { HistoryLog } from './logs/HistoryLog';
-import { NotificationService } from './notifications/NotificationService';
-import { TaskStatus } from './tasks/TaskStatus';
+import { UserClass } from './models/UserClass.js';
+import { UserRole } from './security/UserRole.js';
+import { canCreateTask } from './security/Permissions.js';
+import { BugTask } from './tasks/BugTask.js';
+import { processTask } from './tasks/TaskUtils.js';
+import { HistoryLog } from './logs/HistoryLog.js';
+import { NotificationService } from './notifications/NotificationService.js';
+import { TaskStatus } from './tasks/TaskStatus.js';
 
 const history = new HistoryLog();
 const notifier = new NotificationService();

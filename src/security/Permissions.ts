@@ -1,5 +1,5 @@
 
-import { UserRole } from './UserRole';
+import { UserRole } from './UserRole.js';
 
 /**
  * Verifica se o role tem permissão para criar tarefas

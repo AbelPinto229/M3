@@ -1,5 +1,5 @@
-import { ITask } from './ITask';
-import { TaskStatus } from './TaskStatus';
+import { ITask } from './ITask.js';
+import { TaskStatus } from './TaskStatus.js';
 
 export class BugTask implements ITask {
     id: number;
