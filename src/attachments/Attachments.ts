@@ -1,0 +1,11 @@
+// src/attachments/Attachment.ts
+export class Attachment {
+    constructor(
+        public id: number,
+        public taskId: number,
+        public filename: string,
+        public size: number,      // em bytes
+        public url: string,
+        public uploadedAt: Date
+    ) {}
+}
