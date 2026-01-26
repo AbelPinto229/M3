@@ -4,7 +4,7 @@ export class Attachment {
         public id: number,
         public taskId: number,
         public filename: string,
-        public size: number,      // em bytes
+        public size: number,      
         public url: string,
         public uploadedAt: Date
     ) {}
