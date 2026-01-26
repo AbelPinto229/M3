@@ -1,8 +1,8 @@
-import { Attachment } from '../attachments/attachments';
+import { Attachment } from '../models/Attachments';
 export declare class AttachmentService {
     private attachments;
-    private attachmentIdCounter;
-    addAttachment(taskId: number, filename: string, size: number, url: string): Attachment;
+    private idCounter;
+    addAttachment(taskId: number, attachment: Omit<Attachment, 'id' | 'uploadedAt'>): void;
     getAttachments(taskId: number): Attachment[];
-    removeAttachment(attachmentId: number): boolean;
+    removeAttachment(attachmentId: number): void;
 }

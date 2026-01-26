@@ -1,33 +1,26 @@
-//Sistema de atribuição de tarefas a utilizadores
+export class AssignmentService {
+  private taskToUsers: Map<number, Set<number>> = new Map();
+  private userToTasks: Map<number, Set<number>> = new Map();
 
-const taskToUsers: Map<number, Set<number>> = new Map();
-const userToTasks: Map<number, Set<number>> = new Map();
+  assignUser(taskId: number, userId: number) {
+    if (!this.taskToUsers.has(taskId)) this.taskToUsers.set(taskId, new Set());
+    if (!this.userToTasks.has(userId)) this.userToTasks.set(userId, new Set());
 
-export function assignUser(taskID: number, userID: number): void {
-    // Adiciona user à task
-    if (!taskToUsers.has(taskID)) {
-        taskToUsers.set(taskID, new Set());
-    }
-    taskToUsers.get(taskID)!.add(userID);
+    this.taskToUsers.get(taskId)?.add(userId);
+    this.userToTasks.get(userId)?.add(taskId);
+  }
 
-    // Adiciona task ao user
-    if (!userToTasks.has(userID)) {
-        userToTasks.set(userID, new Set());
-    }
-    userToTasks.get(userID)!.add(taskID);
-}   
-export function unassignUser(taskID: number, userID: number): void {
-    // Remove user da task
-    taskToUsers.get(taskID)?.delete(userID);    
-    // Remove task do user
-    userToTasks.get(userID)?.delete(taskID);
-}
-export function getUsersFromTask(taskID: number): number[] {
-    const users = taskToUsers.get(taskID);              
-    return users ? Array.from(users) : [];
-}           
-export function getTasksFromUser(userID: number): number[] {
-    const tasks = userToTasks.get(userID);              
-    return tasks ? Array.from(tasks) : [];
+  unassignUser(taskId: number, userId: number) {
+    this.taskToUsers.get(taskId)?.delete(userId);
+    this.userToTasks.get(userId)?.delete(taskId);
+  }
+
+  getUsersFromTask(taskId: number): number[] {
+    return Array.from(this.taskToUsers.get(taskId) || []);
+  }
+
+  getTasksFromUser(userId: number): number[] {
+    return Array.from(this.userToTasks.get(userId) || []);
+  }
 }
 
