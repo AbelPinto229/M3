@@ -14,8 +14,7 @@ export declare class NotificationService {
     /**
      * Notifica todos os administradores
      * @param message - mensagem
-     *
-     * Para simulação, vamos assumir que os IDs de admins são fixos.
+
      */
     notifyAdmins(message: string): void;
 }

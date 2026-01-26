@@ -7,3 +7,6 @@ export interface ITask {
     getType(): string;
     moveTo(status: TaskStatus): void;
 }
+export declare function setDeadline(taskID: number, date: Date): void;
+export declare function isExpired(taskID: number): boolean;
+export declare function getExpiredTasks(): number[];
