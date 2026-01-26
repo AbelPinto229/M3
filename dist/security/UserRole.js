@@ -8,6 +8,6 @@ var UserRole;
     UserRole[UserRole["ADMIN"] = 0] = "ADMIN";
     UserRole[UserRole["MANAGER"] = 1] = "MANAGER";
     UserRole[UserRole["MEMBER"] = 2] = "MEMBER";
-    UserRole[UserRole["VIEWER"] = 3] = "VIEWER"; // Visualizador: apenas pode ver tarefas
+    UserRole[UserRole["VIEWER"] = 3] = "VIEWER";
 })(UserRole || (exports.UserRole = UserRole = {}));
 //# sourceMappingURL=UserRole.js.map
