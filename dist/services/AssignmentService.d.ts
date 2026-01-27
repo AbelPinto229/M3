@@ -1,4 +1,8 @@
-export declare function assignUser(taskID: number, userID: number): void;
-export declare function unassignUser(taskID: number, userID: number): void;
-export declare function getUsersFromTask(taskID: number): number[];
-export declare function getTasksFromUser(userID: number): number[];
+export declare class AssignmentService {
+    private taskToUsers;
+    private userToTasks;
+    assignUser(taskId: number, userId: number): void;
+    unassignUser(taskId: number, userId: number): void;
+    getUsersFromTask(taskId: number): number[];
+    getTasksFromUser(userId: number): number[];
+}

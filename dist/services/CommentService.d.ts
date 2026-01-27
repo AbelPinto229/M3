@@ -1,12 +1,8 @@
-export declare class Comment {
-    static nextId: number;
-    id: number;
-    taskId: number;
-    userId: number;
-    content: string;
-    timestamp: Date;
-    constructor(taskId: number, userId: number, content: string);
+import { Comment } from '../models/Comments';
+export declare class CommentService {
+    private comments;
+    private idCounter;
+    addComment(taskId: number, userId: number, message: string): void;
+    getComments(taskId: number): Comment[];
+    deleteComment(commentId: number): void;
 }
-export declare function addComment(taskID: number, userID: number, content: string): Comment;
-export declare function getComments(taskID: number): Comment[];
-export declare function deleteComment(commentID: number): void;

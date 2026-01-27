@@ -1,36 +1,27 @@
 "use strict";
-//Sistema de atribuição de tarefas a utilizadores
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.assignUser = assignUser;
-exports.unassignUser = unassignUser;
-exports.getUsersFromTask = getUsersFromTask;
-exports.getTasksFromUser = getTasksFromUser;
-const taskToUsers = new Map();
-const userToTasks = new Map();
-function assignUser(taskID, userID) {
-    // Adiciona user à task
-    if (!taskToUsers.has(taskID)) {
-        taskToUsers.set(taskID, new Set());
+exports.AssignmentService = void 0;
+class AssignmentService {
+    taskToUsers = new Map();
+    userToTasks = new Map();
+    assignUser(taskId, userId) {
+        if (!this.taskToUsers.has(taskId))
+            this.taskToUsers.set(taskId, new Set());
+        if (!this.userToTasks.has(userId))
+            this.userToTasks.set(userId, new Set());
+        this.taskToUsers.get(taskId)?.add(userId);
+        this.userToTasks.get(userId)?.add(taskId);
     }
-    taskToUsers.get(taskID).add(userID);
-    // Adiciona task ao user
-    if (!userToTasks.has(userID)) {
-        userToTasks.set(userID, new Set());
+    unassignUser(taskId, userId) {
+        this.taskToUsers.get(taskId)?.delete(userId);
+        this.userToTasks.get(userId)?.delete(taskId);
     }
-    userToTasks.get(userID).add(taskID);
+    getUsersFromTask(taskId) {
+        return Array.from(this.taskToUsers.get(taskId) || []);
+    }
+    getTasksFromUser(userId) {
+        return Array.from(this.userToTasks.get(userId) || []);
+    }
 }
-function unassignUser(taskID, userID) {
-    // Remove user da task
-    taskToUsers.get(taskID)?.delete(userID);
-    // Remove task do user
-    userToTasks.get(userID)?.delete(taskID);
-}
-function getUsersFromTask(taskID) {
-    const users = taskToUsers.get(taskID);
-    return users ? Array.from(users) : [];
-}
-function getTasksFromUser(userID) {
-    const tasks = userToTasks.get(userID);
-    return tasks ? Array.from(tasks) : [];
-}
+exports.AssignmentService = AssignmentService;
 //# sourceMappingURL=AssignmentService.js.map

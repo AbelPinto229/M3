@@ -1,5 +1,5 @@
 import { User } from '../models/Users';
-import { Task } from '../models/task';
+import { Task } from '../models/Task';
 
 export class BackupService {
   constructor(private users: User[], private tasks: Task[], private assignments: any) {}
