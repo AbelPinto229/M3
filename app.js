@@ -3,14 +3,16 @@ const state = {
   users: [{ email: 'admin@sistema.com', role: 'ADMIN', active: true }],
   tasks: [],
   logs: [],
-  comments: [] // array para comentários
+  comments: [],
+  attachments: [] // array para anexos
 };
 
 const taskStatusCycle = ["Pendente", "Em Progresso", "Concluído"];
 const taskPriorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 let pendingDeleteAction = null;
-let commentIdCounter = 1; // contador de comentários
-let activeTaskModalId = null; // tarefa atualmente no modal
+let commentIdCounter = 1;
+let attachmentIdCounter = 1; // contador de attachments
+let activeTaskModalId = null;
 
 // ===== PRIORITY SERVICE =====
 class PriorityService {
@@ -150,7 +152,6 @@ document.getElementById('taskList').innerHTML = state.tasks
 
     return `
       <tr class="group hover:bg-slate-50 transition-colors">
-        <!-- CLICÁVEL APENAS NO TD PRINCIPAL -->
         <td class="py-3 font-medium text-slate-700 cursor-pointer ${t.status === 'Concluído' ? 'line-through opacity-40' : ''}" 
             onclick="openTaskModal(${t.id})">
           ${t.title} 
@@ -180,10 +181,9 @@ document.getElementById('taskList').innerHTML = state.tasks
         </td>
       </tr>`;
   }).join('');
-
 };
 
-// ===== MODAL DE COMENTÁRIOS =====
+// ===== MODAL DE COMENTÁRIOS + ATTACHMENTS =====
 window.openTaskModal = (taskId) => {
   activeTaskModalId = taskId;
   const task = state.tasks.find(t => t.id === taskId);
@@ -192,7 +192,8 @@ window.openTaskModal = (taskId) => {
   const modalHtml = `
     <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border border-slate-100">
       <h3 class="font-bold mb-4">${task.title}</h3>
-      <div id="taskComments" class="max-h-60 overflow-y-auto mb-4">
+
+      <div id="taskComments" class="max-h-40 overflow-y-auto mb-4">
         ${state.comments.filter(c => c.taskId === taskId).map(c => `
           <div class="flex justify-between items-center text-[10px] text-slate-600 mb-1">
             <span>${c.userEmail}: ${c.message}</span>
@@ -200,9 +201,18 @@ window.openTaskModal = (taskId) => {
           </div>`).join('')}
       </div>
       <input type="text" id="newCommentInput" class="w-full px-2 py-1 border rounded text-[10px]" placeholder="Adicionar comentário..." onkeypress="if(event.key==='Enter'){ addCommentModal(); }">
+
+      <div id="taskAttachments" class="max-h-40 overflow-y-auto mt-4 mb-2">
+        ${state.attachments.filter(a => a.taskId === taskId).map(a => `
+          <div class="flex justify-between items-center text-[10px] text-slate-600 mb-1">
+            <span>${a.filename}</span>
+            <button onclick="deleteAttachment(${a.id}); renderTaskModal()" class="text-red-500 text-[9px] px-1">x</button>
+          </div>`).join('')}
+      </div>
+      <input type="file" id="newAttachmentInput" class="w-full px-2 py-1 border rounded text-[10px]" onchange="addAttachmentModal()">
+
       <div class="flex justify-end mt-4">
         <button onclick="closeTaskModal()" class="px-4 py-2 bg-gray-200 rounded mr-2 text-xs">Fechar</button>
-        <button onclick="addCommentModal()" class="px-4 py-2 bg-indigo-600 text-white rounded text-xs">Adicionar</button>
       </div>
     </div>
   `;
@@ -220,6 +230,35 @@ window.closeTaskModal = () => {
   activeTaskModalId = null;
 };
 
+// ===== ATTACHMENTS =====
+window.addAttachmentModal = () => {
+  const input = document.getElementById('newAttachmentInput');
+  if (!input || !input.files || input.files.length === 0) return;
+  const file = input.files[0];
+  const taskId = activeTaskModalId;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    state.attachments.push({
+      id: attachmentIdCounter++,
+      taskId,
+      filename: file.name,
+      content: e.target.result
+    });
+    addLog(`Anexo "${file.name}" adicionado a "${state.tasks.find(t => t.id===taskId).title}"`);
+    renderTaskModal();
+    input.value = '';
+  };
+  reader.readAsDataURL(file);
+};
+
+window.deleteAttachment = (attachmentId) => {
+  state.attachments = state.attachments.filter(a => a.id !== attachmentId);
+  addLog(`Anexo removido`);
+  renderTaskModal();
+};
+
+// ===== COMENTÁRIOS =====
 window.addCommentModal = () => {
   const input = document.getElementById('newCommentInput');
   if (!input || !input.value.trim()) return;
@@ -233,12 +272,22 @@ window.addCommentModal = () => {
 window.renderTaskModal = () => {
   if (!activeTaskModalId) return;
   const task = state.tasks.find(t => t.id === activeTaskModalId);
+
   const commentsContainer = document.getElementById('taskComments');
   if (commentsContainer) {
     commentsContainer.innerHTML = state.comments.filter(c => c.taskId === activeTaskModalId)
       .map(c => `<div class="flex justify-between items-center text-[10px] text-slate-600 mb-1">
                    <span>${c.userEmail}: ${c.message}</span>
                    <button onclick="deleteComment(${c.id}); renderTaskModal()" class="text-red-500 text-[9px] px-1">x</button>
+                 </div>`).join('');
+  }
+
+  const attachmentsContainer = document.getElementById('taskAttachments');
+  if (attachmentsContainer) {
+    attachmentsContainer.innerHTML = state.attachments.filter(a => a.taskId === activeTaskModalId)
+      .map(a => `<div class="flex justify-between items-center text-[10px] text-slate-600 mb-1">
+                   <span>${a.filename}</span>
+                   <button onclick="deleteAttachment(${a.id}); renderTaskModal()" class="text-red-500 text-[9px] px-1">x</button>
                  </div>`).join('');
   }
 };
@@ -275,6 +324,7 @@ window.deleteTask = (i) => openModal(`Remover ${state.tasks[i].title}?`, () => {
   const taskId = state.tasks[i].id;
   state.tasks.splice(i, 1); 
   state.comments = state.comments.filter(c => c.taskId !== taskId);
+  state.attachments = state.attachments.filter(a => a.taskId !== taskId);
   addNotification("Tarefa removida", "info"); 
   saveAndRender(); 
 });
@@ -309,7 +359,7 @@ window.setTaskPriority = (taskIndex, priority) => {
 window.addComment = (taskId, message, event) => {
   event.preventDefault();
   if (!message.trim()) return;
-  const userEmail = 'admin@sistema.com'; // fixo por agora
+  const userEmail = 'admin@sistema.com'; 
   state.comments.push({ id: commentIdCounter++, taskId, userEmail, message });
   addLog(`Comentário adicionado a "${state.tasks.find(t => t.id===taskId).title}"`);
   saveAndRender();
@@ -318,7 +368,7 @@ window.addComment = (taskId, message, event) => {
 window.deleteComment = (commentId) => {
   state.comments = state.comments.filter(c => c.id !== commentId);
   addLog(`Comentário removido`);
-  renderTaskModal(); // atualiza modal se estiver aberto
+  renderTaskModal(); 
   saveAndRender();
 };
 
@@ -337,7 +387,7 @@ document.getElementById('userForm').onsubmit = (e) => {
 document.getElementById('taskForm').onsubmit = (e) => {
   e.preventDefault();
   const title = document.getElementById('taskTitle').value;
-  const type = document.getElementById('taskType').value; // 'bug', 'feature', 'task'
+  const type = document.getElementById('taskType').value; 
   const deadline = document.getElementById('taskDeadline').value || null;
 
   const newTask = { 
@@ -349,7 +399,7 @@ document.getElementById('taskForm').onsubmit = (e) => {
     priority: "LOW",
     deadline 
   };
-  applyAutomation(newTask); // aplica automação se for bug
+  applyAutomation(newTask); 
 
   state.tasks.push(newTask);
 
@@ -361,3 +411,4 @@ document.getElementById('taskForm').onsubmit = (e) => {
 
 // ===== START =====
 saveAndRender();
+
