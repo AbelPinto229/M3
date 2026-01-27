@@ -1,4 +1,4 @@
-import { Task } from "../models/Ask";
+import { Task } from "../models/ask";
 
 export class DeadlineService {
   private deadlines: Map<number, Date> = new Map();

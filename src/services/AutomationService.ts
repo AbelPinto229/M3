@@ -1,5 +1,5 @@
 import { User } from '../models/Users';
-import { Task } from "../models/Ask";
+import { Task } from "../models/ask";
 import { AssignmentService } from './AssignmentService.js';
 import { DeadlineService } from './DeadlineService.js';
 

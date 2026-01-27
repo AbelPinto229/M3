@@ -4,7 +4,8 @@ const state = {
   tasks: [],
   logs: [],
   comments: [],
-  attachments: [] // array para attachments
+  attachments: [],
+  tags: [] // { taskId: number, tag: string }
 };
 
 const taskStatusCycle = ["Pendente", "Em Progresso", "Concluído"];
@@ -14,6 +15,44 @@ let commentIdCounter = 1;
 let attachmentIdCounter = 1;
 let activeTaskModalId = null;
 
+// ===== TAG SERVICE =====
+class TagService {
+  addTag(taskId, tag) {
+    if (!tag.trim()) return;
+    const exists = state.tags.some(t => t.taskId === taskId && t.tag.toLowerCase() === tag.toLowerCase());
+    if (!exists) {
+      state.tags.push({ taskId, tag: tag.toLowerCase() });
+      addLog(`Tag "${tag}" adicionada.`);
+    }
+  }
+  removeTag(taskId, tag) {
+    state.tags = state.tags.filter(t => !(t.taskId === taskId && t.tag === tag));
+    addLog(`Tag "${tag}" removida.`);
+  }
+  getTags(taskId) {
+    return state.tags.filter(t => t.taskId === taskId).map(t => t.tag);
+  }
+}
+const tagService = new TagService();
+
+// ===== SEARCH SERVICE (AVANÇADO) =====
+class SearchService {
+  filterTasks(tasks, criteria) {
+    return tasks.filter(task => {
+      const matchTitle = task.title.toLowerCase().includes(criteria.text.toLowerCase());
+      const matchStatus = criteria.status === "" || task.status === criteria.status;
+      const matchPriority = criteria.priority === "" || task.priority === criteria.priority;
+      const matchType = criteria.type === "" || task.type === criteria.type;
+      
+      const taskTags = tagService.getTags(task.id);
+      const matchTag = criteria.tag === "" || taskTags.some(t => t.includes(criteria.tag.toLowerCase()));
+
+      return matchTitle && matchStatus && matchPriority && matchType && matchTag;
+    });
+  }
+}
+const searchService = new SearchService();
+
 // ===== PRIORITY SERVICE =====
 class PriorityService {
   setPriority(task, priority) { task.priority = priority; }
@@ -22,7 +61,7 @@ class PriorityService {
 }
 const priorityService = new PriorityService();
 
-// ===== FUNÇÃO DE MODAL =====
+// ===== FUNÇÃO DE MODAL DE CONFIRMAÇÃO =====
 const openModal = (message, confirmCallback) => {
   document.getElementById('modalMessage').innerText = message;
   document.getElementById('confirmModal').classList.remove('hidden');
@@ -53,7 +92,7 @@ const updateDashboard = () => {
   document.getElementById('userProgressBar').style.width = `${rateU}%`;
 };
 
-// ===== LOGS E NOTIFICAÇÕES =====
+// ===== LOGS E NOTIFICAÇÕES (AJUSTADO) =====
 const addLog = (message) => {
   const time = new Date().toLocaleTimeString();
   state.logs.unshift({ time, msg: message });
@@ -70,15 +109,22 @@ const addLog = (message) => {
 
 const addNotification = (message, type = 'success') => {
   const container = document.getElementById('notifications');
+  if (!container) return; // Segurança caso o ID não exista
+
   const colors = { 
-    success: 'bg-white border-emerald-500 text-emerald-700', 
-    warning: 'bg-white border-red-500 text-red-700', 
-    info: 'bg-white border-indigo-500 text-indigo-700' 
+    success: 'bg-white border-emerald-500 text-emerald-700 shadow-xl', 
+    warning: 'bg-white border-red-500 text-red-700 shadow-xl', 
+    info: 'bg-white border-indigo-500 text-indigo-700 shadow-xl' 
   };
+  
   const notification = document.createElement('div');
-  notification.className = `p-4 mb-3 border-l-4 rounded-xl shadow-lg text-xs font-bold transition-all pointer-events-auto ${colors[type]}`;
+  // Ajustamos o z-index e a transição para garantir que apareça e saia com efeito
+  notification.className = `p-4 mb-3 border-l-4 rounded-xl text-xs font-bold transition-all duration-500 transform translate-x-0 pointer-events-auto relative z-[9999] border ${colors[type]}`;
   notification.innerHTML = message;
+  
   container.prepend(notification);
+
+  // Efeito de saída (Time Get Out)
   setTimeout(() => { 
     notification.style.opacity = '0'; 
     notification.style.transform = 'translateX(20px)'; 
@@ -105,7 +151,14 @@ const applyAutomation = (task) => {
 // ===== RENDER USERS E TASKS =====
 const render = () => {
   const userSearchTerm = document.getElementById('searchUser').value.toLowerCase();
-  const taskSearchTerm = document.getElementById('searchTask').value.toLowerCase();
+  
+  const searchCriteria = {
+    text: document.getElementById('searchTask').value,
+    status: document.getElementById('filterStatus')?.value || "",
+    priority: document.getElementById('filterPriority')?.value || "",
+    type: document.getElementById('filterType')?.value || "",
+    tag: document.getElementById('filterTag')?.value || ""
+  };
 
   const roleColors = {
     'ADMIN': 'text-red-500 bg-red-50 border-red-100',
@@ -133,19 +186,20 @@ const render = () => {
         </td>
       </tr>`).join('');
 
-  // Render Tasks
-  document.getElementById('taskList').innerHTML = state.tasks
-    .filter(t => t.title.toLowerCase().includes(taskSearchTerm))
+  // Render Tasks Filtradas
+  const filteredTasks = searchService.filterTasks(state.tasks, searchCriteria);
+
+  document.getElementById('taskList').innerHTML = filteredTasks
     .map((t) => {
       const statusColor = t.status === "Concluído" ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
                           : (t.status === "Em Progresso" ? "bg-amber-50 text-amber-600 border-amber-100" 
                           : "bg-blue-50 text-blue-600 border-blue-100");
       const assignedText = t.assigned && t.assigned.length ? ` - Atribuído a: ${t.assigned.join(', ')}` : '';
       const deadlineText = t.deadline ? ` | Deadline: ${t.deadline}` : '';
+      const taskTags = tagService.getTags(t.id).map(tag => `<span class="bg-slate-100 text-slate-500 px-1 rounded mr-1">#${tag}</span>`).join('');
 
-      let priorityColorClass = "text-slate-400"; // default LOW
+      let priorityColorClass = "text-slate-400";
       switch(t.priority) {
-        case "LOW": priorityColorClass = "text-slate-400"; break;
         case "MEDIUM": priorityColorClass = "text-blue-500 font-medium"; break;
         case "HIGH": priorityColorClass = "text-red-500 font-bold"; break;
         case "CRITICAL": priorityColorClass = "text-orange-500 font-bold"; break;
@@ -159,32 +213,28 @@ const render = () => {
             <span class="text-[8px] ${priorityColorClass} block uppercase tracking-tighter">
               ${t.type} | ${t.priority || 'LOW'}${assignedText}${deadlineText}
             </span>
+            <div class="mt-1">${taskTags}</div>
           </td>
-
           <td class="py-3 text-center">
-            <button onclick="event.stopPropagation(); cycleTaskStatus(${state.tasks.indexOf(t)})" class="text-[9px] font-bold px-2 py-1 rounded-md border ${statusColor}">${t.status.toUpperCase()}</button>
+            <button onclick="event.stopPropagation(); cycleTaskStatus(${state.tasks.findIndex(task => task.id === t.id)})" class="text-[9px] font-bold px-2 py-1 rounded-md border ${statusColor}">${t.status.toUpperCase()}</button>
           </td>
-
           <td class="py-3 text-right flex items-center gap-2 justify-end">
-            <select onchange="event.stopPropagation(); manualAssign(${state.tasks.indexOf(t)}, this.value)" class="text-[9px] px-2 py-1 rounded-md border bg-white">
-              <option value="">Atribuir a...</option>
-              ${state.users.filter(u => u.active).map(u => `<option value="${u.email}" ${t.assigned && t.assigned.includes(u.email) ? 'selected' : ''}>${u.email}</option>`).join('')}
+            <select onchange="event.stopPropagation(); manualAssign(${state.tasks.findIndex(task => task.id === t.id)}, this.value)" class="text-[9px] px-2 py-1 rounded-md border bg-white">
+              <option value="">Atribuir...</option>
+              ${state.users.filter(u => u.active).map(u => `<option value="${u.email}" ${t.assigned?.includes(u.email) ? 'selected' : ''}>${u.email}</option>`).join('')}
             </select>
-            <select onchange="event.stopPropagation(); setTaskPriority(${state.tasks.indexOf(t)}, this.value)" class="text-[9px] px-2 py-1 rounded-md border bg-white">
+            <select onchange="event.stopPropagation(); setTaskPriority(${state.tasks.findIndex(task => task.id === t.id)}, this.value)" class="text-[9px] px-2 py-1 rounded-md border bg-white">
               ${taskPriorities.map(p => `<option value="${p}" ${t.priority === p ? 'selected' : ''}>${p}</option>`).join('')}
             </select>
-            <button onclick="event.stopPropagation(); removeAssignment(${state.tasks.indexOf(t)})" class="text-white bg-red-600 px-2 py-1 rounded hover:bg-red-700">x</button>
-            <button onclick="event.stopPropagation(); deleteTask(${state.tasks.indexOf(t)})" class="text-slate-300 hover:text-red-500">
-              <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-              </svg>
+            <button onclick="event.stopPropagation(); deleteTask(${state.tasks.findIndex(task => task.id === t.id)})" class="text-slate-300 hover:text-red-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             </button>
           </td>
         </tr>`;
     }).join('');
 };
 
-// ===== MODAL COM COMMENTS + ATTACHMENTS =====
+// ===== MODAL INTEGRADO (COMMENTS + ATTACHMENTS + TAGS) =====
 window.openTaskModal = (taskId) => {
   activeTaskModalId = taskId;
   const task = state.tasks.find(t => t.id === taskId);
@@ -193,19 +243,25 @@ window.openTaskModal = (taskId) => {
   const modalHtml = `
     <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border border-slate-100">
       <h3 class="font-bold mb-2">${task.title}</h3>
-      <p class="text-[10px] text-slate-400 mb-4">Tipo: ${task.type} | Prioridade: ${task.priority || 'LOW'} | Deadline: ${task.deadline || '-'}</p>
+      <p class="text-[10px] text-slate-400 mb-4">Tipo: ${task.type} | Prioridade: ${task.priority || 'LOW'}</p>
 
-      <div id="taskComments" class="max-h-60 overflow-y-auto mb-4"></div>
-      <input type="text" id="newCommentInput" class="w-full px-2 py-1 border rounded text-[10px]" placeholder="Adicionar comentário..." onkeypress="if(event.key==='Enter'){ addCommentModal(); }">
+      <div class="mb-4">
+        <h4 class="font-bold text-xs mb-1">Tags:</h4>
+        <div id="taskTagsList" class="flex flex-wrap gap-1 mb-2"></div>
+        <input type="text" id="tagInput" class="w-full px-2 py-1 border rounded text-[10px]" placeholder="Nova tag... (Enter)" onkeypress="if(event.key==='Enter'){ addTagToTask(); }">
+      </div>
 
-      <div class="mt-4 mb-4">
+      <div id="taskComments" class="max-h-32 overflow-y-auto mb-2 border-t pt-2"></div>
+      <input type="text" id="newCommentInput" class="w-full px-2 py-1 border rounded text-[10px]" placeholder="Comentar..." onkeypress="if(event.key==='Enter'){ addCommentModal(); }">
+
+      <div class="mt-4">
         <h4 class="font-bold text-xs mb-1">Anexos:</h4>
-        <div id="taskAttachments" class="max-h-40 overflow-y-auto"></div>
+        <div id="taskAttachments" class="max-h-24 overflow-y-auto"></div>
         <input type="file" id="newAttachmentInput" class="mt-1 text-xs" onchange="addAttachmentModal(event)">
       </div>
 
       <div class="flex justify-end mt-4">
-        <button onclick="closeTaskModal()" class="px-4 py-2 bg-gray-200 rounded mr-2 text-xs">Fechar</button>
+        <button onclick="closeTaskModal()" class="px-4 py-2 bg-gray-200 rounded text-xs">Fechar</button>
       </div>
     </div>
   `;
@@ -219,192 +275,135 @@ window.openTaskModal = (taskId) => {
   renderTaskModal();
 };
 
+window.renderTaskModal = () => {
+  if (!activeTaskModalId) return;
+
+  const tagsList = document.getElementById('taskTagsList');
+  if (tagsList) {
+    tagsList.innerHTML = tagService.getTags(activeTaskModalId)
+      .map(tag => `<span class="bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full text-[9px] font-bold flex items-center">#${tag} <button onclick="removeTagFromTask('${tag}')" class="ml-1 text-red-400">×</button></span>`).join('');
+  }
+
+  const commentsContainer = document.getElementById('taskComments');
+  if (commentsContainer) {
+    commentsContainer.innerHTML = state.comments
+      .filter(c => c.taskId === activeTaskModalId)
+      .map(c => `<div class="flex justify-between text-[10px] mb-1"><span><b>${c.userEmail}:</b> ${c.message}</span><button onclick="deleteComment(${c.id})" class="text-red-500">×</button></div>`).join('');
+  }
+
+  const attachmentsContainer = document.getElementById('taskAttachments');
+  if (attachmentsContainer) {
+    attachmentsContainer.innerHTML = state.attachments
+      .filter(a => a.taskId === activeTaskModalId)
+      .map(a => `<div class="flex justify-between text-[10px] mb-1"><a href="${a.content}" download="${a.filename}" class="text-blue-600 underline">${a.filename}</a><button onclick="deleteAttachment(${a.id})" class="text-red-500">×</button></div>`).join('');
+  }
+};
+
 window.closeTaskModal = () => {
   const modal = document.getElementById('taskModalContainer');
   if (modal) modal.remove();
   activeTaskModalId = null;
 };
 
-// ===== COMMENTS =====
+// ===== ACTIONS: TAGS, COMMENTS, ATTACHMENTS =====
+window.addTagToTask = () => {
+  const input = document.getElementById('tagInput');
+  tagService.addTag(activeTaskModalId, input.value);
+  input.value = '';
+  renderTaskModal();
+  render();
+};
+window.removeTagFromTask = (tag) => {
+  tagService.removeTag(activeTaskModalId, tag);
+  renderTaskModal();
+  render();
+};
 window.addCommentModal = () => {
   const input = document.getElementById('newCommentInput');
-  if (!input || !input.value.trim()) return;
-  const taskId = activeTaskModalId;
-  state.comments.push({ id: commentIdCounter++, taskId, userEmail: 'admin@sistema.com', message: input.value });
-  addLog(`Comentário adicionado a "${state.tasks.find(t => t.id===taskId).title}"`);
+  if (!input.value.trim()) return;
+  state.comments.push({ id: commentIdCounter++, taskId: activeTaskModalId, userEmail: 'admin@sistema.com', message: input.value });
   input.value = '';
   renderTaskModal();
 };
-
-window.renderTaskModal = () => {
-  if (!activeTaskModalId) return;
-
-  // Comments
-  const commentsContainer = document.getElementById('taskComments');
-  if (commentsContainer) {
-    commentsContainer.innerHTML = state.comments
-      .filter(c => c.taskId === activeTaskModalId)
-      .map(c => `<div class="flex justify-between items-center text-[10px] text-slate-600 mb-1">
-                   <span>${c.userEmail}: ${c.message}</span>
-                   <button onclick="deleteComment(${c.id}); renderTaskModal()" class="text-red-500 text-[9px] px-1">x</button>
-                 </div>`).join('');
-  }
-
-  // Attachments
-  const attachmentsContainer = document.getElementById('taskAttachments');
-  if (attachmentsContainer) {
-    attachmentsContainer.innerHTML = state.attachments
-      .filter(a => a.taskId === activeTaskModalId)
-      .map(a => `<div class="flex justify-between items-center text-[10px] text-slate-600 mb-1">
-                   <a href="${a.content}" download="${a.filename}" class="underline text-blue-600 hover:text-blue-800" target="_blank">${a.filename}</a>
-                   <button onclick="deleteAttachment(${a.id}); renderTaskModal()" class="text-red-500 text-[9px] px-1">x</button>
-                 </div>`).join('');
-  }
+window.deleteComment = (id) => {
+  state.comments = state.comments.filter(c => c.id !== id);
+  renderTaskModal();
 };
-
-// ===== ATTACHMENTS =====
 window.addAttachmentModal = (event) => {
   const file = event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
   reader.onload = (e) => {
-    state.attachments.push({
-      id: attachmentIdCounter++,
-      taskId: activeTaskModalId,
-      filename: file.name,
-      content: e.target.result // base64
-    });
-    addLog(`Attachment adicionado: ${file.name}`);
+    state.attachments.push({ id: attachmentIdCounter++, taskId: activeTaskModalId, filename: file.name, content: e.target.result });
     renderTaskModal();
   };
   reader.readAsDataURL(file);
 };
-
 window.deleteAttachment = (id) => {
   state.attachments = state.attachments.filter(a => a.id !== id);
   renderTaskModal();
-  addLog(`Attachment removido`);
 };
 
-// ===== SAVE & RENDER =====
-const saveAndRender = () => {
-  render();
-  updateDashboard();
-};
+// ===== ACÇÕES GERAIS =====
+const saveAndRender = () => { render(); updateDashboard(); };
 
-// ===== FILTROS =====
-document.getElementById('searchUser').addEventListener('input', render);
-document.getElementById('searchTask').addEventListener('input', render);
-
-// ===== AÇÕES =====
-window.toggleUserStatus = (i) => { 
-  state.users[i].active = !state.users[i].active; 
-  addLog(`Acesso: ${state.users[i].email} (${state.users[i].active ? 'ON' : 'OFF'})`); 
-  saveAndRender(); 
-};
+window.toggleUserStatus = (i) => { state.users[i].active = !state.users[i].active; saveAndRender(); };
 window.cycleTaskStatus = (i) => { 
   state.tasks[i].status = taskStatusCycle[(taskStatusCycle.indexOf(state.tasks[i].status) + 1) % taskStatusCycle.length]; 
-  addLog(`Tarefa: ${state.tasks[i].title} -> ${state.tasks[i].status}`); 
   saveAndRender(); 
 };
-window.deleteUser = (i) => openModal(`Eliminar ${state.users[i].email}?`, () => { 
-  addLog(`Removido: ${state.users[i].email}`); 
-  state.users.splice(i, 1); 
-  addNotification("Utilizador removido", "warning"); 
-  saveAndRender(); 
-});
-window.deleteTask = (i) => openModal(`Remover ${state.tasks[i].title}?`, () => { 
-  addLog(`Removida: ${state.tasks[i].title}`); 
+window.deleteUser = (i) => openModal(`Eliminar ${state.users[i].email}?`, () => { state.users.splice(i, 1); saveAndRender(); });
+window.deleteTask = (i) => openModal(`Remover tarefa?`, () => {
   const taskId = state.tasks[i].id;
-  state.tasks.splice(i, 1); 
+  state.tasks.splice(i, 1);
   state.comments = state.comments.filter(c => c.taskId !== taskId);
   state.attachments = state.attachments.filter(a => a.taskId !== taskId);
-  addNotification("Tarefa removida", "info"); 
-  saveAndRender(); 
+  state.tags = state.tags.filter(t => t.taskId !== taskId);
+  saveAndRender();
 });
 
-// ===== MANUAL ASSIGNMENT =====
-window.manualAssign = (taskIndex, userEmail) => {
-  const task = state.tasks[taskIndex];
-  if (!task.assigned) task.assigned = [];
-  if (userEmail && !task.assigned.includes(userEmail)) {
-    task.assigned.push(userEmail);
-    addLog(`Tarefa: "${task.title}" atribuída manualmente a ${userEmail}`);
-  }
+window.manualAssign = (taskIndex, email) => {
+  if (!state.tasks[taskIndex].assigned) state.tasks[taskIndex].assigned = [];
+  if (email && !state.tasks[taskIndex].assigned.includes(email)) state.tasks[taskIndex].assigned.push(email);
   saveAndRender();
 };
-window.removeAssignment = (taskIndex) => {
-  const task = state.tasks[taskIndex];
-  if (!task.assigned) return;
-  task.assigned = [];
-  addLog(`Tarefa: "${task.title}" não tem nenhum utilizador atribuído`);
-  saveAndRender();
-};
+window.setTaskPriority = (taskIndex, p) => { state.tasks[taskIndex].priority = p; saveAndRender(); };
 
-// ===== PRIORITY ACTION =====
-window.setTaskPriority = (taskIndex, priority) => {
-  const task = state.tasks[taskIndex];
-  priorityService.setPriority(task, priority);
-  addLog(`Tarefa: "${task.title}" prioridade definida como ${priority}`);
-  saveAndRender();
-};
-
-// ===== COMENTÁRIOS =====
-window.addComment = (taskId, message, event) => {
-  event.preventDefault();
-  if (!message.trim()) return;
-  const userEmail = 'admin@sistema.com'; 
-  state.comments.push({ id: commentIdCounter++, taskId, userEmail, message });
-  addLog(`Comentário adicionado a "${state.tasks.find(t => t.id===taskId).title}"`);
-  saveAndRender();
-};
-
-window.deleteComment = (commentId) => {
-  state.comments = state.comments.filter(c => c.id !== commentId);
-  addLog(`Comentário removido`);
-  renderTaskModal(); 
-  saveAndRender();
-};
-
-// ===== FORMS =====
+// ===== FORMS E FILTROS =====
 document.getElementById('userForm').onsubmit = (e) => {
   e.preventDefault();
   const email = document.getElementById('userEmail').value;
-  if (state.users.some(u => u.email === email)) return addNotification("Email já existe", "warning");
-  state.users.push({ email, role: document.getElementById('userRole').value, active: true });
-  addNotification("Utilizador criado");
-  addLog(`Novo User: ${email}`);
-  saveAndRender(); 
+  // Adicionei apenas a notificação aqui como exemplo de uso
+  if(state.users.some(u => u.email === email)) {
+      addNotification("Email já existe!", "warning");
+      return;
+  }
+  state.users.push({ email: email, role: document.getElementById('userRole').value, active: true });
+  addNotification("Utilizador adicionado!");
   e.target.reset();
+  saveAndRender();
 };
 
 document.getElementById('taskForm').onsubmit = (e) => {
   e.preventDefault();
-  const title = document.getElementById('taskTitle').value;
-  const type = document.getElementById('taskType').value; 
-  const deadline = document.getElementById('taskDeadline').value || null;
-
   const newTask = { 
-    id: state.tasks.length+1, 
-    title, 
-    type, 
+    id: Date.now(), 
+    title: document.getElementById('taskTitle').value, 
+    type: document.getElementById('taskType').value, 
     status: "Pendente", 
-    assigned: [], 
     priority: "LOW",
-    deadline 
+    deadline: document.getElementById('taskDeadline').value || null 
   };
-  applyAutomation(newTask); 
-
+  applyAutomation(newTask);
   state.tasks.push(newTask);
-
-  addNotification("Tarefa adicionada");
-  addLog(`Nova Tarefa: ${title}`);
-  saveAndRender(); 
+  addNotification("Tarefa criada!");
   e.target.reset();
+  saveAndRender();
 };
 
-document.getElementById('searchUser').addEventListener('input', render);
-document.getElementById('searchTask').addEventListener('input', render);
+['searchUser', 'searchTask', 'filterStatus', 'filterPriority', 'filterType', 'filterTag'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', render);
+  document.getElementById(id)?.addEventListener('change', render);
+});
 
-// ===== START =====
 saveAndRender();
