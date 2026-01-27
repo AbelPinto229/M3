@@ -189,44 +189,57 @@ const render = () => {
 
   document.getElementById('taskList').innerHTML = filteredTasks
     .map((t) => {
+      const idx = state.tasks.findIndex(task => task.id === t.id);
       const statusColor = t.status === "Concluído" ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
                           : (t.status === "Em Progresso" ? "bg-amber-50 text-amber-600 border-amber-100" 
                           : "bg-blue-50 text-blue-600 border-blue-100");
-      const assignedText = t.assigned && t.assigned.length ? ` - Atribuído a: ${t.assigned.join(', ')}` : '';
-      const deadlineText = t.deadline ? ` | Deadline: ${t.deadline}` : '';
-      const taskTags = tagService.getTags(t.id).map(tag => `<span class="bg-slate-100 text-slate-500 px-1 rounded mr-1">#${tag}</span>`).join('');
 
       let priorityColorClass = "text-slate-400";
       switch(t.priority) {
-        case "MEDIUM": priorityColorClass = "text-amber-500 font-bold"; break; // Amarelo
-        case "HIGH": priorityColorClass = "text-orange-500 font-bold"; break; // Laranja
-        case "CRITICAL": priorityColorClass = "text-red-600 font-bold"; break; // Vermelho
+        case "MEDIUM": priorityColorClass = "text-amber-500 font-bold"; break;
+        case "HIGH": priorityColorClass = "text-orange-500 font-bold"; break;
+        case "CRITICAL": priorityColorClass = "text-red-600 font-bold"; break;
       }
 
       return `
-        <tr class="group hover:bg-slate-50 transition-colors">
-          <td class="py-3 font-medium text-slate-700 cursor-pointer ${t.status === 'Concluído' ? 'line-through opacity-40' : ''}" 
-              onclick="openTaskModal(${t.id})">
-            ${t.title} 
-            <span class="text-[8px] ${priorityColorClass} block uppercase tracking-tighter">
-              ${t.type} | ${t.priority || 'LOW'}${assignedText}${deadlineText}
+        <tr class="group hover:bg-slate-50 transition-colors border-b border-slate-100">
+          <td class="py-4 px-2 cursor-pointer" onclick="openTaskModal(${t.id})">
+            <p class="font-bold text-slate-700 ${t.status === 'Concluído' ? 'line-through opacity-40' : ''}">${t.title}</p>
+            <span class="text-[8px] ${priorityColorClass} block uppercase tracking-tighter mt-1">
+              ${t.type} | ${t.priority || 'LOW'} ${t.deadline ? '| Expira: ' + t.deadline : ''}
             </span>
-            <div class="mt-1">${taskTags}</div>
           </td>
-          <td class="py-3 text-center">
-            <button onclick="event.stopPropagation(); cycleTaskStatus(${state.tasks.findIndex(task => task.id === t.id)})" class="text-[9px] font-bold px-2 py-1 rounded-md border ${statusColor}">${t.status.toUpperCase()}</button>
-          </td>
-          <td class="py-3 text-right flex items-center gap-2 justify-end">
-            <select onchange="event.stopPropagation(); manualAssign(${state.tasks.findIndex(task => task.id === t.id)}, this.value)" class="text-[9px] px-2 py-1 rounded-md border bg-white">
-              <option value="">Atribuir...</option>
-              ${state.users.filter(u => u.active).map(u => `<option value="${u.email}" ${t.assigned?.includes(u.email) ? 'selected' : ''}>${u.email}</option>`).join('')}
-            </select>
-            <select onchange="event.stopPropagation(); setTaskPriority(${state.tasks.findIndex(task => task.id === t.id)}, this.value)" class="text-[9px] px-2 py-1 rounded-md border bg-white">
-              ${taskPriorities.map(p => `<option value="${p}" ${t.priority === p ? 'selected' : ''}>${p}</option>`).join('')}
-            </select>
-            <button onclick="event.stopPropagation(); deleteTask(${state.tasks.findIndex(task => task.id === t.id)})" class="text-slate-300 hover:text-red-500">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+
+          <td class="py-4 text-center align-middle">
+            <button onclick="event.stopPropagation(); cycleTaskStatus(${idx})" 
+                    class="text-[9px] font-bold px-3 py-1.5 rounded-md border min-w-[100px] inline-block ${statusColor}">
+              ${t.status.toUpperCase()}
             </button>
+          </td>
+
+          <td class="py-4 text-right pr-2">
+            <div class="flex items-center justify-end gap-3 h-full">
+              
+              <select onchange="event.stopPropagation(); manualAssign(${idx}, this.value)" 
+                      class="text-[10px] h-8 px-2 rounded-md border bg-white focus:ring-1 focus:ring-indigo-300 outline-none min-w-[120px]">
+                <option value="">Atribuir...</option>
+                ${state.users.filter(u => u.active).map(u => `
+                  <option value="${u.email}" ${t.assigned?.includes(u.email) ? 'selected' : ''}>${u.email.split('@')[0]}</option>
+                `).join('')}
+              </select>
+
+              <select onchange="event.stopPropagation(); setTaskPriority(${idx}, this.value)" 
+                      class="text-[10px] h-8 px-2 rounded-md border bg-white focus:ring-1 focus:ring-indigo-300 outline-none min-w-[90px]">
+                ${taskPriorities.map(p => `<option value="${p}" ${t.priority === p ? 'selected' : ''}>${p}</option>`).join('')}
+              </select>
+
+              <button onclick="event.stopPropagation(); deleteTask(${idx})" 
+                      class="text-slate-300 hover:text-red-500 transition-colors p-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+              </button>
+            </div>
           </td>
         </tr>`;
     }).join('');
