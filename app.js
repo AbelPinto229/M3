@@ -2,12 +2,15 @@
 const state = {
   users: [{ email: 'admin@sistema.com', role: 'ADMIN', active: true }],
   tasks: [],
-  logs: []
+  logs: [],
+  comments: [] // array para comentários
 };
 
 const taskStatusCycle = ["Pendente", "Em Progresso", "Concluído"];
 const taskPriorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 let pendingDeleteAction = null;
+let commentIdCounter = 1; // contador de comentários
+let activeTaskModalId = null; // tarefa atualmente no modal
 
 // ===== PRIORITY SERVICE =====
 class PriorityService {
@@ -129,55 +132,116 @@ const render = () => {
       </tr>`).join('');
 
   // Render Tasks
-document.getElementById('taskList').innerHTML = state.tasks
-  .filter(t => t.title.toLowerCase().includes(taskSearchTerm))
-  .map((t) => {
-    const statusColor = t.status === "Concluído" ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
-                        : (t.status === "Em Progresso" ? "bg-amber-50 text-amber-600 border-amber-100" 
-                        : "bg-blue-50 text-blue-600 border-blue-100");
-    const assignedText = t.assigned && t.assigned.length ? ` - Atribuído a: ${t.assigned.join(', ')}` : '';
+  document.getElementById('taskList').innerHTML = state.tasks
+    .filter(t => t.title.toLowerCase().includes(taskSearchTerm))
+    .map((t) => {
+      const statusColor = t.status === "Concluído" ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
+                          : (t.status === "Em Progresso" ? "bg-amber-50 text-amber-600 border-amber-100" 
+                          : "bg-blue-50 text-blue-600 border-blue-100");
+      const assignedText = t.assigned && t.assigned.length ? ` - Atribuído a: ${t.assigned.join(', ')}` : '';
 
-    let priorityColorClass = "text-slate-400"; // default LOW
-    switch(t.priority) {
-      case "LOW": priorityColorClass = "text-slate-400"; break;
-      case "MEDIUM": priorityColorClass = "text-blue-500 font-medium"; break;
-      case "HIGH": priorityColorClass = "text-red-500 font-bold"; break;
-      case "CRITICAL": priorityColorClass = "text-orange-500 font-bold"; break;
-    }
+      let priorityColorClass = "text-slate-400"; // default LOW
+      switch(t.priority) {
+        case "LOW": priorityColorClass = "text-slate-400"; break;
+        case "MEDIUM": priorityColorClass = "text-blue-500 font-medium"; break;
+        case "HIGH": priorityColorClass = "text-red-500 font-bold"; break;
+        case "CRITICAL": priorityColorClass = "text-orange-500 font-bold"; break;
+      }
 
-    return `
-      <tr class="group hover:bg-slate-50 transition-colors">
-        <td class="py-3 font-medium text-slate-700 ${t.status === 'Concluído' ? 'line-through opacity-40' : ''}">
-          ${t.title} 
-          <span class="text-[8px] ${priorityColorClass} block uppercase tracking-tighter">
-            ${t.type} | ${t.priority || 'LOW'}${assignedText}
-          </span>
-        </td>
-        <td class="py-3 text-center">
-          <button onclick="cycleTaskStatus(${state.tasks.indexOf(t)})" class="text-[9px] font-bold px-2 py-1 rounded-md border ${statusColor}">${t.status.toUpperCase()}</button>
-        </td>
-        <td class="py-3 text-right flex items-center gap-2 justify-end">
-          <!-- Dropdown para atribuição manual -->
-          <select onchange="manualAssign(${state.tasks.indexOf(t)}, this.value)" class="text-[9px] px-2 py-1 rounded-md border bg-white">
-            <option value="">Atribuir a...</option>
-            ${state.users.filter(u => u.active).map(u => `<option value="${u.email}" ${t.assigned && t.assigned.includes(u.email) ? 'selected' : ''}>${u.email}</option>`).join('')}
-          </select>
-          <!-- Dropdown para prioridade -->
-          <select onchange="setTaskPriority(${state.tasks.indexOf(t)}, this.value)" class="text-[9px] px-2 py-1 rounded-md border bg-white">
-            ${taskPriorities.map(p => `<option value="${p}" ${t.priority === p ? 'selected' : ''}>${p}</option>`).join('')}
-          </select>
-          <!-- Botão vermelho para remover atribuição -->
-          <button onclick="removeAssignment(${state.tasks.indexOf(t)})" class="text-white bg-red-600 px-2 py-1 rounded hover:bg-red-700">x</button>
-          <!-- Botão icone de lixo para deletar task -->
-          <button onclick="deleteTask(${state.tasks.indexOf(t)})" class="text-slate-300 hover:text-red-500">
-            <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-            </svg>
-          </button>
-        </td>
-      </tr>`;
-  }).join('');
+      // Comentários resumidos
+      const commentsHtml = state.comments
+        .filter(c => c.taskId === t.id)
+        .map(c => `<div class="text-[10px] text-slate-600 mt-1">${c.userEmail}: ${c.message}</div>`).join('');
 
+      return `
+        <tr class="group hover:bg-slate-50 transition-colors cursor-pointer" onclick="openTaskModal(${t.id})">
+          <td class="py-3 font-medium text-slate-700 ${t.status === 'Concluído' ? 'line-through opacity-40' : ''}">
+            ${t.title} 
+            <span class="text-[8px] ${priorityColorClass} block uppercase tracking-tighter">
+              ${t.type} | ${t.priority || 'LOW'}${assignedText}
+            </span>
+            <div class="mt-1">${commentsHtml}</div>
+          </td>
+          <td class="py-3 text-center">
+            <button onclick="event.stopPropagation(); cycleTaskStatus(${state.tasks.indexOf(t)})" class="text-[9px] font-bold px-2 py-1 rounded-md border ${statusColor}">${t.status.toUpperCase()}</button>
+          </td>
+          <td class="py-3 text-right flex items-center gap-2 justify-end">
+            <select onchange="event.stopPropagation(); manualAssign(${state.tasks.indexOf(t)}, this.value)" class="text-[9px] px-2 py-1 rounded-md border bg-white">
+              <option value="">Atribuir a...</option>
+              ${state.users.filter(u => u.active).map(u => `<option value="${u.email}" ${t.assigned && t.assigned.includes(u.email) ? 'selected' : ''}>${u.email}</option>`).join('')}
+            </select>
+            <select onchange="event.stopPropagation(); setTaskPriority(${state.tasks.indexOf(t)}, this.value)" class="text-[9px] px-2 py-1 rounded-md border bg-white">
+              ${taskPriorities.map(p => `<option value="${p}" ${t.priority === p ? 'selected' : ''}>${p}</option>`).join('')}
+            </select>
+            <button onclick="event.stopPropagation(); removeAssignment(${state.tasks.indexOf(t)})" class="text-white bg-red-600 px-2 py-1 rounded hover:bg-red-700">x</button>
+            <button onclick="event.stopPropagation(); deleteTask(${state.tasks.indexOf(t)})" class="text-slate-300 hover:text-red-500">
+              <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </button>
+          </td>
+        </tr>`;
+    }).join('');
+};
+
+// ===== MODAL DE COMENTÁRIOS =====
+window.openTaskModal = (taskId) => {
+  activeTaskModalId = taskId;
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task) return;
+
+  const modalHtml = `
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border border-slate-100">
+      <h3 class="font-bold mb-4">${task.title}</h3>
+      <div id="taskComments" class="max-h-60 overflow-y-auto mb-4">
+        ${state.comments.filter(c => c.taskId === taskId).map(c => `
+          <div class="flex justify-between items-center text-[10px] text-slate-600 mb-1">
+            <span>${c.userEmail}: ${c.message}</span>
+            <button onclick="deleteComment(${c.id}); renderTaskModal()" class="text-red-500 text-[9px] px-1">x</button>
+          </div>`).join('')}
+      </div>
+      <input type="text" id="newCommentInput" class="w-full px-2 py-1 border rounded text-[10px]" placeholder="Adicionar comentário..." onkeypress="if(event.key==='Enter'){ addCommentModal(); }">
+      <div class="flex justify-end mt-4">
+        <button onclick="closeTaskModal()" class="px-4 py-2 bg-gray-200 rounded mr-2 text-xs">Fechar</button>
+        <button onclick="addCommentModal()" class="px-4 py-2 bg-indigo-600 text-white rounded text-xs">Adicionar</button>
+      </div>
+    </div>
+  `;
+
+  const container = document.createElement('div');
+  container.id = 'taskModalContainer';
+  container.className = 'fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50';
+  container.innerHTML = modalHtml;
+  document.body.appendChild(container);
+};
+
+window.closeTaskModal = () => {
+  const modal = document.getElementById('taskModalContainer');
+  if (modal) modal.remove();
+  activeTaskModalId = null;
+};
+
+window.addCommentModal = () => {
+  const input = document.getElementById('newCommentInput');
+  if (!input || !input.value.trim()) return;
+  const taskId = activeTaskModalId;
+  state.comments.push({ id: commentIdCounter++, taskId, userEmail: 'admin@sistema.com', message: input.value });
+  addLog(`Comentário adicionado a "${state.tasks.find(t => t.id===taskId).title}"`);
+  input.value = '';
+  renderTaskModal();
+};
+
+window.renderTaskModal = () => {
+  if (!activeTaskModalId) return;
+  const task = state.tasks.find(t => t.id === activeTaskModalId);
+  const commentsContainer = document.getElementById('taskComments');
+  if (commentsContainer) {
+    commentsContainer.innerHTML = state.comments.filter(c => c.taskId === activeTaskModalId)
+      .map(c => `<div class="flex justify-between items-center text-[10px] text-slate-600 mb-1">
+                   <span>${c.userEmail}: ${c.message}</span>
+                   <button onclick="deleteComment(${c.id}); renderTaskModal()" class="text-red-500 text-[9px] px-1">x</button>
+                 </div>`).join('');
+  }
 };
 
 // ===== SAVE & RENDER =====
@@ -209,7 +273,9 @@ window.deleteUser = (i) => openModal(`Eliminar ${state.users[i].email}?`, () => 
 });
 window.deleteTask = (i) => openModal(`Remover ${state.tasks[i].title}?`, () => { 
   addLog(`Removida: ${state.tasks[i].title}`); 
+  const taskId = state.tasks[i].id;
   state.tasks.splice(i, 1); 
+  state.comments = state.comments.filter(c => c.taskId !== taskId);
   addNotification("Tarefa removida", "info"); 
   saveAndRender(); 
 });
@@ -224,7 +290,6 @@ window.manualAssign = (taskIndex, userEmail) => {
   }
   saveAndRender();
 };
-
 window.removeAssignment = (taskIndex) => {
   const task = state.tasks[taskIndex];
   if (!task.assigned) return;
@@ -238,6 +303,23 @@ window.setTaskPriority = (taskIndex, priority) => {
   const task = state.tasks[taskIndex];
   priorityService.setPriority(task, priority);
   addLog(`Tarefa: "${task.title}" prioridade definida como ${priority}`);
+  saveAndRender();
+};
+
+// ===== COMENTÁRIOS =====
+window.addComment = (taskId, message, event) => {
+  event.preventDefault();
+  if (!message.trim()) return;
+  const userEmail = 'admin@sistema.com'; // fixo por agora
+  state.comments.push({ id: commentIdCounter++, taskId, userEmail, message });
+  addLog(`Comentário adicionado a "${state.tasks.find(t => t.id===taskId).title}"`);
+  saveAndRender();
+};
+
+window.deleteComment = (commentId) => {
+  state.comments = state.comments.filter(c => c.id !== commentId);
+  addLog(`Comentário removido`);
+  renderTaskModal(); // atualiza modal se estiver aberto
   saveAndRender();
 };
 
@@ -257,8 +339,17 @@ document.getElementById('taskForm').onsubmit = (e) => {
   e.preventDefault();
   const title = document.getElementById('taskTitle').value;
   const type = document.getElementById('taskType').value; // 'bug', 'feature', 'task'
+  const deadline = document.getElementById('taskDeadline').value || null;
 
-  const newTask = { title, type, status: "Pendente", assigned: [], priority: "LOW" };
+  const newTask = { 
+    id: state.tasks.length+1, 
+    title, 
+    type, 
+    status: "Pendente", 
+    assigned: [], 
+    priority: "LOW",
+    deadline 
+  };
   applyAutomation(newTask); // aplica automação se for bug
 
   state.tasks.push(newTask);
