@@ -88,6 +88,12 @@ const applyAutomation = (task) => {
   }
 };
 
+// ===== DEADLINE HELPERS =====
+const isExpired = (task) => {
+  if (!task.deadline) return false;
+  return new Date(task.deadline).getTime() < Date.now();
+};
+
 // ===== RENDER USERS E TASKS =====
 const render = () => {
   const userSearchTerm = document.getElementById('searchUser').value.toLowerCase();
@@ -120,17 +126,21 @@ const render = () => {
       </tr>`).join('');
 
   // Render Tasks
-document.getElementById('taskList').innerHTML = state.tasks
-  .filter(t => t.title.toLowerCase().includes(taskSearchTerm))
-  .map((t) => {
-    const statusColor = t.status === "Concluído" ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
-                        : (t.status === "Em Progresso" ? "bg-amber-50 text-amber-600 border-amber-100" 
-                        : "bg-blue-50 text-blue-600 border-blue-100");
-    const assignedText = t.assigned && t.assigned.length ? ` - Atribuído a: ${t.assigned.join(', ')}` : '';
-    return `
+  document.getElementById('taskList').innerHTML = state.tasks
+    .filter(t => t.title.toLowerCase().includes(taskSearchTerm))
+    .map((t) => {
+      const statusColor = t.status === "Concluído" ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
+                          : (t.status === "Em Progresso" ? "bg-amber-50 text-amber-600 border-amber-100" 
+                          : "bg-blue-50 text-blue-600 border-blue-100");
+      const assignedText = t.assigned && t.assigned.length ? ` - Atribuído a: ${t.assigned.join(', ')}` : '';
+      const expiredClass = isExpired(t) ? 'line-through text-red-600 opacity-50' : '';
+      const deadlineText = t.deadline ? `<span class="text-[8px] font-mono text-slate-400 block">Deadline: ${new Date(t.deadline).toLocaleDateString()}</span>` : '';
+
+      return `
       <tr class="group hover:bg-slate-50 transition-colors">
-        <td class="py-3 font-medium text-slate-700 ${t.status === 'Concluído' ? 'line-through opacity-40' : ''}">
+        <td class="py-3 font-medium text-slate-700 ${t.status === 'Concluído' ? 'line-through opacity-40' : ''} ${expiredClass}">
           ${t.title} <span class="text-[8px] font-bold text-slate-400 block uppercase tracking-tighter">${t.type}${assignedText}</span>
+          ${deadlineText}
         </td>
         <td class="py-3 text-center">
           <button onclick="cycleTaskStatus(${state.tasks.indexOf(t)})" class="text-[9px] font-bold px-2 py-1 rounded-md border ${statusColor}">${t.status.toUpperCase()}</button>
@@ -151,8 +161,7 @@ document.getElementById('taskList').innerHTML = state.tasks
           </button>
         </td>
       </tr>`;
-  }).join('');
-
+    }).join('');
 };
 
 // ===== SAVE & RENDER =====
@@ -224,10 +233,12 @@ document.getElementById('taskForm').onsubmit = (e) => {
   e.preventDefault();
   const title = document.getElementById('taskTitle').value;
   const type = document.getElementById('taskType').value; // 'bug', 'feature', 'task'
+  const deadlineInput = document.getElementById('taskDeadline')?.value;
 
   const newTask = { title, type, status: "Pendente", assigned: [] };
-  applyAutomation(newTask); // aplica automação se for bug
+  if (deadlineInput) newTask.deadline = new Date(deadlineInput);
 
+  applyAutomation(newTask); // aplica automação se for bug
   state.tasks.push(newTask);
 
   addNotification("Tarefa adicionada");
