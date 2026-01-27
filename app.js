@@ -6,7 +6,16 @@ const state = {
 };
 
 const taskStatusCycle = ["Pendente", "Em Progresso", "Concluído"];
+const taskPriorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 let pendingDeleteAction = null;
+
+// ===== PRIORITY SERVICE =====
+class PriorityService {
+  setPriority(task, priority) { task.priority = priority; }
+  getPriority(task) { return task.priority || "LOW"; }
+  isHighPriority(task) { return task.priority === "HIGH" || task.priority === "CRITICAL"; }
+}
+const priorityService = new PriorityService();
 
 // ===== FUNÇÃO DE MODAL =====
 const openModal = (message, confirmCallback) => {
@@ -88,12 +97,6 @@ const applyAutomation = (task) => {
   }
 };
 
-// ===== DEADLINE HELPERS =====
-const isExpired = (task) => {
-  if (!task.deadline) return false;
-  return new Date(task.deadline).getTime() < Date.now();
-};
-
 // ===== RENDER USERS E TASKS =====
 const render = () => {
   const userSearchTerm = document.getElementById('searchUser').value.toLowerCase();
@@ -133,34 +136,35 @@ const render = () => {
                           : (t.status === "Em Progresso" ? "bg-amber-50 text-amber-600 border-amber-100" 
                           : "bg-blue-50 text-blue-600 border-blue-100");
       const assignedText = t.assigned && t.assigned.length ? ` - Atribuído a: ${t.assigned.join(', ')}` : '';
-      const expiredClass = isExpired(t) ? 'line-through text-red-600 opacity-50' : '';
-      const deadlineText = t.deadline ? `<span class="text-[8px] font-mono text-slate-400 block">Deadline: ${new Date(t.deadline).toLocaleDateString()}</span>` : '';
-
+      const priorityColor = priorityService.isHighPriority(t) ? "text-red-500 font-bold" : "text-slate-400";
       return `
-      <tr class="group hover:bg-slate-50 transition-colors">
-        <td class="py-3 font-medium text-slate-700 ${t.status === 'Concluído' ? 'line-through opacity-40' : ''} ${expiredClass}">
-          ${t.title} <span class="text-[8px] font-bold text-slate-400 block uppercase tracking-tighter">${t.type}${assignedText}</span>
-          ${deadlineText}
-        </td>
-        <td class="py-3 text-center">
-          <button onclick="cycleTaskStatus(${state.tasks.indexOf(t)})" class="text-[9px] font-bold px-2 py-1 rounded-md border ${statusColor}">${t.status.toUpperCase()}</button>
-        </td>
-        <td class="py-3 text-right flex items-center gap-2 justify-end">
-          <!-- Dropdown para atribuição manual -->
-          <select onchange="manualAssign(${state.tasks.indexOf(t)}, this.value)" class="text-[9px] px-2 py-1 rounded-md border bg-white">
-            <option value="">Atribuir a...</option>
-            ${state.users.filter(u => u.active).map(u => `<option value="${u.email}" ${t.assigned && t.assigned.includes(u.email) ? 'selected' : ''}>${u.email}</option>`).join('')}
-          </select>
-          <!-- Botão vermelho para remover atribuição -->
-          <button onclick="removeAssignment(${state.tasks.indexOf(t)})" class="text-white bg-red-600 px-2 py-1 rounded hover:bg-red-700">x</button>
-          <!-- Botão icone de lixo para deletar task -->
-          <button onclick="deleteTask(${state.tasks.indexOf(t)})" class="text-slate-300 hover:text-red-500">
-            <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-            </svg>
-          </button>
-        </td>
-      </tr>`;
+        <tr class="group hover:bg-slate-50 transition-colors">
+          <td class="py-3 font-medium text-slate-700 ${t.status === 'Concluído' ? 'line-through opacity-40' : ''}">
+            ${t.title} <span class="text-[8px] ${priorityColor} block uppercase tracking-tighter">${t.type} | ${t.priority || 'LOW'}${assignedText}</span>
+          </td>
+          <td class="py-3 text-center">
+            <button onclick="cycleTaskStatus(${state.tasks.indexOf(t)})" class="text-[9px] font-bold px-2 py-1 rounded-md border ${statusColor}">${t.status.toUpperCase()}</button>
+          </td>
+          <td class="py-3 text-right flex items-center gap-2 justify-end">
+            <!-- Dropdown para atribuição manual -->
+            <select onchange="manualAssign(${state.tasks.indexOf(t)}, this.value)" class="text-[9px] px-2 py-1 rounded-md border bg-white">
+              <option value="">Atribuir a...</option>
+              ${state.users.filter(u => u.active).map(u => `<option value="${u.email}" ${t.assigned && t.assigned.includes(u.email) ? 'selected' : ''}>${u.email}</option>`).join('')}
+            </select>
+            <!-- Dropdown para prioridade -->
+            <select onchange="setTaskPriority(${state.tasks.indexOf(t)}, this.value)" class="text-[9px] px-2 py-1 rounded-md border bg-white">
+              ${taskPriorities.map(p => `<option value="${p}" ${t.priority === p ? 'selected' : ''}>${p}</option>`).join('')}
+            </select>
+            <!-- Botão vermelho para remover atribuição -->
+            <button onclick="removeAssignment(${state.tasks.indexOf(t)})" class="text-white bg-red-600 px-2 py-1 rounded hover:bg-red-700">x</button>
+            <!-- Botão icone de lixo para deletar task -->
+            <button onclick="deleteTask(${state.tasks.indexOf(t)})" class="text-slate-300 hover:text-red-500">
+              <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </button>
+          </td>
+        </tr>`;
     }).join('');
 };
 
@@ -217,6 +221,14 @@ window.removeAssignment = (taskIndex) => {
   saveAndRender();
 };
 
+// ===== PRIORITY ACTION =====
+window.setTaskPriority = (taskIndex, priority) => {
+  const task = state.tasks[taskIndex];
+  priorityService.setPriority(task, priority);
+  addLog(`Tarefa: "${task.title}" prioridade definida como ${priority}`);
+  saveAndRender();
+};
+
 // ===== FORMS =====
 document.getElementById('userForm').onsubmit = (e) => {
   e.preventDefault();
@@ -233,12 +245,10 @@ document.getElementById('taskForm').onsubmit = (e) => {
   e.preventDefault();
   const title = document.getElementById('taskTitle').value;
   const type = document.getElementById('taskType').value; // 'bug', 'feature', 'task'
-  const deadlineInput = document.getElementById('taskDeadline')?.value;
 
-  const newTask = { title, type, status: "Pendente", assigned: [] };
-  if (deadlineInput) newTask.deadline = new Date(deadlineInput);
-
+  const newTask = { title, type, status: "Pendente", assigned: [], priority: "LOW" };
   applyAutomation(newTask); // aplica automação se for bug
+
   state.tasks.push(newTask);
 
   addNotification("Tarefa adicionada");
