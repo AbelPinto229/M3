@@ -131,57 +131,56 @@ const render = () => {
         </td>
       </tr>`).join('');
 
-  // Render Tasks
-  document.getElementById('taskList').innerHTML = state.tasks
-    .filter(t => t.title.toLowerCase().includes(taskSearchTerm))
-    .map((t) => {
-      const statusColor = t.status === "Concluído" ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
-                          : (t.status === "Em Progresso" ? "bg-amber-50 text-amber-600 border-amber-100" 
-                          : "bg-blue-50 text-blue-600 border-blue-100");
-      const assignedText = t.assigned && t.assigned.length ? ` - Atribuído a: ${t.assigned.join(', ')}` : '';
+ // Render Tasks
+document.getElementById('taskList').innerHTML = state.tasks
+  .filter(t => t.title.toLowerCase().includes(taskSearchTerm))
+  .map((t) => {
+    const statusColor = t.status === "Concluído" ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
+                        : (t.status === "Em Progresso" ? "bg-amber-50 text-amber-600 border-amber-100" 
+                        : "bg-blue-50 text-blue-600 border-blue-100");
+    const assignedText = t.assigned && t.assigned.length ? ` - Atribuído a: ${t.assigned.join(', ')}` : '';
 
-      let priorityColorClass = "text-slate-400"; // default LOW
-      switch(t.priority) {
-        case "LOW": priorityColorClass = "text-slate-400"; break;
-        case "MEDIUM": priorityColorClass = "text-blue-500 font-medium"; break;
-        case "HIGH": priorityColorClass = "text-red-500 font-bold"; break;
-        case "CRITICAL": priorityColorClass = "text-orange-500 font-bold"; break;
-      }
+    let priorityColorClass = "text-slate-400"; // default LOW
+    switch(t.priority) {
+      case "LOW": priorityColorClass = "text-slate-400"; break;
+      case "MEDIUM": priorityColorClass = "text-blue-500 font-medium"; break;
+      case "HIGH": priorityColorClass = "text-red-500 font-bold"; break;
+      case "CRITICAL": priorityColorClass = "text-orange-500 font-bold"; break;
+    }
 
-      // Comentários resumidos
-      const commentsHtml = state.comments
-        .filter(c => c.taskId === t.id)
-        .map(c => `<div class="text-[10px] text-slate-600 mt-1">${c.userEmail}: ${c.message}</div>`).join('');
+    return `
+      <tr class="group hover:bg-slate-50 transition-colors">
+        <!-- CLICÁVEL APENAS NO TD PRINCIPAL -->
+        <td class="py-3 font-medium text-slate-700 cursor-pointer ${t.status === 'Concluído' ? 'line-through opacity-40' : ''}" 
+            onclick="openTaskModal(${t.id})">
+          ${t.title} 
+          <span class="text-[8px] ${priorityColorClass} block uppercase tracking-tighter">
+            ${t.type} | ${t.priority || 'LOW'}${assignedText}
+          </span>
+        </td>
 
-      return `
-        <tr class="group hover:bg-slate-50 transition-colors cursor-pointer" onclick="openTaskModal(${t.id})">
-          <td class="py-3 font-medium text-slate-700 ${t.status === 'Concluído' ? 'line-through opacity-40' : ''}">
-            ${t.title} 
-            <span class="text-[8px] ${priorityColorClass} block uppercase tracking-tighter">
-              ${t.type} | ${t.priority || 'LOW'}${assignedText}
-            </span>
-            <div class="mt-1">${commentsHtml}</div>
-          </td>
-          <td class="py-3 text-center">
-            <button onclick="event.stopPropagation(); cycleTaskStatus(${state.tasks.indexOf(t)})" class="text-[9px] font-bold px-2 py-1 rounded-md border ${statusColor}">${t.status.toUpperCase()}</button>
-          </td>
-          <td class="py-3 text-right flex items-center gap-2 justify-end">
-            <select onchange="event.stopPropagation(); manualAssign(${state.tasks.indexOf(t)}, this.value)" class="text-[9px] px-2 py-1 rounded-md border bg-white">
-              <option value="">Atribuir a...</option>
-              ${state.users.filter(u => u.active).map(u => `<option value="${u.email}" ${t.assigned && t.assigned.includes(u.email) ? 'selected' : ''}>${u.email}</option>`).join('')}
-            </select>
-            <select onchange="event.stopPropagation(); setTaskPriority(${state.tasks.indexOf(t)}, this.value)" class="text-[9px] px-2 py-1 rounded-md border bg-white">
-              ${taskPriorities.map(p => `<option value="${p}" ${t.priority === p ? 'selected' : ''}>${p}</option>`).join('')}
-            </select>
-            <button onclick="event.stopPropagation(); removeAssignment(${state.tasks.indexOf(t)})" class="text-white bg-red-600 px-2 py-1 rounded hover:bg-red-700">x</button>
-            <button onclick="event.stopPropagation(); deleteTask(${state.tasks.indexOf(t)})" class="text-slate-300 hover:text-red-500">
-              <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-              </svg>
-            </button>
-          </td>
-        </tr>`;
-    }).join('');
+        <td class="py-3 text-center">
+          <button onclick="event.stopPropagation(); cycleTaskStatus(${state.tasks.indexOf(t)})" class="text-[9px] font-bold px-2 py-1 rounded-md border ${statusColor}">${t.status.toUpperCase()}</button>
+        </td>
+
+        <td class="py-3 text-right flex items-center gap-2 justify-end">
+          <select onchange="event.stopPropagation(); manualAssign(${state.tasks.indexOf(t)}, this.value)" class="text-[9px] px-2 py-1 rounded-md border bg-white">
+            <option value="">Atribuir a...</option>
+            ${state.users.filter(u => u.active).map(u => `<option value="${u.email}" ${t.assigned && t.assigned.includes(u.email) ? 'selected' : ''}>${u.email}</option>`).join('')}
+          </select>
+          <select onchange="event.stopPropagation(); setTaskPriority(${state.tasks.indexOf(t)}, this.value)" class="text-[9px] px-2 py-1 rounded-md border bg-white">
+            ${taskPriorities.map(p => `<option value="${p}" ${t.priority === p ? 'selected' : ''}>${p}</option>`).join('')}
+          </select>
+          <button onclick="event.stopPropagation(); removeAssignment(${state.tasks.indexOf(t)})" class="text-white bg-red-600 px-2 py-1 rounded hover:bg-red-700">x</button>
+          <button onclick="event.stopPropagation(); deleteTask(${state.tasks.indexOf(t)})" class="text-slate-300 hover:text-red-500">
+            <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+          </button>
+        </td>
+      </tr>`;
+  }).join('');
+
 };
 
 // ===== MODAL DE COMENTÁRIOS =====
