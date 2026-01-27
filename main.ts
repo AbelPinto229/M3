@@ -1,5 +1,5 @@
 import { User } from './src/models/Users.js';
-import { Task } from './src/models/ask.js';
+import { Task } from './src/models/Task.js';
 
 import { CommentService } from './src/services/CommentService.js';
 import { AttachmentService } from './src/services/AttachmentService.js';
