@@ -2,7 +2,8 @@
 const state = {
   users: [{ email: 'admin@sistema.com', role: 'ADMIN', active: true }],
   tasks: [],
-  logs: []
+  logs: [],
+  assignments: [] // { taskIndex, userIndex }
 };
 
 const taskStatusCycle = ["Pendente", "Em Progresso", "Concluído"];
@@ -14,19 +15,14 @@ const openModal = (message, confirmCallback) => {
   document.getElementById('confirmModal').classList.remove('hidden');
   pendingDeleteAction = confirmCallback;
 };
-
 window.closeModal = () => document.getElementById('confirmModal').classList.add('hidden');
+document.getElementById('confirmBtn').onclick = () => { if (pendingDeleteAction) pendingDeleteAction(); closeModal(); };
 
-document.getElementById('confirmBtn').onclick = () => {
-  if (pendingDeleteAction) pendingDeleteAction();
-  closeModal();
-};
-
-// ===== DASHBOARD STATS =====
+// ===== DASHBOARD =====
 const updateDashboard = () => {
   const totalT = state.tasks.length;
   const completedT = state.tasks.filter(t => t.status === "Concluído").length;
-  const pendingT = state.tasks.filter(t => t.status !== "Concluído").length;
+  const pendingT = totalT - completedT;
   const rateT = totalT === 0 ? 0 : Math.round((completedT / totalT) * 100);
 
   const totalU = state.users.length;
@@ -52,9 +48,9 @@ const addLog = (message) => {
   if (logContainer) {
     logContainer.innerHTML = state.logs.slice(0, 20).map(log => `
       <div class="relative pl-2">
-        <div class="absolute -left-[23px] top-1 w-3 h-3 bg-white border-2 border-slate-300 rounded-full z-10"></div>
-        <p class="text-[10px] font-bold text-indigo-600 font-mono">${log.time}</p>
-        <p class="text-[11px] text-slate-600 font-medium">${log.msg}</p>
+          <div class="absolute -left-[23px] top-1 w-3 h-3 bg-white border-2 border-slate-300 rounded-full z-10"></div>
+          <p class="text-[10px] font-bold text-indigo-600 font-mono">${log.time}</p>
+          <p class="text-[11px] text-slate-600 font-medium">${log.msg}</p>
       </div>`).join('');
   }
 };
@@ -89,82 +85,108 @@ const render = () => {
     'VIEWER': 'text-slate-500 bg-slate-50 border-slate-100'
   };
 
-  // Render users
+  // === USERS ===
   document.getElementById('userList').innerHTML = state.users
     .filter(u => u.email.toLowerCase().includes(userSearchTerm))
-    .map(u => `
+    .map((u, i) => `
       <tr class="group hover:bg-slate-50 transition-colors">
         <td class="py-3 font-medium text-slate-700">
           ${u.email} 
           <span class="text-[8px] px-1.5 py-0.5 rounded border font-black inline-block mt-1 ${roleColors[u.role] || 'bg-slate-50'}">${u.role}</span>
         </td>
         <td class="py-3 text-center">
-          <button onclick="toggleUserStatus(${state.users.indexOf(u)})" class="text-[9px] font-bold px-2 py-1 rounded-full border ${u.active ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-100 text-slate-400 border-slate-200'}">${u.active ? 'ATIVO' : 'INATIVO'}</button>
+          <button onclick="toggleUserStatus(${i})" class="text-[9px] font-bold px-2 py-1 rounded-full border ${u.active ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-100 text-slate-400 border-slate-200'}">${u.active ? 'ATIVO' : 'INATIVO'}</button>
         </td>
         <td class="py-3 text-right">
-          <button onclick="deleteUser(${state.users.indexOf(u)})" class="text-slate-300 hover:text-red-500 transition-colors">
+          <button onclick="deleteUser(${i})" class="text-slate-300 hover:text-red-500 transition-colors">
             <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
             </svg>
+          </button>
         </td>
       </tr>`).join('');
 
-  // Render tasks
+  // === TASKS ===
   document.getElementById('taskList').innerHTML = state.tasks
     .filter(t => t.title.toLowerCase().includes(taskSearchTerm))
-    .map(t => {
-      const statusColor = t.status === "Concluído" ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
-                          t.status === "Em Progresso" ? "bg-amber-50 text-amber-600 border-amber-100" :
-                          "bg-blue-50 text-blue-600 border-blue-100";
+    .map((t, ti) => {
+      const statusColor = t.status === "Concluído" ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
+                        : (t.status === "Em Progresso" ? "bg-amber-50 text-amber-600 border-amber-100" 
+                        : "bg-blue-50 text-blue-600 border-blue-100");
+
+      // Assigned users for this task
+      const assignedUsers = state.assignments
+        .filter(a => a.taskIndex === ti)
+        .map(a => state.users[a.userIndex]?.email)
+        .filter(Boolean)
+        .join(', ');
+
       return `
       <tr class="group hover:bg-slate-50 transition-colors">
-        <td class="py-3 font-medium text-slate-700 ${t.status === 'Concluído' ? 'line-through opacity-40' : ''}">${t.title}<span class="text-[8px] font-bold text-slate-400 block uppercase tracking-tighter">${t.type}</span></td>
+        <td class="py-3 font-medium text-slate-700 ${t.status === 'Concluído' ? 'line-through opacity-40' : ''}">
+          ${t.title}<span class="text-[8px] font-bold text-slate-400 block uppercase tracking-tighter">${t.type}</span>
+          ${assignedUsers ? `<p class="text-[9px] text-slate-500 mt-1">Atribuído a: ${assignedUsers}</p>` : ''}
+          <div class="mt-1 flex gap-1 items-center">
+            <select id="assignUser-${ti}" class="text-[10px] p-1 border rounded">
+              <option value="">Selecionar usuário</option>
+              ${state.users.filter(u => u.active).map((u, ui) => `<option value="${ui}">${u.email}</option>`).join('')}
+            </select>
+            <button onclick="assignUserToTask(${ti}, document.getElementById('assignUser-${ti}').value)" class="text-[9px] font-bold px-2 py-1 bg-indigo-600 text-white rounded">+</button>
+          </div>
+        </td>
         <td class="py-3 text-center">
-          <button onclick="cycleTaskStatus(${state.tasks.indexOf(t)})" class="text-[9px] font-bold px-2 py-1 rounded-md border ${statusColor}">${t.status.toUpperCase()}</button>
+          <button onclick="cycleTaskStatus(${ti})" class="text-[9px] font-bold px-2 py-1 rounded-md border ${statusColor}">${t.status.toUpperCase()}</button>
         </td>
         <td class="py-3 text-right">
-          <button onclick="deleteTask(${state.tasks.indexOf(t)})" class="text-slate-300 hover:text-red-500 transition-colors">
+          <button onclick="deleteTask(${ti})" class="text-slate-300 hover:text-red-500 transition-colors">
             <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
             </svg>
+          </button>
         </td>
       </tr>`;
     }).join('');
 };
 
-// ===== FUNÇÕES DE AÇÃO =====
-const saveAndRender = () => {
-  render();
-  updateDashboard();
-};
+// ===== SAVE & RENDER =====
+const saveAndRender = () => { render(); updateDashboard(); };
 
-window.toggleUserStatus = (i) => {
-  state.users[i].active = !state.users[i].active;
+// ===== FILTROS =====
+document.getElementById('searchUser').addEventListener('input', render);
+document.getElementById('searchTask').addEventListener('input', render);
+
+// ===== AÇÕES =====
+window.toggleUserStatus = (i) => { 
+  state.users[i].active = !state.users[i].active; 
   addLog(`Acesso: ${state.users[i].email} (${state.users[i].active ? 'ON' : 'OFF'})`);
-  saveAndRender();
+  saveAndRender(); 
 };
 
-window.cycleTaskStatus = (i) => {
-  state.tasks[i].status = taskStatusCycle[(taskStatusCycle.indexOf(state.tasks[i].status) + 1) % taskStatusCycle.length];
+window.cycleTaskStatus = (i) => { 
+  state.tasks[i].status = taskStatusCycle[(taskStatusCycle.indexOf(state.tasks[i].status) + 1) % taskStatusCycle.length]; 
   addLog(`Tarefa: ${state.tasks[i].title} -> ${state.tasks[i].status}`);
-  saveAndRender();
+  saveAndRender(); 
 };
 
-window.deleteUser = (i) => openModal(`Eliminar ${state.users[i].email}?`, () => {
+window.deleteUser = (i) => openModal(`Eliminar ${state.users[i].email}?`, () => { 
   addLog(`Removido: ${state.users[i].email}`);
-  state.users.splice(i, 1);
-  addNotification("Utilizador removido", "warning");
-  saveAndRender();
+  state.users.splice(i, 1); 
+  addNotification("Utilizador removido", "warning"); 
+  // Remove any assignments for this user
+  state.assignments = state.assignments.filter(a => a.userIndex !== i);
+  saveAndRender(); 
 });
 
-window.deleteTask = (i) => openModal(`Remover ${state.tasks[i].title}?`, () => {
+window.deleteTask = (i) => openModal(`Remover ${state.tasks[i].title}?`, () => { 
   addLog(`Removida: ${state.tasks[i].title}`);
-  state.tasks.splice(i, 1);
-  addNotification("Tarefa removida", "info");
-  saveAndRender();
+  state.tasks.splice(i, 1); 
+  addNotification("Tarefa removida", "info"); 
+  // Remove assignments for this task
+  state.assignments = state.assignments.filter(a => a.taskIndex !== i);
+  saveAndRender(); 
 });
 
-// ===== FORMS =====
+// ===== FORMULÁRIOS =====
 document.getElementById('userForm').onsubmit = (e) => {
   e.preventDefault();
   const email = document.getElementById('userEmail').value;
@@ -172,7 +194,7 @@ document.getElementById('userForm').onsubmit = (e) => {
   state.users.push({ email, role: document.getElementById('userRole').value, active: true });
   addNotification("Utilizador criado");
   addLog(`Novo User: ${email}`);
-  saveAndRender();
+  saveAndRender(); 
   e.target.reset();
 };
 
@@ -182,8 +204,20 @@ document.getElementById('taskForm').onsubmit = (e) => {
   state.tasks.push({ title, type: document.getElementById('taskType').value, status: "Pendente" });
   addNotification("Tarefa adicionada");
   addLog(`Nova Tarefa: ${title}`);
-  saveAndRender();
+  saveAndRender(); 
   e.target.reset();
+};
+
+// ===== ASSIGNMENT =====
+window.assignUserToTask = (taskIndex, userIndex) => {
+  if (userIndex === "") return;
+  userIndex = parseInt(userIndex);
+  if (!state.assignments.some(a => a.taskIndex === taskIndex && a.userIndex === userIndex)) {
+    state.assignments.push({ taskIndex, userIndex });
+    addLog(`Tarefa "${state.tasks[taskIndex].title}" atribuída a ${state.users[userIndex].email}`);
+    addNotification("Usuário atribuído", "success");
+    saveAndRender();
+  }
 };
 
 // ===== START =====
