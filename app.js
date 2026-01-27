@@ -1,14 +1,14 @@
 // ===== ESTADO EM MEMÓRIA =====
 const state = {
   users: [{ email: 'admin@sistema.com', role: 'ADMIN', active: true }],
-  tasks: [], // cada task terá { title, type, status, assignedUsers: [] }
+  tasks: [],
   logs: []
 };
 
 const taskStatusCycle = ["Pendente", "Em Progresso", "Concluído"];
 let pendingDeleteAction = null;
 
-// ===== MODAL =====
+// ===== FUNÇÃO DE MODAL =====
 const openModal = (message, confirmCallback) => {
   document.getElementById('modalMessage').innerText = message;
   document.getElementById('confirmModal').classList.remove('hidden');
@@ -17,11 +17,11 @@ const openModal = (message, confirmCallback) => {
 window.closeModal = () => document.getElementById('confirmModal').classList.add('hidden');
 document.getElementById('confirmBtn').onclick = () => { if (pendingDeleteAction) pendingDeleteAction(); closeModal(); };
 
-// ===== DASHBOARD =====
+// ===== DASHBOARD STATS =====
 const updateDashboard = () => {
   const totalT = state.tasks.length;
   const completedT = state.tasks.filter(t => t.status === "Concluído").length;
-  const pendingT = totalT - completedT;
+  const pendingT = state.tasks.filter(t => t.status !== "Concluído").length;
   const rateT = totalT === 0 ? 0 : Math.round((completedT / totalT) * 100);
 
   const totalU = state.users.length;
@@ -39,7 +39,7 @@ const updateDashboard = () => {
   document.getElementById('userProgressBar').style.width = `${rateU}%`;
 };
 
-// ===== LOGS & NOTIFICAÇÕES =====
+// ===== LOGS E NOTIFICAÇÕES =====
 const addLog = (message) => {
   const time = new Date().toLocaleTimeString();
   state.logs.unshift({ time, msg: message });
@@ -72,7 +72,23 @@ const addNotification = (message, type = 'success') => {
   }, 3000);
 };
 
-// ===== RENDER =====
+// ===== AUTOMATION BUGS =====
+const applyAutomation = (task) => {
+  if (task.type === 'bug') {
+    const candidates = state.users.filter(u => (u.role === 'ADMIN' || u.role === 'MANAGER') && u.active);
+    if (candidates.length > 0) {
+      const randomUser = candidates[Math.floor(Math.random() * candidates.length)];
+      task.assigned = [randomUser.email];
+      addLog(`Automação: "${task.title}" atribuída a ${randomUser.email}`);
+    } else {
+      task.assigned = [];
+    }
+  } else {
+    task.assigned = [];
+  }
+};
+
+// ===== RENDER USERS E TASKS =====
 const render = () => {
   const userSearchTerm = document.getElementById('searchUser').value.toLowerCase();
   const taskSearchTerm = document.getElementById('searchTask').value.toLowerCase();
@@ -84,128 +100,115 @@ const render = () => {
     'VIEWER': 'text-slate-500 bg-slate-50 border-slate-100'
   };
 
-  // USERS
+  // Render Users
   document.getElementById('userList').innerHTML = state.users
     .filter(u => u.email.toLowerCase().includes(userSearchTerm))
-    .map((u, i) => `
+    .map((u) => `
       <tr class="group hover:bg-slate-50 transition-colors">
         <td class="py-3 font-medium text-slate-700">
           ${u.email} 
           <span class="text-[8px] px-1.5 py-0.5 rounded border font-black inline-block mt-1 ${roleColors[u.role] || 'bg-slate-50'}">${u.role}</span>
         </td>
         <td class="py-3 text-center">
-          <button onclick="toggleUserStatus(${i})" class="text-[9px] font-bold px-2 py-1 rounded-full border ${u.active ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-100 text-slate-400 border-slate-200'}">${u.active ? 'ATIVO' : 'INATIVO'}</button>
+          <button onclick="toggleUserStatus(${state.users.indexOf(u)})" class="text-[9px] font-bold px-2 py-1 rounded-full border ${u.active ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-100 text-slate-400 border-slate-200'}">${u.active ? 'ATIVO' : 'INATIVO'}</button>
         </td>
         <td class="py-3 text-right">
-          <button onclick="deleteUser(${i})" class="text-slate-300 hover:text-red-500 transition-colors">
-            <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-            </svg>
+          <button onclick="deleteUser(${state.users.indexOf(u)})" class="text-slate-300 hover:text-red-500 transition-colors">
+              <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
           </button>
         </td>
       </tr>`).join('');
 
-  // TASKS
-  document.getElementById('taskList').innerHTML = state.tasks
-    .filter(t => t.title.toLowerCase().includes(taskSearchTerm))
-    .map((t, ti) => {
-      const statusColor = t.status === "Concluído" ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
+  // Render Tasks
+document.getElementById('taskList').innerHTML = state.tasks
+  .filter(t => t.title.toLowerCase().includes(taskSearchTerm))
+  .map((t) => {
+    const statusColor = t.status === "Concluído" ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
                         : (t.status === "Em Progresso" ? "bg-amber-50 text-amber-600 border-amber-100" 
                         : "bg-blue-50 text-blue-600 border-blue-100");
-
-      const assignedHTML = (t.assignedUsers || []).map(ui => `
-        <span class="text-[9px] text-slate-500 mt-1 flex items-center justify-between gap-1">
-          ${state.users[ui]?.email || 'Desconhecido'}
-          <button onclick="unassignUserFromTask(${ti}, ${ui})" class="text-red-500 font-bold text-[10px] px-1">x</button>
-        </span>
-      `).join('');
-
-      return `
+    const assignedText = t.assigned && t.assigned.length ? ` - Atribuído a: ${t.assigned.join(', ')}` : '';
+    return `
       <tr class="group hover:bg-slate-50 transition-colors">
         <td class="py-3 font-medium text-slate-700 ${t.status === 'Concluído' ? 'line-through opacity-40' : ''}">
-          ${t.title}<span class="text-[8px] font-bold text-slate-400 block uppercase tracking-tighter">${t.type}</span>
-          ${assignedHTML}
-          <div class="mt-1 flex gap-1 items-center">
-            <select id="assignUser-${ti}" class="text-[10px] p-1 border rounded">
-              <option value="">Selecionar usuário</option>
-              ${state.users.filter(u => u.active).map((u, ui) => `<option value="${ui}">${u.email}</option>`).join('')}
-            </select>
-            <button onclick="assignUserToTask(${ti}, document.getElementById('assignUser-${ti}').value)" class="text-[9px] font-bold px-2 py-1 bg-indigo-600 text-white rounded">+</button>
-          </div>
+          ${t.title} <span class="text-[8px] font-bold text-slate-400 block uppercase tracking-tighter">${t.type}${assignedText}</span>
         </td>
         <td class="py-3 text-center">
-          <button onclick="cycleTaskStatus(${ti})" class="text-[9px] font-bold px-2 py-1 rounded-md border ${statusColor}">${t.status.toUpperCase()}</button>
+          <button onclick="cycleTaskStatus(${state.tasks.indexOf(t)})" class="text-[9px] font-bold px-2 py-1 rounded-md border ${statusColor}">${t.status.toUpperCase()}</button>
         </td>
-        <td class="py-3 text-right">
-          <button onclick="deleteTask(${ti})" class="text-slate-300 hover:text-red-500 transition-colors">
+        <td class="py-3 text-right flex items-center gap-2 justify-end">
+          <!-- Dropdown para atribuição manual -->
+          <select onchange="manualAssign(${state.tasks.indexOf(t)}, this.value)" class="text-[9px] px-2 py-1 rounded-md border bg-white">
+            <option value="">Atribuir a...</option>
+            ${state.users.filter(u => u.active).map(u => `<option value="${u.email}" ${t.assigned && t.assigned.includes(u.email) ? 'selected' : ''}>${u.email}</option>`).join('')}
+          </select>
+          <!-- Botão vermelho para remover atribuição -->
+          <button onclick="removeAssignment(${state.tasks.indexOf(t)})" class="text-white bg-red-600 px-2 py-1 rounded hover:bg-red-700">x</button>
+          <!-- Botão icone de lixo para deletar task -->
+          <button onclick="deleteTask(${state.tasks.indexOf(t)})" class="text-slate-300 hover:text-red-500">
             <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
             </svg>
           </button>
         </td>
       </tr>`;
-    }).join('');
+  }).join('');
+
 };
 
 // ===== SAVE & RENDER =====
-const saveAndRender = () => { render(); updateDashboard(); };
+const saveAndRender = () => {
+  render();
+  updateDashboard();
+};
 
 // ===== FILTROS =====
 document.getElementById('searchUser').addEventListener('input', render);
 document.getElementById('searchTask').addEventListener('input', render);
 
-// ===== FUNÇÕES =====
+// ===== AÇÕES =====
 window.toggleUserStatus = (i) => { 
   state.users[i].active = !state.users[i].active; 
-  addLog(`Acesso: ${state.users[i].email} (${state.users[i].active ? 'ON' : 'OFF'})`);
+  addLog(`Acesso: ${state.users[i].email} (${state.users[i].active ? 'ON' : 'OFF'})`); 
   saveAndRender(); 
 };
-
 window.cycleTaskStatus = (i) => { 
   state.tasks[i].status = taskStatusCycle[(taskStatusCycle.indexOf(state.tasks[i].status) + 1) % taskStatusCycle.length]; 
-  addLog(`Tarefa: ${state.tasks[i].title} -> ${state.tasks[i].status}`);
+  addLog(`Tarefa: ${state.tasks[i].title} -> ${state.tasks[i].status}`); 
   saveAndRender(); 
 };
-
 window.deleteUser = (i) => openModal(`Eliminar ${state.users[i].email}?`, () => { 
-  addLog(`Removido: ${state.users[i].email}`);
+  addLog(`Removido: ${state.users[i].email}`); 
   state.users.splice(i, 1); 
   addNotification("Utilizador removido", "warning"); 
-  // Remove dos assignedUsers
-  state.tasks.forEach(t => t.assignedUsers = (t.assignedUsers || []).filter(ui => ui !== i));
   saveAndRender(); 
 });
-
 window.deleteTask = (i) => openModal(`Remover ${state.tasks[i].title}?`, () => { 
-  addLog(`Removida: ${state.tasks[i].title}`);
+  addLog(`Removida: ${state.tasks[i].title}`); 
   state.tasks.splice(i, 1); 
   addNotification("Tarefa removida", "info"); 
   saveAndRender(); 
 });
 
-window.assignUserToTask = (taskIndex, userIndex) => {
-  if (userIndex === "") return;
-  userIndex = parseInt(userIndex);
-  const t = state.tasks[taskIndex];
-  t.assignedUsers = t.assignedUsers || [];
-  if (!t.assignedUsers.includes(userIndex)) {
-    t.assignedUsers.push(userIndex);
-    addLog(`Tarefa "${t.title}" atribuída a ${state.users[userIndex].email}`);
-    addNotification("Usuário atribuído", "success");
-    saveAndRender();
+// ===== MANUAL ASSIGNMENT =====
+window.manualAssign = (taskIndex, userEmail) => {
+  const task = state.tasks[taskIndex];
+  if (!task.assigned) task.assigned = [];
+  if (userEmail && !task.assigned.includes(userEmail)) {
+    task.assigned.push(userEmail);
+    addLog(`Tarefa: "${task.title}" atribuída manualmente a ${userEmail}`);
   }
-};
-
-window.unassignUserFromTask = (taskIndex, userIndex) => {
-  const t = state.tasks[taskIndex];
-  t.assignedUsers = t.assignedUsers || [];
-  t.assignedUsers = t.assignedUsers.filter(ui => ui !== userIndex);
-  addLog(`Usuário "${state.users[userIndex]?.email}" removido da tarefa "${t.title}"`);
-  addNotification("Usuário removido da tarefa", "warning");
   saveAndRender();
 };
 
-// ===== FORMULÁRIOS =====
+window.removeAssignment = (taskIndex) => {
+  const task = state.tasks[taskIndex];
+  if (!task.assigned) return;
+  task.assigned = [];
+  addLog(`Tarefa: "${task.title}" não tem nenhum utilizador atribuído`);
+  saveAndRender();
+};
+
+// ===== FORMS =====
 document.getElementById('userForm').onsubmit = (e) => {
   e.preventDefault();
   const email = document.getElementById('userEmail').value;
@@ -220,7 +223,13 @@ document.getElementById('userForm').onsubmit = (e) => {
 document.getElementById('taskForm').onsubmit = (e) => {
   e.preventDefault();
   const title = document.getElementById('taskTitle').value;
-  state.tasks.push({ title, type: document.getElementById('taskType').value, status: "Pendente", assignedUsers: [] });
+  const type = document.getElementById('taskType').value; // 'bug', 'feature', 'task'
+
+  const newTask = { title, type, status: "Pendente", assigned: [] };
+  applyAutomation(newTask); // aplica automação se for bug
+
+  state.tasks.push(newTask);
+
   addNotification("Tarefa adicionada");
   addLog(`Nova Tarefa: ${title}`);
   saveAndRender(); 
