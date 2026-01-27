@@ -1,4 +1,4 @@
-import { Task } from "../models/Task";
+import { Task } from "../models/Ask";
 
 export class SearchService {
   constructor(private tasks: Task[]) {}

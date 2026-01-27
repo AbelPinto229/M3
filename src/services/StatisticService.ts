@@ -1,4 +1,4 @@
-import { Task } from '../models/Task';
+import { Task } from '../models/Ask';
 import { User } from '../models/Users';
 
 export class StatisticsService {
