@@ -1,9 +1,8 @@
 // ===== ESTADO EM MEMÓRIA =====
 const state = {
   users: [{ email: 'admin@sistema.com', role: 'ADMIN', active: true }],
-  tasks: [],
-  logs: [],
-  assignments: [] // { taskIndex, userIndex }
+  tasks: [], // cada task terá { title, type, status, assignedUsers: [] }
+  logs: []
 };
 
 const taskStatusCycle = ["Pendente", "Em Progresso", "Concluído"];
@@ -85,7 +84,7 @@ const render = () => {
     'VIEWER': 'text-slate-500 bg-slate-50 border-slate-100'
   };
 
-  // === USERS ===
+  // USERS
   document.getElementById('userList').innerHTML = state.users
     .filter(u => u.email.toLowerCase().includes(userSearchTerm))
     .map((u, i) => `
@@ -106,7 +105,7 @@ const render = () => {
         </td>
       </tr>`).join('');
 
-  // === TASKS ===
+  // TASKS
   document.getElementById('taskList').innerHTML = state.tasks
     .filter(t => t.title.toLowerCase().includes(taskSearchTerm))
     .map((t, ti) => {
@@ -114,18 +113,18 @@ const render = () => {
                         : (t.status === "Em Progresso" ? "bg-amber-50 text-amber-600 border-amber-100" 
                         : "bg-blue-50 text-blue-600 border-blue-100");
 
-      // Assigned users for this task
-      const assignedUsers = state.assignments
-        .filter(a => a.taskIndex === ti)
-        .map(a => state.users[a.userIndex]?.email)
-        .filter(Boolean)
-        .join(', ');
+      const assignedHTML = (t.assignedUsers || []).map(ui => `
+        <span class="text-[9px] text-slate-500 mt-1 flex items-center justify-between gap-1">
+          ${state.users[ui]?.email || 'Desconhecido'}
+          <button onclick="unassignUserFromTask(${ti}, ${ui})" class="text-red-500 font-bold text-[10px] px-1">x</button>
+        </span>
+      `).join('');
 
       return `
       <tr class="group hover:bg-slate-50 transition-colors">
         <td class="py-3 font-medium text-slate-700 ${t.status === 'Concluído' ? 'line-through opacity-40' : ''}">
           ${t.title}<span class="text-[8px] font-bold text-slate-400 block uppercase tracking-tighter">${t.type}</span>
-          ${assignedUsers ? `<p class="text-[9px] text-slate-500 mt-1">Atribuído a: ${assignedUsers}</p>` : ''}
+          ${assignedHTML}
           <div class="mt-1 flex gap-1 items-center">
             <select id="assignUser-${ti}" class="text-[10px] p-1 border rounded">
               <option value="">Selecionar usuário</option>
@@ -155,7 +154,7 @@ const saveAndRender = () => { render(); updateDashboard(); };
 document.getElementById('searchUser').addEventListener('input', render);
 document.getElementById('searchTask').addEventListener('input', render);
 
-// ===== AÇÕES =====
+// ===== FUNÇÕES =====
 window.toggleUserStatus = (i) => { 
   state.users[i].active = !state.users[i].active; 
   addLog(`Acesso: ${state.users[i].email} (${state.users[i].active ? 'ON' : 'OFF'})`);
@@ -172,8 +171,8 @@ window.deleteUser = (i) => openModal(`Eliminar ${state.users[i].email}?`, () => 
   addLog(`Removido: ${state.users[i].email}`);
   state.users.splice(i, 1); 
   addNotification("Utilizador removido", "warning"); 
-  // Remove any assignments for this user
-  state.assignments = state.assignments.filter(a => a.userIndex !== i);
+  // Remove dos assignedUsers
+  state.tasks.forEach(t => t.assignedUsers = (t.assignedUsers || []).filter(ui => ui !== i));
   saveAndRender(); 
 });
 
@@ -181,10 +180,30 @@ window.deleteTask = (i) => openModal(`Remover ${state.tasks[i].title}?`, () => {
   addLog(`Removida: ${state.tasks[i].title}`);
   state.tasks.splice(i, 1); 
   addNotification("Tarefa removida", "info"); 
-  // Remove assignments for this task
-  state.assignments = state.assignments.filter(a => a.taskIndex !== i);
   saveAndRender(); 
 });
+
+window.assignUserToTask = (taskIndex, userIndex) => {
+  if (userIndex === "") return;
+  userIndex = parseInt(userIndex);
+  const t = state.tasks[taskIndex];
+  t.assignedUsers = t.assignedUsers || [];
+  if (!t.assignedUsers.includes(userIndex)) {
+    t.assignedUsers.push(userIndex);
+    addLog(`Tarefa "${t.title}" atribuída a ${state.users[userIndex].email}`);
+    addNotification("Usuário atribuído", "success");
+    saveAndRender();
+  }
+};
+
+window.unassignUserFromTask = (taskIndex, userIndex) => {
+  const t = state.tasks[taskIndex];
+  t.assignedUsers = t.assignedUsers || [];
+  t.assignedUsers = t.assignedUsers.filter(ui => ui !== userIndex);
+  addLog(`Usuário "${state.users[userIndex]?.email}" removido da tarefa "${t.title}"`);
+  addNotification("Usuário removido da tarefa", "warning");
+  saveAndRender();
+};
 
 // ===== FORMULÁRIOS =====
 document.getElementById('userForm').onsubmit = (e) => {
@@ -201,23 +220,11 @@ document.getElementById('userForm').onsubmit = (e) => {
 document.getElementById('taskForm').onsubmit = (e) => {
   e.preventDefault();
   const title = document.getElementById('taskTitle').value;
-  state.tasks.push({ title, type: document.getElementById('taskType').value, status: "Pendente" });
+  state.tasks.push({ title, type: document.getElementById('taskType').value, status: "Pendente", assignedUsers: [] });
   addNotification("Tarefa adicionada");
   addLog(`Nova Tarefa: ${title}`);
   saveAndRender(); 
   e.target.reset();
-};
-
-// ===== ASSIGNMENT =====
-window.assignUserToTask = (taskIndex, userIndex) => {
-  if (userIndex === "") return;
-  userIndex = parseInt(userIndex);
-  if (!state.assignments.some(a => a.taskIndex === taskIndex && a.userIndex === userIndex)) {
-    state.assignments.push({ taskIndex, userIndex });
-    addLog(`Tarefa "${state.tasks[taskIndex].title}" atribuída a ${state.users[userIndex].email}`);
-    addNotification("Usuário atribuído", "success");
-    saveAndRender();
-  }
 };
 
 // ===== START =====
