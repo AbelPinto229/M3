@@ -92,7 +92,7 @@ const updateDashboard = () => {
   document.getElementById('userProgressBar').style.width = `${rateU}%`;
 };
 
-// ===== LOGS E NOTIFICAÇÕES (AJUSTADO) =====
+// ===== LOGS E NOTIFICAÇÕES =====
 const addLog = (message) => {
   const time = new Date().toLocaleTimeString();
   state.logs.unshift({ time, msg: message });
@@ -109,7 +109,7 @@ const addLog = (message) => {
 
 const addNotification = (message, type = 'success') => {
   const container = document.getElementById('notifications');
-  if (!container) return; // Segurança caso o ID não exista
+  if (!container) return;
 
   const colors = { 
     success: 'bg-white border-emerald-500 text-emerald-700 shadow-xl', 
@@ -118,13 +118,11 @@ const addNotification = (message, type = 'success') => {
   };
   
   const notification = document.createElement('div');
-  // Ajustamos o z-index e a transição para garantir que apareça e saia com efeito
   notification.className = `p-4 mb-3 border-l-4 rounded-xl text-xs font-bold transition-all duration-500 transform translate-x-0 pointer-events-auto relative z-[9999] border ${colors[type]}`;
   notification.innerHTML = message;
   
   container.prepend(notification);
 
-  // Efeito de saída (Time Get Out)
   setTimeout(() => { 
     notification.style.opacity = '0'; 
     notification.style.transform = 'translateX(20px)'; 
@@ -200,9 +198,9 @@ const render = () => {
 
       let priorityColorClass = "text-slate-400";
       switch(t.priority) {
-        case "MEDIUM": priorityColorClass = "text-blue-500 font-medium"; break;
-        case "HIGH": priorityColorClass = "text-red-500 font-bold"; break;
-        case "CRITICAL": priorityColorClass = "text-orange-500 font-bold"; break;
+        case "MEDIUM": priorityColorClass = "text-amber-500 font-bold"; break; // Amarelo
+        case "HIGH": priorityColorClass = "text-orange-500 font-bold"; break; // Laranja
+        case "CRITICAL": priorityColorClass = "text-red-600 font-bold"; break; // Vermelho
       }
 
       return `
@@ -373,13 +371,12 @@ window.setTaskPriority = (taskIndex, p) => { state.tasks[taskIndex].priority = p
 document.getElementById('userForm').onsubmit = (e) => {
   e.preventDefault();
   const email = document.getElementById('userEmail').value;
-  // Adicionei apenas a notificação aqui como exemplo de uso
   if(state.users.some(u => u.email === email)) {
       addNotification("Email já existe!", "warning");
       return;
   }
   state.users.push({ email: email, role: document.getElementById('userRole').value, active: true });
-  addNotification("Utilizador adicionado!");
+  addNotification("Utilizador adicionado com sucesso!");
   e.target.reset();
   saveAndRender();
 };
@@ -396,7 +393,7 @@ document.getElementById('taskForm').onsubmit = (e) => {
   };
   applyAutomation(newTask);
   state.tasks.push(newTask);
-  addNotification("Tarefa criada!");
+  addNotification("Tarefa criada com sucesso!");
   e.target.reset();
   saveAndRender();
 };
