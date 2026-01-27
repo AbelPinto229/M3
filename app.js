@@ -311,14 +311,53 @@ window.setTaskPriority = (idx, p) => {
   saveAndRender(); 
 };
 window.editTaskTitle = (idx) => {
-  const newTitle = prompt("Editar título da tarefa:", state.tasks[idx].title);
-  if (newTitle && newTitle.trim() !== "") {
-    const oldTitle = state.tasks[idx].title;
-    state.tasks[idx].title = newTitle.trim();
-    addLog(`Título alterado: "${oldTitle}" -> "${newTitle}"`);
-    saveAndRender();
-  }
+  const task = state.tasks[idx];
+  if (!task) return;
+
+  // Se já existir, não duplica
+  if (document.getElementById('editTitleModal')) return;
+
+  const modal = document.createElement('div');
+  modal.id = 'editTitleModal';
+  modal.className = 'fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]';
+
+  modal.innerHTML = `
+    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
+      <h3 class="font-bold text-lg mb-3">Editar nome da tarefa</h3>
+      <input id="editTitleInput" class="w-full border rounded px-3 py-2 mb-4 text-sm" value="${task.title}">
+      <div class="flex justify-end gap-2">
+        <button onclick="closeEditTitleModal()" class="px-4 py-2 bg-gray-200 rounded text-sm">Cancelar</button>
+        <button onclick="saveEditTitleModal(${idx})" class="px-4 py-2 bg-indigo-600 text-white rounded text-sm">Salvar</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  setTimeout(() => {
+    document.getElementById('editTitleInput')?.focus();
+  }, 50);
 };
+window.closeEditTitleModal = () => {
+  const modal = document.getElementById('editTitleModal');
+  if (modal) modal.remove();
+};
+
+window.saveEditTitleModal = (idx) => {
+  const input = document.getElementById('editTitleInput');
+  if (!input) return;
+
+  const newTitle = input.value.trim();
+  if (!newTitle) return;
+
+  const oldTitle = state.tasks[idx].title;
+  state.tasks[idx].title = newTitle;
+
+  addLog(`Título alterado: "${oldTitle}" -> "${newTitle}"`);
+  closeEditTitleModal();
+  saveAndRender();
+};
+
 
 // ===== FORMS E FILTROS =====
 document.getElementById('userForm').onsubmit = (e) => {
