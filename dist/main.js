@@ -58,6 +58,24 @@ window.renderModals = new RenderModals(taskService, userService);
 // ===== INITIALIZE CURRENT USER =====
 // Set current logged-in user to admin (id: 0)
 window.currentUserId = 0;
+window.currentUserRole = 'ADMIN';
+// ===== PERMISSION SYSTEM =====
+window.checkPermission = function (action) {
+    const role = window.currentUserRole;
+    const permissions = {
+        'create_user': ['ADMIN', 'MANAGER'],
+        'create_task': ['ADMIN', 'MANAGER'],
+        'edit_task': ['ADMIN', 'MANAGER', 'MEMBER'],
+        'delete_task': ['ADMIN'],
+        'delete_user': ['ADMIN'],
+        'assign_task': ['ADMIN', 'MANAGER'],
+        'edit_title': ['ADMIN', 'MANAGER'],
+        'add_comment': ['ADMIN', 'MANAGER', 'MEMBER'],
+        'toggle_user': ['ADMIN'],
+        'view_all': ['ADMIN', 'MANAGER', 'MEMBER', 'VIEWER']
+    };
+    return permissions[action]?.includes(role) || false;
+};
 // ===== APPLICATION INITIALIZATION =====
 export function initializeApp() {
     setupEventListeners();
@@ -122,6 +140,16 @@ function renderLogs() {
 }
 // Setup search and filter listeners
 function setupSearchAndFilterListeners() {
+    // Role selector
+    const roleSelector = document.getElementById('roleSelector');
+    if (roleSelector) {
+        roleSelector.addEventListener('change', (e) => {
+            const target = e.target;
+            window.currentUserRole = target.value;
+            console.log('Role changed to:', window.currentUserRole);
+            saveAndRender();
+        });
+    }
     // Task search and filter inputs
     const searchInput = document.getElementById('searchTask');
     const filterStatus = document.getElementById('filterStatus');
@@ -147,6 +175,10 @@ function setupEventListeners() {
     if (addUserForm) {
         addUserForm.addEventListener('submit', (e) => {
             e.preventDefault();
+            if (!window.checkPermission('create_user')) {
+                window.services.notificationService.addNotification('Sem permissão para criar utilizadores!', 'warning');
+                return;
+            }
             const emailInput = document.getElementById('userEmail');
             const roleSelect = document.getElementById('userRole');
             console.log('User form submitted:', { email: emailInput?.value, role: roleSelect?.value });
@@ -173,6 +205,10 @@ function setupEventListeners() {
     if (addTaskForm) {
         addTaskForm.addEventListener('submit', (e) => {
             e.preventDefault();
+            if (!window.checkPermission('create_task')) {
+                window.services.notificationService.addNotification('Sem permissão para criar tarefas!', 'warning');
+                return;
+            }
             const titleInput = document.getElementById('taskTitle');
             const typeSelect = document.getElementById('taskType');
             const deadlineInput = document.getElementById('taskDeadline');

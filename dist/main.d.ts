@@ -10,6 +10,7 @@ declare global {
         currentUserRole: string;
         currentUserId: number;
         saveAndRender: () => void;
+        checkPermission: (action: string) => boolean;
     }
 }
 export declare function initializeApp(): void;

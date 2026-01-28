@@ -58,26 +58,29 @@ export class RenderTask {
         </td>
         <td class="py-4 text-right pr-2">
           <div class="flex flex-row items-center justify-end gap-1 h-full">
-            <select onchange="event.stopPropagation(); window.renderTask.manualAssign(${t.id}, this.value)" class="text-[10px] h-6 px-2 rounded-md border bg-white min-w-[100px]">>
+            ${(window.checkPermission?.('assign_task')) ? `
+            <select onchange="event.stopPropagation(); window.renderTask.manualAssign(${t.id}, this.value)" class="text-[10px] h-6 px-2 rounded-md border bg-white min-w-[100px]">
               <option value="">Atribuir...</option>
               ${this.userService
             .getActiveUsers()
             .map(u => `<option value="${u.email}" ${t.assigned?.includes(u.email) ? 'selected' : ''}>${u.email.split('@')[0]}</option>`)
             .join('')}
-            </select>
-            <select onchange="event.stopPropagation(); window.renderTask.setTaskPriority(${t.id}, this.value)" class="text-[10px] h-6 px-2 rounded-md border bg-white min-w-[70px]">
+            </select>` : ''}
+            <select onchange="event.stopPropagation(); window.renderTask.setTaskPriority(${t.id}, this.value)" class="text-[10px] h-6 px-2 rounded-md border bg-white min-w-[70px]" ${!(window.checkPermission?.('edit_task')) ? 'disabled' : ''}>
               ${TASK_PRIORITIES.map(p => `<option value="${p}" ${t.priority === p ? 'selected' : ''}>${p}</option>`).join('')}
             </select>
+            ${(window.checkPermission?.('edit_title')) ? `
             <button onclick="event.stopPropagation(); window.renderTask.editTaskTitle(${t.id})" class="text-slate-300 hover:text-indigo-600 p-1.5 rounded-md">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
               </svg>
-            </button>
+            </button>` : ''}
+            ${(window.checkPermission?.('delete_task')) ? `
             <button onclick="event.stopPropagation(); window.renderTask.deleteTask(${t.id})" class="text-slate-300 hover:text-red-500 p-1.5 rounded-md">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
               </svg>
-            </button>
+            </button>` : ''}
           </div>
         </td>
       </tr>`;

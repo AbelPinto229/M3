@@ -48,6 +48,7 @@ declare global {
     currentUserRole: string;
     currentUserId: number;
     saveAndRender: () => void;
+    checkPermission: (action: string) => boolean;
   }
 }
 
@@ -77,6 +78,27 @@ window.renderModals = new RenderModals(taskService, userService);
 // ===== INITIALIZE CURRENT USER =====
 // Set current logged-in user to admin (id: 0)
 window.currentUserId = 0;
+window.currentUserRole = 'ADMIN';
+
+// ===== PERMISSION SYSTEM =====
+window.checkPermission = function(action: string): boolean {
+  const role = window.currentUserRole;
+  
+  const permissions: Record<string, string[]> = {
+    'create_user': ['ADMIN', 'MANAGER'],
+    'create_task': ['ADMIN', 'MANAGER'],
+    'edit_task': ['ADMIN', 'MANAGER', 'MEMBER'],
+    'delete_task': ['ADMIN'],
+    'delete_user': ['ADMIN'],
+    'assign_task': ['ADMIN', 'MANAGER'],
+    'edit_title': ['ADMIN', 'MANAGER'],
+    'add_comment': ['ADMIN', 'MANAGER', 'MEMBER'],
+    'toggle_user': ['ADMIN'],
+    'view_all': ['ADMIN', 'MANAGER', 'MEMBER', 'VIEWER']
+  };
+  
+  return permissions[action]?.includes(role) || false;
+};
 
 // ===== APPLICATION INITIALIZATION =====
 export function initializeApp(): void {
@@ -150,6 +172,17 @@ function renderLogs(): void {
 
 // Setup search and filter listeners
 function setupSearchAndFilterListeners(): void {
+  // Role selector
+  const roleSelector = document.getElementById('roleSelector') as HTMLSelectElement;
+  if (roleSelector) {
+    roleSelector.addEventListener('change', (e: Event) => {
+      const target = e.target as HTMLSelectElement;
+      window.currentUserRole = target.value;
+      console.log('Role changed to:', window.currentUserRole);
+      saveAndRender();
+    });
+  }
+
   // Task search and filter inputs
   const searchInput = document.getElementById('searchTask') as HTMLInputElement;
   const filterStatus = document.getElementById('filterStatus') as HTMLSelectElement;
@@ -174,6 +207,12 @@ function setupEventListeners(): void {
   if (addUserForm) {
     addUserForm.addEventListener('submit', (e: Event) => {
       e.preventDefault();
+      
+      if (!window.checkPermission('create_user')) {
+        window.services.notificationService.addNotification('Sem permissão para criar utilizadores!', 'warning');
+        return;
+      }
+      
       const emailInput = document.getElementById('userEmail') as HTMLInputElement;
       const roleSelect = document.getElementById('userRole') as HTMLSelectElement;
       console.log('User form submitted:', { email: emailInput?.value, role: roleSelect?.value });
@@ -201,6 +240,12 @@ function setupEventListeners(): void {
   if (addTaskForm) {
     addTaskForm.addEventListener('submit', (e: Event) => {
       e.preventDefault();
+      
+      if (!window.checkPermission('create_task')) {
+        window.services.notificationService.addNotification('Sem permissão para criar tarefas!', 'warning');
+        return;
+      }
+      
       const titleInput = document.getElementById('taskTitle') as HTMLInputElement;
       const typeSelect = document.getElementById('taskType') as HTMLSelectElement;
       const deadlineInput = document.getElementById('taskDeadline') as HTMLInputElement;
