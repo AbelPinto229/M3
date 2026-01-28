@@ -6,7 +6,7 @@ A comprehensive TypeScript-based task and user management application with role-
 
 ## 📋 Overview
 
-M3 is a full-featured management system designed to help teams organize users, manage tasks, track progress, and collaborate efficiently. It features a sophisticated permission system with four distinct roles, comprehensive task tracking, and user administration capabilities.
+M3 (PROJETO M3) - Task & User Management System is a full-featured management system designed to help teams organize users, manage tasks, track progress, and collaborate efficiently. It features a sophisticated permission system with four distinct roles, comprehensive task tracking, and user administration capabilities.
 
 ---
 
