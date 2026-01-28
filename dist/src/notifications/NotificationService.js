@@ -1,10 +1,5 @@
 // src/notifications/NotificationService.ts
 export class NotificationService {
-    /**
-     * Adiciona uma notificação visual na UI
-     * @param message - Mensagem a exibir
-     * @param type - Tipo de notificação (success, warning, info)
-     */
     addNotification(message, type = 'success') {
         const container = document.getElementById('notifications');
         if (!container)
@@ -24,30 +19,15 @@ export class NotificationService {
             setTimeout(() => notification.remove(), 500);
         }, 3000);
     }
-    /**
-     * Notifica um usuário específico (log console)
-     * @param userId - ID do usuário
-     * @param message - mensagem a enviar
-     */
     notifyUser(userId, message) {
         console.log(`[NOTIFY] Usuário ${userId}: ${message}`);
     }
-    /**
-     * Notifica um grupo de usuários (log console)
-     * @param userIds - array de IDs
-     * @param message - mensagem
-     */
     notifyGroup(userIds, message) {
         userIds.forEach(id => {
             console.log(`[NOTIFY] Usuário ${id}: ${message}`);
         });
     }
-    /**
-     * Notifica todos os administradores (log console)
-     * @param message - mensagem
-     */
     notifyAdmins(message) {
-        // Aqui, só como exemplo, vamos supor que admins têm IDs 1 e 2
         const adminIds = [1, 2];
         this.notifyGroup(adminIds, message);
     }
