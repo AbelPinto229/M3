@@ -2,6 +2,8 @@
 
 A comprehensive TypeScript-based task and user management application with role-based access control, built with modern web technologies.
 
+**Live Demo**: https://abelpinto229.github.io/M3/
+
 ## 📋 Overview
 
 M3 is a full-featured management system designed to help teams organize users, manage tasks, track progress, and collaborate efficiently. It features a sophisticated permission system with four distinct roles, comprehensive task tracking, and user administration capabilities.
