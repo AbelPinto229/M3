@@ -10,4 +10,5 @@ export declare class UserService {
     addUser(email: string, name: string, role: string | UserRole, photo?: string): User | null;
     toggleUserStatus(id: number): void;
     deleteUser(id: number): void;
+    updateUser(id: number, updates: Partial<User>): User | null;
 }

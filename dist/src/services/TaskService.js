@@ -1,8 +1,12 @@
 import { TaskStatus } from '../tasks/TaskStatus.js';
 import { BugTask } from '../tasks/BugTask.js';
 export class TaskService {
-    tasks = [];
-    nextId = 1;
+    tasks = [
+        { id: 1, title: 'Review class 2 slides', type: 'task', status: 'Aberta', priority: 'MEDIUM', deadline: '2026-02-05', assigned: ['0'] },
+        { id: 2, title: 'Do guided exercises', type: 'task', status: 'Em Progresso', priority: 'HIGH', deadline: '2026-02-03', assigned: ['1', '3'] },
+        { id: 3, title: 'Do autonomous exercises', type: 'task', status: 'Aberta', priority: 'LOW', deadline: '2026-02-10', assigned: [] }
+    ];
+    nextId = 4;
     getTasks() {
         return this.tasks;
     }

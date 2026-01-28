@@ -6,4 +6,5 @@ export declare class RenderUser {
     toggleUserStatus(id: number): void;
     deleteUser(id: number): void;
     showUserDetails(id: number): void;
+    editUser(id: number): void;
 }
