@@ -1,7 +1,11 @@
+// taskutils.ts
+import { ITask } from './ITask.js';
 import { TaskStatus } from './TaskStatus.js';
+
 // Função genérica que processa qualquer tarefa de forma diferente
-export function processTask(task) {
+export function processTask(task: ITask) {
     const type = task.getType();
+
     switch (type) {
         case "bug":
             console.log(`[LOG] Processando bug: ${task.title}`);
@@ -15,6 +19,7 @@ export function processTask(task) {
             }
             // Aqui você poderia disparar notificações extras
             break;
+
         case "feature":
             console.log(`[LOG] Processando feature: ${task.title}`);
             // Regras mais flexíveis
@@ -23,6 +28,7 @@ export function processTask(task) {
                 console.log(`Feature "${task.title}" iniciada.`);
             }
             break;
+
         case "task":
         default:
             console.log(`[LOG] Processando tarefa genérica: ${task.title}`);
@@ -33,4 +39,3 @@ export function processTask(task) {
             break;
     }
 }
-//# sourceMappingURL=TaskUtils.js.map
