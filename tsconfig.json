@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "rootDir": "./src",            // pasta de origem
+    "rootDir": "./",               // raiz do projeto
     "outDir": "./dist",            // pasta de saída compilada
-    "module": "nodenext",          // módulos ES para Node moderno
-    "moduleResolution": "nodenext",
+    "module": "es2022",            // módulos ES para browser
+    "moduleResolution": "bundler",
     "target": "es2022",            // JS moderno
     "strict": true,                // ativa todas as verificações estritas
     "esModuleInterop": true,       // compatibilidade com import/export CommonJS
@@ -12,6 +12,6 @@
     "declaration": true,           // gera .d.ts
     "sourceMap": true              // gera .map para debug
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["main.ts", "src/**/*"],
+  "exclude": ["node_modules", "dist", "M3/**/*"]
 }

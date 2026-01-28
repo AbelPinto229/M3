@@ -1,4 +1,5 @@
 import { Task } from "../models/Task";
+import { TagService } from "./TagService";
 
 export class SearchService {
   constructor(private tasks: Task[]) {}
@@ -29,5 +30,23 @@ export class SearchService {
 
     const all = [...byTitle, ...byStatus, ...byUser];
     return Array.from(new Set(all)); // remove duplicados
+  }
+
+  filterTasks(tasks: Task[], criteria: {
+    text: string;
+    status: string;
+    priority: string;
+    type: string;
+    tag: string;
+  }, tagService: TagService): Task[] {
+    return tasks.filter(task => {
+      const matchTitle = task.title.toLowerCase().includes(criteria.text.toLowerCase());
+      const matchStatus = criteria.status === "" || task.status === criteria.status;
+      const matchPriority = criteria.priority === "" || (task as any).priority === criteria.priority;
+      const matchType = criteria.type === "" || task.type === criteria.type;
+      const taskTags = tagService.getTags(task.id);
+      const matchTag = criteria.tag === "" || taskTags.some(t => t.includes(criteria.tag.toLowerCase()));
+      return matchTitle && matchStatus && matchPriority && matchType && matchTag;
+    });
   }
 }

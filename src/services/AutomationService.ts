@@ -1,5 +1,6 @@
 import { User } from '../models/Users';
 import { Task } from "../models/Task";
+import { TaskStatus } from '../tasks/TaskStatus.js';
 import { AssignmentService } from './AssignmentService.js';
 import { DeadlineService } from './DeadlineService.js';
 
@@ -25,7 +26,7 @@ export class AutomationRulesService {
 
   // Se task ficar COMPLETED → criar log automático
   private ruleTaskCompleted(task: Task) {
-    if (task.status === 'Concluído') {
+    if (task.status === TaskStatus.COMPLETED) {
       console.log(`LOG: Task "${task.title}" foi concluída.`);
     }
   }
@@ -39,7 +40,7 @@ export class AutomationRulesService {
 
   // Se task expirar → mover para BLOCKED
   private ruleTaskExpired(task: Task) {
-    if (this.deadlineService.isExpired(task.id) && task.status !== 'Concluído') {
+    if (this.deadlineService.isExpired(task.id) && task.status !== TaskStatus.COMPLETED) {
       task.status = 'Bloqueada';
       console.log(`REGRA: Task "${task.title}" expirou e foi bloqueada.`);
     }

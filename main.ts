@@ -1,22 +1,31 @@
-import { User } from './src/models/Users.js';
-import { Task } from './src/models/Task.js';
+// ===== MAIN APPLICATION ENTRY POINT =====
+// This file bootstraps the entire application with all services and UI
 
+// Import all services
+import { UserService } from './src/services/UserService.js';
+import { TaskService } from './src/services/TaskService.js';
+import { HistoryLog } from './src/logs/HistoryLog.js';
 import { CommentService } from './src/services/CommentService.js';
 import { AttachmentService } from './src/services/AttachmentService.js';
 import { TagService } from './src/services/TagService.js';
 import { DeadlineService } from './src/services/DeadlineService.js';
-import { PriorityService, Priority } from './src/services/PriorityService.js';
+import { PriorityService } from './src/services/PriorityService.js';
 import { AssignmentService } from './src/services/AssignmentService.js';
 import { SearchService } from './src/services/SearchService.js';
 import { StatisticsService } from './src/services/StatisticService.js';
 import { BackupService } from './src/services/BackupService.js';
 import { AutomationRulesService } from './src/services/AutomationService.js';
+import { NotificationService } from './src/notifications/NotificationService.js';
 
-// === ESTADO EM MEMÓRIA ===
-const stateUsers: User[] = [];
-const stateTasks: Task[] = [];
+// Import UI components
+import { RenderUser } from './src/ui/renderUser.js';
+import { RenderTask } from './src/ui/renderTask.js';
+import { RenderModals } from './src/ui/renderModals.js';
 
-// === SERVIÇOS ===
+// ===== INITIALIZE SERVICES =====
+const userService = new UserService();
+const taskService = new TaskService();
+const logService = new HistoryLog();
 const deadlineService = new DeadlineService();
 const priorityService = new PriorityService();
 const assignmentService = new AssignmentService();
@@ -24,88 +33,208 @@ const commentService = new CommentService();
 const attachmentService = new AttachmentService();
 const tagService = new TagService();
 const automationService = new AutomationRulesService(assignmentService, deadlineService);
-const statisticsService = new StatisticsService(stateTasks, stateUsers);
-const searchService = new SearchService(stateTasks);
-const backupService = new BackupService(stateUsers, stateTasks, assignmentService);
+const statisticsService = new StatisticsService(taskService.getTasks(), userService.getUsers());
+const searchService = new SearchService(taskService.getTasks());
+const backupService = new BackupService(userService.getUsers(), taskService.getTasks(), assignmentService);
+const notificationService = new NotificationService();
 
-// === CRIAR USER ===
-// Corrigido: Retorna User | null para permitir o uso de optional chaining (?.)
-export const createUser = (email: string, role: string): User | null => {
-  if (stateUsers.some(u => u.email === email)) return null;
+// ===== EXPOSE SERVICES TO WINDOW =====
+declare global {
+  interface Window {
+    services: any;
+    renderTask: RenderTask;
+    renderUser: RenderUser;
+    renderModals: RenderModals;
+    currentUserRole: string;
+    currentUserId: number;
+    saveAndRender: () => void;
+  }
+}
+
+// Create centralized service container
+window.services = {
+  userService,
+  taskService,
+  logService,
+  tagService,
+  searchService,
+  automationService,
+  priorityService,
+  assignmentService,
+  deadlineService,
+  commentService,
+  attachmentService,
+  statisticsService,
+  backupService,
+  notificationService
+};
+
+// ===== INITIALIZE UI RENDERERS =====
+window.renderUser = new RenderUser(userService);
+window.renderTask = new RenderTask(taskService, userService, tagService, searchService, commentService, attachmentService);
+window.renderModals = new RenderModals(taskService, userService);
+
+// ===== INITIALIZE CURRENT USER =====
+// Set current logged-in user to admin (id: 0)
+window.currentUserId = 0;
+
+// ===== APPLICATION INITIALIZATION =====
+export function initializeApp(): void {
+  setupEventListeners();
+  setupSearchAndFilterListeners();
+  updateDashboard();
+  window.renderUser.render();
+  window.renderTask.render();
+  renderLogs();
   
-  const id = stateUsers.length ? Math.max(...stateUsers.map(u => u.id)) + 1 : 1;
-  const user: User = { id, email, role, active: true };
-  stateUsers.push(user);
+  console.log('Application initialized successfully');
+}
 
-  automationService.applyUserRules(user);
-  return user;
-};
+// Helper to update dashboard stats
+function updateDashboard(): void {
+  const taskStats = window.services.statisticsService.calculateTaskStats();
+  const userStats = window.services.statisticsService.calculateUserStats();
 
-// === CRIAR TASK ===
-export const createTask = (title: string, type: string): Task => {
-  const id = stateTasks.length ? Math.max(...stateTasks.map(t => t.id)) + 1 : 1;
-  const task: Task = { id, title, type, status: 'Pendente' };
-  stateTasks.push(task);
+  setElementText('totalTasks', taskStats.total);
+  setElementText('pendingTasks', taskStats.pending);
+  setElementText('completionRate', `${taskStats.completionRate}%`);
+  setProgressBar('taskProgressBar', taskStats.completionRate);
 
-  automationService.applyRules(task);
-  return task;
-};
+  setElementText('totalUsers', userStats.total);
+  setElementText('activeUsers', userStats.active);
+  setElementText('userActiveRate', `${userStats.activeRate}%`);
+  setProgressBar('userProgressBar', userStats.activeRate);
+}
 
-// === MUDAR STATUS DA TASK ===
-export const updateTaskStatus = (taskId: number) => {
-  const task = stateTasks.find(t => t.id === taskId);
-  if (!task) return;
+// Helper to set element text
+function setElementText(id: string, text: string | number): void {
+  const el = document.getElementById(id);
+  if (el) el.innerText = String(text);
+}
 
-  const statusCycle = ['Pendente', 'Em Progresso', 'Concluído'];
-  const currentIndex = statusCycle.indexOf(task.status);
-  task.status = statusCycle[(currentIndex + 1) % statusCycle.length] as any;
+// Helper to set progress bar
+function setProgressBar(id: string, width: number): void {
+  const el = document.getElementById(id);
+  if (el) el.style.width = `${width}%`;
+}
 
-  automationService.applyRules(task);
-};
+// Helper to save and render
+export function saveAndRender(): void {
+  window.services.backupService.createBackup();
+  updateDashboard();
+  window.renderUser.render();
+  window.renderTask.render();
+  renderLogs();
+}
 
-// === ATIVAR / DESATIVAR USER ===
-export const toggleUserStatus = (userId: number) => {
-  const user = stateUsers.find(u => u.id === userId);
-  if (!user) return;
+// Expose saveAndRender to window
+window.saveAndRender = saveAndRender;
 
-  user.active = !user.active;
-  automationService.applyUserRules(user);
-};
+// Helper to render logs
+function renderLogs(): void {
+  const logsContainer = document.getElementById('logs');
+  if (!logsContainer) return;
+  
+  const logs = window.services.logService.getLogs();
+  logsContainer.innerHTML = logs
+    .slice()
+    .reverse()
+    .map((log: any) => `
+      <div class="text-[10px] text-slate-600 leading-relaxed">
+        <span class="text-slate-400">${log.timestamp}</span><br>
+        <span class="text-slate-700 font-medium">${log.message}</span>
+      </div>
+    `)
+    .join('');
+}
 
-// === ASSIGNMENTS ===
-export const assignUserToTask = (taskId: number, userId: number) => {
-  assignmentService.assignUser(taskId, userId);
-};
+// Setup search and filter listeners
+function setupSearchAndFilterListeners(): void {
+  // Task search and filter inputs
+  const searchInput = document.getElementById('searchTask') as HTMLInputElement;
+  const filterStatus = document.getElementById('filterStatus') as HTMLSelectElement;
+  const filterPriority = document.getElementById('filterPriority') as HTMLSelectElement;
+  const filterTag = document.getElementById('filterTag') as HTMLInputElement;
 
-export const unassignUserFromTask = (taskId: number, userId: number) => {
-  assignmentService.unassignUser(taskId, userId);
-};
+  const updateTaskRender = () => window.renderTask.render();
+  
+  if (searchInput) searchInput.addEventListener('input', updateTaskRender);
+  if (filterStatus) filterStatus.addEventListener('change', updateTaskRender);
+  if (filterPriority) filterPriority.addEventListener('change', updateTaskRender);
+  if (filterTag) filterTag.addEventListener('input', updateTaskRender);
 
-// === EXEMPLO DE USO ===
-// Agora o 'admin' e o 'member' podem ser User ou null
-const admin = createUser('admin@example.com', 'ADMIN');
-const member = createUser('member@example.com', 'MEMBER');
+  // User search input
+  const userSearchInput = document.getElementById('searchUser') as HTMLInputElement;
+  if (userSearchInput) userSearchInput.addEventListener('input', () => window.renderUser.render());
+}
 
-const bug = createTask('Erro no login', 'BUG REPORT');
+// Setup event listeners
+function setupEventListeners(): void {
+  const addUserForm = document.getElementById('userForm') as HTMLFormElement;
+  if (addUserForm) {
+    addUserForm.addEventListener('submit', (e: Event) => {
+      e.preventDefault();
+      const emailInput = document.getElementById('userEmail') as HTMLInputElement;
+      const roleSelect = document.getElementById('userRole') as HTMLSelectElement;
+      console.log('User form submitted:', { email: emailInput?.value, role: roleSelect?.value });
+      if (emailInput?.value && roleSelect?.value) {
+        const newUser = window.services.userService.addUser(emailInput.value, roleSelect.value);
+        console.log('User added:', newUser);
+        
+        if (newUser) {
+          // User added successfully
+          window.services.notificationService.addNotification('Utilizador adicionado!', 'success');
+        } else {
+          // User with this email already exists
+          window.services.notificationService.addNotification('Email já existe!', 'warning');
+        }
+        
+        addUserForm.reset();
+        saveAndRender();
+      }
+    });
+  } else {
+    console.warn('User form not found');
+  }
 
-// Com o retorno sendo null, o member?.id já funciona perfeitamente!
-assignUserToTask(bug.id, member?.id || 0);
+  const addTaskForm = document.getElementById('taskForm') as HTMLFormElement;
+  if (addTaskForm) {
+    addTaskForm.addEventListener('submit', (e: Event) => {
+      e.preventDefault();
+      const titleInput = document.getElementById('taskTitle') as HTMLInputElement;
+      const typeSelect = document.getElementById('taskType') as HTMLSelectElement;
+      const deadlineInput = document.getElementById('taskDeadline') as HTMLInputElement;
+      
+      if (titleInput?.value && typeSelect?.value) {
+        const newTask = window.services.taskService.addTask(titleInput.value, typeSelect.value, deadlineInput?.value);
+        
+        // Apply automation rules for bug tasks
+        if (typeSelect.value.toLowerCase() === 'bug') {
+          // Set priority to CRITICAL
+          window.services.taskService.updateTaskPriority(newTask.id, 'CRITICAL');
+          
+          // Assign to first admin or manager
+          const adminOrManager = window.services.userService.getUsers().find(
+            (u: any) => u.role === 'ADMIN' || u.role === 'MANAGER'
+          );
+          if (adminOrManager) {
+            newTask.assigned = [adminOrManager.email];
+            window.services.logService.addLog(`Bug task "${newTask.title}" atribuído a ${adminOrManager.email}`);
+          }
+        }
+        
+        window.services.logService.addLog(`Nova tarefa: "${newTask.title}"`);
+        window.services.notificationService.addNotification('Tarefa criada!');
+        addTaskForm.reset();
+        saveAndRender();
+      }
+    });
+  }
+}
 
-priorityService.setPriority(bug.id, Priority.HIGH);
-deadlineService.setDeadline(bug.id, new Date('2026-01-30'));
-
-// O mesmo para o admin?.id
-commentService.addComment(bug.id, admin?.id || 0, 'Verificar stack trace');
-tagService.addTag(bug.id, 'urgent');
-
-const searchResult = searchService.searchByTitle('login');
-
-const stats = {
-  totalUsers: statisticsService.countUsers(),
-  totalTasks: statisticsService.countTasks(),
-  completedTasks: statisticsService.countCompletedTasks()
-};
-
-console.log('Search Result:', searchResult);
-console.log('Stats:', stats);
-console.log('Expired Tasks:', deadlineService.getExpiredTasks());
+// Auto-initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+  initializeApp();
+}

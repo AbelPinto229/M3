@@ -1,30 +1,30 @@
-// src/logs/HistoryLog.ts
+// ===== HISTORY LOG - Application Logging Service =====
+
+export interface LogEntry {
+  id: number;
+  message: string;
+  timestamp: Date;
+}
 
 export class HistoryLog {
-    // Armazena as mensagens do histórico
-    private logs: string[] = [];
+  private logs: LogEntry[] = [];
+  private nextId = 1;
 
-    /**
-     * Adiciona uma mensagem ao histórico com timestamp
-     * @param message - mensagem de log
-     */
-    addLog(message: string) {
-        const timestamp = new Date().toISOString();
-        this.logs.push(`[${timestamp}] ${message}`);
-    }
+  addLog(message: string): void {
+    const logEntry: LogEntry = {
+      id: this.nextId++,
+      message,
+      timestamp: new Date(),
+    };
+    this.logs.push(logEntry);
+  }
 
-    /**
-     * Retorna todos os logs registrados
-     */
-    getLogs(): string[] {
-        // devolve uma cópia para evitar alteração externa
-        return [...this.logs];
-    }
+  getLogs(): LogEntry[] {
+    return [...this.logs];
+  }
 
-    /**
-     * Limpa todo o histórico
-     */
-    clearLogs() {
-        this.logs = [];
-    }
+  clearLogs(): void {
+    this.logs = [];
+  }
 }
+

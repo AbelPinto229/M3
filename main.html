@@ -163,12 +163,12 @@
     <div class="bg-white rounded-3xl shadow-2xl max-w-xs w-full p-8 border border-slate-100">
         <p id="modalMessage" class="text-sm font-semibold text-slate-800 text-center mb-8"></p>
         <div class="flex gap-3">
-            <button onclick="closeModal()" class="flex-1 py-3 text-xs font-bold text-slate-400 hover:text-slate-600 uppercase">Sair</button>
-            <button id="confirmBtn" class="flex-1 py-3 text-xs font-bold bg-slate-900 text-white rounded-xl uppercase">Confirmar</button>
+            <button onclick="window.renderModals.closeConfirmModal()" class="flex-1 py-3 text-xs font-bold text-slate-400 hover:text-slate-600 uppercase">Sair</button>
+            <button onclick="window.renderModals.confirmAction()" class="flex-1 py-3 text-xs font-bold bg-slate-900 text-white rounded-xl uppercase">Confirmar</button>
         </div>
     </div>
 </div>
 
-<script type="module" src="app.js"></script>
+<script type="module" src="dist/main.js"></script>
 </body>
 </html>
