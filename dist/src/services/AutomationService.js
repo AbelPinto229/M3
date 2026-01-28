@@ -6,42 +6,42 @@ export class AutomationRulesService {
         this.assignmentService = assignmentService;
         this.deadlineService = deadlineService;
     }
-    // 👉 Lê o estado da task e aplica regras
+    // Apply all rules for a task
     applyRules(task) {
         this.ruleTaskCompleted(task);
         this.ruleTaskBlocked(task);
         this.ruleTaskExpired(task);
     }
-    // 👉 Lê o estado do user e aplica regras
+    // Apply all rules for a user
     applyUserRules(user) {
         this.ruleUserInactive(user);
     }
-    // ===== REGRAS (funções pequenas) =====
-    // Se task ficar COMPLETED → criar log automático
+    // Rules - Business logic
+    // Task completed: log the event
     ruleTaskCompleted(task) {
         if (task.status === TaskStatus.COMPLETED) {
-            console.log(`LOG: Task "${task.title}" foi concluída.`);
+            console.log(`LOG: Task "${task.title}" has been completed.`);
         }
     }
-    // Se task ficar BLOCKED → notificar
+    // Task blocked: notify about it
     ruleTaskBlocked(task) {
         if (task.status === 'Bloqueada') {
-            console.log(`NOTIFICAÇÃO: Task "${task.title}" está bloqueada.`);
+            console.log(`NOTIFICATION: Task "${task.title}" is blocked.`);
         }
     }
-    // Se task expirar → mover para BLOCKED
+    // Task expired: auto-block it
     ruleTaskExpired(task) {
         if (this.deadlineService.isExpired(task.id) && task.status !== TaskStatus.COMPLETED) {
             task.status = 'Bloqueada';
-            console.log(`REGRA: Task "${task.title}" expirou e foi bloqueada.`);
+            console.log(`RULE: Task "${task.title}" expired and was blocked.`);
         }
     }
-    // Se user ficar inactive → remover assignments
+    // User inactive: remove assignments
     ruleUserInactive(user) {
         if (!user.active) {
             const tasks = this.assignmentService.getTasksFromUser(user.id);
             tasks.forEach(taskId => this.assignmentService.unassignUser(taskId, user.id));
-            console.log(`REGRA: User "${user.email}" inativo, tarefas removidas.`);
+            console.log(`RULE: Inactive user "${user.email}", assignments removed.`);
         }
     }
 }

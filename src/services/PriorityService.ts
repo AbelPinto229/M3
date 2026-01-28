@@ -1,5 +1,6 @@
 import { ExtendedTask } from './TaskService.js';
 
+// PRIORITY SERVICE - Task priorities
 export enum Priority {
   LOW = 'LOW',
   MEDIUM = 'MEDIUM',

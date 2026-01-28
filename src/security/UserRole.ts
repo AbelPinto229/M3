@@ -1,6 +1,6 @@
 // src/security/UserRole.ts
 
-// Enum com todos os perfis de usuário
+// User roles enum
 export enum UserRole {
     ADMIN,    
     MANAGER,  

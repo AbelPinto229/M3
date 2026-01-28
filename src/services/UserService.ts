@@ -1,6 +1,7 @@
 import { User } from '../models/Users.js';
 import { UserRole } from '../security/UserRole.js';
 
+// USER SERVICE - User management
 export class UserService {
   private users: User[] = [
     { id: 0, email: 'admin@sistema.com', name: 'Administrator', role: 'ADMIN', active: true },

@@ -1,3 +1,4 @@
+// ASSIGNMENT SERVICE - Task assignments
 export class AssignmentService {
   private taskToUsers: Map<number, Set<number>> = new Map();
   private userToTasks: Map<number, Set<number>> = new Map();

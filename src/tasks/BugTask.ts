@@ -10,16 +10,16 @@ export class BugTask implements ITask {
     constructor(id: number, title: string) {
         this.id = id;
         this.title = title;
-        this.completed = false;        // começa não concluída
-        this.status = TaskStatus.PENDING; // status inicial
+        this.completed = false;        // starts not completed
+        this.status = TaskStatus.PENDING; // initial status
     }
 
-    // Tipo específico da tarefa
+    // Specific type of the task
     getType(): string {
         return "bug";
     }
 
-    // Move a tarefa para outro estado com validação
+    // Moves the task to another state with validation
     moveTo(newStatus: TaskStatus): void {
         const validTransitions: Record<string, string[]> = {
             [TaskStatus.PENDING]: [TaskStatus.IN_PROGRESS],
@@ -27,15 +27,15 @@ export class BugTask implements ITask {
             [TaskStatus.COMPLETED]: []
         };
 
-        // Verifica se a transição é permitida
+        // Checks if the transition is allowed
         if (!validTransitions[this.status]?.includes(newStatus)) {
-            throw new Error(`Transição inválida de ${this.status} para ${newStatus}`);
+            throw new Error(`Invalid transition from ${this.status} to ${newStatus}`);
         }
 
-        // Atualiza o status
+        // Updates the status
         this.status = newStatus;
 
-        // Se chegou a COMPLETED, marca como concluída
+        // If reached COMPLETED, marks as completed
         if (newStatus === TaskStatus.COMPLETED) {
             this.completed = true;
         }

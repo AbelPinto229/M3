@@ -1,5 +1,6 @@
-// src/notifications/NotificationService.ts
+// NOTIFICATION SERVICE - User notifications
 export class NotificationService {
+    // Display UI notification with auto-fade
     addNotification(message, type = 'success') {
         const container = document.getElementById('notifications');
         if (!container)
@@ -19,14 +20,17 @@ export class NotificationService {
             setTimeout(() => notification.remove(), 500);
         }, 3000);
     }
+    // Notify specific user (console log)
     notifyUser(userId, message) {
         console.log(`[NOTIFY] Usuário ${userId}: ${message}`);
     }
+    // Notify multiple users (console log)
     notifyGroup(userIds, message) {
         userIds.forEach(id => {
             console.log(`[NOTIFY] Usuário ${id}: ${message}`);
         });
     }
+    // Notify all admins
     notifyAdmins(message) {
         const adminIds = [1, 2];
         this.notifyGroup(adminIds, message);

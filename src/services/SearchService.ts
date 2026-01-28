@@ -1,6 +1,7 @@
 import { Task } from "../models/Task";
 import { TagService } from "./TagService";
 
+// SEARCH SERVICE - Search and filtering
 export class SearchService {
   constructor(private tasks: Task[]) {}
 
@@ -22,14 +23,14 @@ export class SearchService {
   globalSearch(query: string, assignmentService: any): Task[] {
     const byTitle = this.searchByTitle(query);
     const byStatus = this.searchByStatus(query);
-    // assume query numérica para userId
+    // Try to parse query as numeric userId
     const userId = Number(query);
     const byUser = isNaN(userId)
       ? []
       : this.searchByUser(userId, assignmentService);
 
     const all = [...byTitle, ...byStatus, ...byUser];
-    return Array.from(new Set(all)); // remove duplicados
+    return Array.from(new Set(all)); // Remove duplicates
   }
 
   filterTasks(tasks: Task[], criteria: {

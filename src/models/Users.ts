@@ -1,3 +1,5 @@
+// USER MODEL - User interface
+
 export interface User {
   id: number;
   email: string;

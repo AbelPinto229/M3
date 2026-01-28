@@ -1,24 +1,24 @@
 import { UserRole } from './UserRole.js';
 /**
- * Verifica se o role tem permissão para criar tarefas
+ * Check if role can create tasks
  */
 export function canCreateTask(role) {
     return role === UserRole.ADMIN || role === UserRole.MANAGER;
 }
 /**
- * Verifica se o role tem permissão para editar tarefas
+ * Check if role can edit tasks
  */
 export function canEditTask(role) {
     return role === UserRole.ADMIN || role === UserRole.MANAGER;
 }
 /**
- * Verifica se o role tem permissão para apagar tarefas
+ * Check if role can delete tasks
  */
 export function canDeleteTask(role) {
-    return role === UserRole.ADMIN; // apenas admins podem apagar
+    return role === UserRole.ADMIN; // Only admins can delete
 }
 /**
- * Verifica se o role tem permissão para atribuir tarefas
+ * Check if role can assign tasks
  */
 export function canAssignTask(role) {
     return role === UserRole.ADMIN || role === UserRole.MANAGER;

@@ -1,3 +1,4 @@
+// ASSIGNMENT SERVICE - Task assignments
 export class AssignmentService {
     taskToUsers = new Map();
     userToTasks = new Map();

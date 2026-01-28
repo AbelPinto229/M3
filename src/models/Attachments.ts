@@ -1,4 +1,5 @@
-// src/attachments/Attachment.ts
+// ATTACHMENT MODEL - File attachment class
+
 export class Attachment {
     constructor(
         public id: number,

@@ -1,17 +1,17 @@
 import { UserRole } from './UserRole.js';
 /**
- * Verifica se o role tem permissão para criar tarefas
+ * Check if role can create tasks
  */
 export declare function canCreateTask(role: UserRole): boolean;
 /**
- * Verifica se o role tem permissão para editar tarefas
+ * Check if role can edit tasks
  */
 export declare function canEditTask(role: UserRole): boolean;
 /**
- * Verifica se o role tem permissão para apagar tarefas
+ * Check if role can delete tasks
  */
 export declare function canDeleteTask(role: UserRole): boolean;
 /**
- * Verifica se o role tem permissão para atribuir tarefas
+ * Check if role can assign tasks
  */
 export declare function canAssignTask(role: UserRole): boolean;

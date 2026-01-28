@@ -1,5 +1,6 @@
 import { Task } from "../models/Task";
 
+// DEADLINE SERVICE - Deadline tracking
 export class DeadlineService {
   private deadlines: Map<number, Date> = new Map();
 

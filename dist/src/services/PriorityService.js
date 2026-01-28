@@ -1,3 +1,4 @@
+// PRIORITY SERVICE - Task priorities
 export var Priority;
 (function (Priority) {
     Priority["LOW"] = "LOW";

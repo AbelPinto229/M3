@@ -1,3 +1,4 @@
+// USER SERVICE - User management
 export class UserService {
     users = [
         { id: 0, email: 'admin@sistema.com', name: 'Administrator', role: 'ADMIN', active: true },

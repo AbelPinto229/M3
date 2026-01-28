@@ -2,6 +2,7 @@ import { Task } from '../models/Task.js';
 import { TaskStatus } from '../tasks/TaskStatus.js';
 import { BugTask } from '../tasks/BugTask.js';
 
+// TASK SERVICE - Task management
 export interface ExtendedTask extends Task {
   priority?: string;
   deadline?: string;

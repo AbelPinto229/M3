@@ -2,24 +2,24 @@ import { BaseEntity } from './BaseEntity.js';
 import { UserRole } from '../security/UserRole.js';
 
 /**
- * Classe que representa um usuário do sistema
- * Herda de BaseEntity para id e createdAt
- * Encapsula propriedades com getters/setters
+ * Class representing a system user
+ * Inherits from BaseEntity for id and createdAt
+ * Encapsulates properties with getters/setters
  */
 export class UserClass extends BaseEntity {
-    private _email!: string;       // email do usuário
-    private _active!: boolean;     // ativo ou inativo
-    private _role!: UserRole;      // perfil do usuário
+    private _email!: string;       // user email
+    private _active!: boolean;     // active or inactive
+    private _role!: UserRole;      // user role
 
     constructor(id: number, email: string, role: UserRole) {
-        super(id);                 // inicializa id e createdAt da BaseEntity
-        this.email = email;        // usa setter para validação
-        this._role = role;         // role inicial
-        this._active = true;       // usuário começa ativo
+        super(id);                 // initializes id and createdAt from BaseEntity
+        this.email = email;        // uses setter for validation
+        this._role = role;         // initial role
+        this._active = true;       // user starts active
     }
 
     // ===========================
-    // GETTERS E SETTERS
+    // GETTERS AND SETTERS
     // ===========================
 
     get email(): string {
@@ -28,7 +28,7 @@ export class UserClass extends BaseEntity {
 
     set email(value: string) {
         if (!this.validateEmail(value)) {
-            throw new Error(`Email inválido: ${value}`);
+            throw new Error(`Invalid email: ${value}`);
         }
         this._email = value;
     }
@@ -43,24 +43,24 @@ export class UserClass extends BaseEntity {
 
     set role(value: UserRole) {
         if (value === undefined || value === null) {
-            throw new Error('Role inválido');
+            throw new Error('Invalid role');
         }
         this._role = value;
     }
 
     // ===========================
-    // MÉTODOS DE NEGÓCIO
+    // BUSINESS METHODS
     // ===========================
 
     /**
-     * Ativa ou desativa o usuário
+     * Activates or deactivates the user
      */
     toggleActive(): void {
         this._active = !this._active;
     }
 
     /**
-     * Validação simples de email
+     * Simple email validation
      */
     private validateEmail(email: string): boolean {
         const re = /\S+@\S+\.\S+/;

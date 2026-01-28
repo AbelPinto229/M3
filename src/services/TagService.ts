@@ -1,3 +1,4 @@
+// TAG SERVICE - Task tagging
 export class TagService {
   private tags: Map<number, Set<string>> = new Map();
 

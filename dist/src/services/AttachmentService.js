@@ -1,3 +1,4 @@
+// ATTACHMENT SERVICE - File attachments
 export class AttachmentService {
     attachments = [];
     idCounter = 1;

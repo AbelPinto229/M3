@@ -2,6 +2,7 @@
 export class HistoryLog {
     logs = [];
     nextId = 1;
+    // Add a new log entry with timestamp
     addLog(message) {
         const logEntry = {
             id: this.nextId++,
@@ -10,9 +11,11 @@ export class HistoryLog {
         };
         this.logs.push(logEntry);
     }
+    // Retrieve all log entries
     getLogs() {
         return [...this.logs];
     }
+    // Clear all log entries
     clearLogs() {
         this.logs = [];
     }

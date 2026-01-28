@@ -1,5 +1,6 @@
 import { Attachment } from '../models/Attachments';
 
+// ATTACHMENT SERVICE - File attachments
 export class AttachmentService {
   private attachments: Attachment[] = [];
   private idCounter = 1;

@@ -1,3 +1,4 @@
+// TAG SERVICE - Task tagging
 export class TagService {
     tags = new Map();
     addTag(taskId, tag) {

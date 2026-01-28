@@ -1,3 +1,4 @@
+// COMMENT SERVICE - Task comments
 export class CommentService {
     comments = [];
     idCounter = 1;

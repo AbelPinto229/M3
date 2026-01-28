@@ -1,7 +1,7 @@
 // src/tasks/TaskStatus.ts
-// Enum que define todos os possíveis estados de uma tarefa
+// Enum that defines all possible states of a task
 export enum TaskStatus {
-    PENDING = "Pendente",
-    IN_PROGRESS = "Em Progresso",
-    COMPLETED = "Concluído"
+    PENDING = "Pending",
+    IN_PROGRESS = "In Progress",
+    COMPLETED = "Completed"
 }

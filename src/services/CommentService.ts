@@ -1,5 +1,6 @@
 import { Comment } from '../models/Comments';
 
+// COMMENT SERVICE - Task comments
 export class CommentService {
   private comments: Comment[] = [];
   private idCounter = 1;
