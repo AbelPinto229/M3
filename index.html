@@ -51,9 +51,14 @@
                 <div class="flex justify-between items-end mb-4">
                     <div>
                         <h2 class="text-xs font-extrabold text-slate-500 uppercase tracking-widest">Acessos</h2>
-                        <p class="text-[10px] text-slate-400 font-bold mt-1 uppercase"><span id="activeUsers">0</span> Ativos de <span id="totalUsers">0</span></p>
+                        <p class="text-[10px] text-slate-400 font-bold mt-2 uppercase"><span id="totalUsers">0</span> Total</p>
+                        <p class="text-[10px] text-slate-400 font-bold mt-1 uppercase"><span id="inactiveUsers">0</span> Inativos</p>
+                        <p class="text-[10px] text-slate-400 font-bold mt-1 uppercase"><span id="activeUsers">0</span> Ativos</p>
                     </div>
-                    <div id="userActiveRate" class="text-xs font-black text-emerald-600 italic">0%</div>
+                </div>
+                <div class="flex justify-between items-center mb-2">
+                    <p class="text-[9px] text-slate-400 font-bold uppercase">Taxa de Ativos</p>
+                    <div id="userActiveRate2" class="text-xs font-black text-emerald-600 italic">0%</div>
                 </div>
                 <div class="w-full h-1.5 bg-slate-100 rounded-full mb-6 overflow-hidden">
                     <div id="userProgressBar" class="h-full bg-emerald-500 transition-all duration-700" style="width: 0%"></div>
@@ -102,8 +107,13 @@
                 <div class="flex justify-between items-end mb-4">
                     <div>
                         <h2 class="text-xs font-extrabold text-slate-500 uppercase tracking-widest">Workflow</h2>
-                        <p class="text-[10px] text-slate-400 font-bold mt-1 uppercase">Taxa de Conclusão</p>
+                        <p class="text-[10px] text-slate-400 font-bold mt-2 uppercase"><span id="pendingTasksCount">0</span> Pendentes</p>
+                        <p class="text-[10px] text-slate-400 font-bold mt-1 uppercase"><span id="inProgressTasks">0</span> Em Progresso</p>
+                        <p class="text-[10px] text-slate-400 font-bold mt-1 uppercase"><span id="completedTasksCount">0</span> Concluídas</p>
                     </div>
+                </div>
+                <div class="flex justify-between items-center mb-2">
+                    <p class="text-[9px] text-slate-400 font-bold uppercase">Taxa de Conclusão</p>
                     <div id="completionRate" class="text-xs font-black text-indigo-600 italic">0%</div>
                 </div>
                 <div class="w-full h-1.5 bg-slate-100 rounded-full mb-6 overflow-hidden">
@@ -146,7 +156,10 @@
                             <option value="feature">FEATURE</option>
                             <option value="task">TASK</option>
                         </select>
-                        <input type="date" id="taskDeadline" class="bg-white p-2 text-[9px] font-bold rounded-lg shadow-sm border border-slate-100 flex-1 lg:flex-initial">
+                        <div class="flex-1 lg:flex-initial">
+                            <label class="text-[8px] text-slate-400 font-bold uppercase mb-1 block">Deadline (opcional)</label>
+                            <input type="date" id="taskDeadline" class="w-full bg-white p-2 text-[9px] font-bold rounded-lg shadow-sm border border-slate-100">
+                        </div>
                         <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 px-4 text-[10px] font-bold rounded-lg transition-all active:scale-95">+</button>
                     </div>
                 </form>

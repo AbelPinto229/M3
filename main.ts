@@ -123,14 +123,23 @@ function updateDashboard(): void {
   const taskStats = window.services.statisticsService.calculateTaskStats();
   const userStats = window.services.statisticsService.calculateUserStats();
 
+  // Count tasks by status
+  const inProgressCount = taskStats.byStatus['Em Progresso'] || 0;
+  const pendingCount = taskStats.byStatus['Pendente'] || 0;
+  const completedCount = taskStats.byStatus['Concluído'] || 0;
+
   setElementText('totalTasks', taskStats.total);
   setElementText('pendingTasks', taskStats.pending);
+  setElementText('inProgressTasks', inProgressCount);
+  setElementText('pendingTasksCount', pendingCount);
+  setElementText('completedTasksCount', completedCount);
   setElementText('completionRate', `${taskStats.completionRate}%`);
   setProgressBar('taskProgressBar', taskStats.completionRate);
 
   setElementText('totalUsers', userStats.total);
   setElementText('activeUsers', userStats.active);
-  setElementText('userActiveRate', `${userStats.activeRate}%`);
+  setElementText('inactiveUsers', userStats.inactive);
+  setElementText('userActiveRate2', `${userStats.activeRate}%`);
   setProgressBar('userProgressBar', userStats.activeRate);
 }
 
