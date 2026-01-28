@@ -1,4 +1,4 @@
-# M3 - Task & User Management System
+# PROJETO M3 - Task & User Management System
 
 A comprehensive TypeScript-based task and user management application with role-based access control, built with modern web technologies.
 
