@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "rootDir": "./",               // raiz do projeto
+    "outDir": "./dist",            // pasta de saída compilada
+    "module": "es2022",            // módulos ES para browser
+    "moduleResolution": "bundler",
+    "target": "es2022",            // JS moderno
+    "strict": true,                // ativa todas as verificações estritas
+    "esModuleInterop": true,       // compatibilidade com import/export CommonJS
+    "forceConsistentCasingInFileNames": true, // evita problemas de maiúsculas/minúsculas
+    "skipLibCheck": true,          // ignora checagem de libs
+    "declaration": true,           // gera .d.ts
+    "sourceMap": true              // gera .map para debug
+  },
+  "include": ["main.ts", "src/**/*"],
+  "exclude": ["node_modules", "dist", "M3/**/*"]
+}

@@ -1,0 +1,32 @@
+import { TaskService } from '../services/TaskService.js';
+import { UserService } from '../services/UserService.js';
+import { TagService } from '../services/TagService.js';
+import { SearchService } from '../services/SearchService.js';
+import { CommentService } from '../services/CommentService.js';
+import { AttachmentService } from '../services/AttachmentService.js';
+export declare class RenderTask {
+    private taskService;
+    private userService;
+    private tagService;
+    private searchService;
+    private commentService;
+    private attachmentService;
+    private activeTaskModalId;
+    constructor(taskService: TaskService, userService: UserService, tagService: TagService, searchService: SearchService, commentService: CommentService, attachmentService: AttachmentService);
+    render(): void;
+    private renderTaskRow;
+    openTaskModal(taskId: number): void;
+    closeTaskModal(): void;
+    private renderTaskModalContent;
+    addTag(): void;
+    removeTag(tag: string): void;
+    addComment(): void;
+    deleteComment(id: number): void;
+    addAttachment(event: Event): void;
+    deleteAttachment(id: number): void;
+    cycleTaskStatus(id: number): void;
+    deleteTask(id: number): void;
+    manualAssign(taskId: number, email: string): void;
+    setTaskPriority(taskId: number, p: string): void;
+    editTaskTitle(taskId: number): void;
+}
