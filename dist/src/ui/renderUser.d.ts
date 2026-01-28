@@ -5,4 +5,5 @@ export declare class RenderUser {
     render(): void;
     toggleUserStatus(id: number): void;
     deleteUser(id: number): void;
+    showUserDetails(id: number): void;
 }

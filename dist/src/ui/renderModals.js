@@ -73,5 +73,33 @@ export class RenderModals {
         this.closeEditTitleModal();
         window.saveAndRender();
     }
+    // ===== GENERIC MODAL =====
+    openModal(title, content) {
+        const modalId = 'genericModal';
+        // Close any existing generic modal
+        const existing = document.getElementById(modalId);
+        if (existing)
+            existing.remove();
+        const modal = document.createElement('div');
+        modal.id = modalId;
+        modal.className = 'fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]';
+        modal.innerHTML = `
+      <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
+        <h3 class="font-bold text-lg mb-4">${title}</h3>
+        <div class="mb-4">
+          ${content}
+        </div>
+        <div class="flex justify-end gap-2">
+          <button onclick="window.renderModals.closeModal()" class="px-4 py-2 bg-gray-200 rounded text-sm">Fechar</button>
+        </div>
+      </div>
+    `;
+        document.body.appendChild(modal);
+    }
+    closeModal() {
+        const modal = document.getElementById('genericModal');
+        if (modal)
+            modal.remove();
+    }
 }
 //# sourceMappingURL=renderModals.js.map

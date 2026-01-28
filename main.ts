@@ -49,6 +49,8 @@ declare global {
     currentUserId: number;
     saveAndRender: () => void;
     checkPermission: (action: string) => boolean;
+    taskSortState: string;
+    userFilter: string;
   }
 }
 
@@ -79,6 +81,9 @@ window.renderModals = new RenderModals(taskService, userService);
 // Set current logged-in user to admin (id: 0)
 window.currentUserId = 0;
 window.currentUserRole = 'ADMIN';
+
+// ===== SORT STATE =====
+window.taskSortState = 'none'; // none | asc | desc
 
 // ===== PERMISSION SYSTEM =====
 window.checkPermission = function(action: string): boolean {
@@ -188,6 +193,8 @@ function setupSearchAndFilterListeners(): void {
   const filterStatus = document.getElementById('filterStatus') as HTMLSelectElement;
   const filterPriority = document.getElementById('filterPriority') as HTMLSelectElement;
   const filterTag = document.getElementById('filterTag') as HTMLInputElement;
+  const sortAZBtn = document.getElementById('sortTasksAZ') as HTMLButtonElement;
+  const clearCompletedBtn = document.getElementById('clearCompleted') as HTMLButtonElement;
 
   const updateTaskRender = () => window.renderTask.render();
   
@@ -195,10 +202,82 @@ function setupSearchAndFilterListeners(): void {
   if (filterStatus) filterStatus.addEventListener('change', updateTaskRender);
   if (filterPriority) filterPriority.addEventListener('change', updateTaskRender);
   if (filterTag) filterTag.addEventListener('input', updateTaskRender);
+  
+  if (sortAZBtn) sortAZBtn.addEventListener('click', () => {
+    const currentState = (window as any).taskSortState || 'none';
+    let newState = 'asc';
+    
+    if (currentState === 'asc') {
+      newState = 'desc';
+    } else if (currentState === 'desc') {
+      newState = 'none';
+    }
+    
+    (window as any).taskSortState = newState;
+    
+    // Update button text
+    if (newState === 'asc') {
+      sortAZBtn.textContent = '↑ A-Z';
+    } else if (newState === 'desc') {
+      sortAZBtn.textContent = '↓ Z-A';
+    } else {
+      sortAZBtn.textContent = 'Sort A-Z';
+    }
+    
+    window.renderTask.render();
+  });
+  
+  if (clearCompletedBtn) clearCompletedBtn.addEventListener('click', () => {
+    const completedTasks = window.services.taskService.getTasks().filter((t: any) => t.status === 'Concluído');
+    completedTasks.forEach((t: any) => window.services.taskService.deleteTask(t.id));
+    window.services.logService.addLog(`${completedTasks.length} tarefa(s) concluída(s) removida(s)`);
+    window.services.notificationService.addNotification(`${completedTasks.length} tarefas removidas!`, 'success');
+    saveAndRender();
+  });
 
-  // User search input
+  // User search and filter inputs
   const userSearchInput = document.getElementById('searchUser') as HTMLInputElement;
+  const filterAllBtn = document.getElementById('filterAllUsers') as HTMLButtonElement;
+  const filterActiveBtn = document.getElementById('filterActiveUsers') as HTMLButtonElement;
+  const filterInactiveBtn = document.getElementById('filterInactiveUsers') as HTMLButtonElement;
+  
   if (userSearchInput) userSearchInput.addEventListener('input', () => window.renderUser.render());
+  
+  if (filterAllBtn) filterAllBtn.addEventListener('click', () => {
+    (window as any).userFilter = 'all';
+    filterAllBtn.classList.add('bg-indigo-600', 'text-white');
+    filterAllBtn.classList.remove('bg-slate-100', 'text-slate-700');
+    filterActiveBtn?.classList.remove('bg-indigo-600', 'text-white');
+    filterActiveBtn?.classList.add('bg-slate-100', 'text-slate-700');
+    filterInactiveBtn?.classList.remove('bg-indigo-600', 'text-white');
+    filterInactiveBtn?.classList.add('bg-slate-100', 'text-slate-700');
+    window.renderUser.render();
+  });
+  
+  if (filterActiveBtn) filterActiveBtn.addEventListener('click', () => {
+    (window as any).userFilter = 'active';
+    filterAllBtn?.classList.remove('bg-indigo-600', 'text-white');
+    filterAllBtn?.classList.add('bg-slate-100', 'text-slate-700');
+    filterActiveBtn.classList.add('bg-indigo-600', 'text-white');
+    filterActiveBtn.classList.remove('bg-slate-100', 'text-slate-700');
+    filterInactiveBtn?.classList.remove('bg-indigo-600', 'text-white');
+    filterInactiveBtn?.classList.add('bg-slate-100', 'text-slate-700');
+    window.renderUser.render();
+  });
+  
+  if (filterInactiveBtn) filterInactiveBtn.addEventListener('click', () => {
+    (window as any).userFilter = 'inactive';
+    filterAllBtn?.classList.remove('bg-indigo-600', 'text-white');
+    filterAllBtn?.classList.add('bg-slate-100', 'text-slate-700');
+    filterActiveBtn?.classList.remove('bg-indigo-600', 'text-white');
+    filterActiveBtn?.classList.add('bg-slate-100', 'text-slate-700');
+    filterInactiveBtn.classList.add('bg-indigo-600', 'text-white');
+    filterInactiveBtn.classList.remove('bg-slate-100', 'text-slate-700');
+    window.renderUser.render();
+  });
+  
+  // Initialize user filter
+  (window as any).userFilter = 'all';
 }
 
 // Setup event listeners
@@ -213,23 +292,43 @@ function setupEventListeners(): void {
         return;
       }
       
+      const nameInput = document.getElementById('userName') as HTMLInputElement;
       const emailInput = document.getElementById('userEmail') as HTMLInputElement;
       const roleSelect = document.getElementById('userRole') as HTMLSelectElement;
-      console.log('User form submitted:', { email: emailInput?.value, role: roleSelect?.value });
-      if (emailInput?.value && roleSelect?.value) {
-        const newUser = window.services.userService.addUser(emailInput.value, roleSelect.value);
-        console.log('User added:', newUser);
-        
-        if (newUser) {
-          // User added successfully
-          window.services.notificationService.addNotification('Utilizador adicionado!', 'success');
+      const photoInput = document.getElementById('userPhoto') as HTMLInputElement;
+      
+      if (nameInput?.value && emailInput?.value && roleSelect?.value) {
+        // Handle photo conversion to base64 if file is selected
+        if (photoInput?.files && photoInput.files.length > 0) {
+          const file = photoInput.files[0];
+          const reader = new FileReader();
+          reader.onload = (event: ProgressEvent<FileReader>) => {
+            const photoBase64 = event.target?.result as string;
+            const newUser = window.services.userService.addUser(emailInput.value, nameInput.value, roleSelect.value, photoBase64);
+            
+            if (newUser) {
+              window.services.notificationService.addNotification('Utilizador adicionado!', 'success');
+            } else {
+              window.services.notificationService.addNotification('Email já existe!', 'warning');
+            }
+            
+            addUserForm.reset();
+            saveAndRender();
+          };
+          reader.readAsDataURL(file);
         } else {
-          // User with this email already exists
-          window.services.notificationService.addNotification('Email já existe!', 'warning');
+          // No photo selected
+          const newUser = window.services.userService.addUser(emailInput.value, nameInput.value, roleSelect.value);
+          
+          if (newUser) {
+            window.services.notificationService.addNotification('Utilizador adicionado!', 'success');
+          } else {
+            window.services.notificationService.addNotification('Email já existe!', 'warning');
+          }
+          
+          addUserForm.reset();
+          saveAndRender();
         }
-        
-        addUserForm.reset();
-        saveAndRender();
       }
     });
   } else {

@@ -1,5 +1,5 @@
 export class UserService {
-    users = [{ id: 0, email: 'admin@sistema.com', role: 'ADMIN', active: true }];
+    users = [{ id: 0, email: 'admin@sistema.com', name: 'Administrator', role: 'ADMIN', active: true }];
     nextId = 1;
     getUsers() {
         return this.users;
@@ -13,10 +13,10 @@ export class UserService {
     getActiveUsers() {
         return this.users.filter(u => u.active);
     }
-    addUser(email, role) {
+    addUser(email, name, role, photo) {
         if (this.users.some(u => u.email === email))
             return null;
-        const user = { id: this.nextId++, email, role: role, active: true };
+        const user = { id: this.nextId++, email, name, role: role, active: true, photo };
         this.users.push(user);
         return user;
     }

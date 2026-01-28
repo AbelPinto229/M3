@@ -60,12 +60,25 @@
                 </div>
 
                 <input type="text" id="searchUser" placeholder="Procurar utilizador..." 
-                    class="w-full mb-4 p-2 text-[11px] bg-slate-50 border border-slate-100 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500">
+                    class="w-full mb-2 p-2 text-[11px] bg-slate-50 border border-slate-100 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500">
+                
+                <div class="flex gap-2 mb-4">
+                    <button id="filterAllUsers" class="text-[9px] font-bold px-2 py-1 rounded-md bg-indigo-600 text-white">Todos</button>
+                    <button id="filterActiveUsers" class="text-[9px] font-bold px-2 py-1 rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200">Ativos</button>
+                    <button id="filterInactiveUsers" class="text-[9px] font-bold px-2 py-1 rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200">Inativos</button>
+                </div>
                 
                 <form id="userForm" class="flex flex-col gap-2 p-2 bg-slate-50 rounded-xl border border-slate-100 mb-6">
+                    <input type="text" id="userName" placeholder="Nome completo" required 
+                        class="bg-transparent border-none p-2 text-xs font-medium outline-none">
                     <input type="email" id="userEmail" placeholder="Email institucional" required 
                         class="bg-transparent border-none p-2 text-xs font-medium outline-none">
-                    <div class="flex gap-2 border-t border-slate-200 pt-2">
+                    <div class="border-t border-slate-200 pt-2">
+                        <label for="userPhoto" class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">Foto do Perfil (opcional)</label>
+                        <input type="file" id="userPhoto" accept="image/*" 
+                            class="bg-white border border-slate-200 rounded p-2 text-xs font-medium outline-none cursor-pointer w-full">
+                    </div>
+                    <div class="flex gap-2">
                         <select id="userRole" class="bg-white p-2 text-[10px] font-bold rounded-lg shadow-sm border border-slate-100 flex-1 text-slate-700 uppercase">
                             <option value="ADMIN">ADMIN</option>
                             <option value="MANAGER">MANAGER</option>
@@ -118,6 +131,10 @@
                         <input type="text" id="filterTag" placeholder="Tag (#)" 
                             class="w-24 p-2 text-[11px] bg-slate-50 border border-slate-100 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500">
                     </div>
+                    <div class="flex gap-2 mt-2">
+                        <button id="sortTasksAZ" class="text-[9px] font-bold px-2 py-1 rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200 flex-1">Sort A-Z</button>
+                        <button id="clearCompleted" class="text-[9px] font-bold px-2 py-1 rounded-md bg-red-100 text-red-700 hover:bg-red-200 flex-1">Limpar Concluídas</button>
+                    </div>
                 </div>
                 
                 <form id="taskForm" class="flex flex-col gap-2 p-2 bg-slate-50 rounded-xl border border-slate-100 mb-6">
@@ -146,12 +163,12 @@
             <div class="grid grid-cols-2 gap-4">
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
                     <div class="absolute right-0 top-0 w-1 bg-indigo-600 h-full"></div>
-                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-1 text-center">Total</p>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-1 text-center">Total de Tarefas</p>
                     <span id="totalTasks" class="text-2xl font-bold block text-center">0</span>
                 </div>
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
                     <div class="absolute right-0 top-0 w-1 bg-orange-500 h-full"></div>
-                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-1 text-center">Abertas</p>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-1 text-center">Tarefas Abertas</p>
                     <span id="pendingTasks" class="text-2xl font-bold block text-center">0</span>
                 </div>
             </div>

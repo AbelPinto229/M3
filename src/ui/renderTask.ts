@@ -32,11 +32,23 @@ export class RenderTask {
       tag: (document.getElementById('filterTag') as HTMLInputElement)?.value || '',
     };
 
-    const filteredTasks = this.searchService.filterTasks(
+    let filteredTasks = this.searchService.filterTasks(
       this.taskService.getTasks(),
       searchCriteria,
       this.tagService
     );
+
+    // Apply sorting based on sort state
+    const sortState = (window as any).taskSortState || 'none';
+    if (sortState === 'asc') {
+      filteredTasks = filteredTasks.sort((a: ExtendedTask, b: ExtendedTask) => 
+        a.title.localeCompare(b.title)
+      );
+    } else if (sortState === 'desc') {
+      filteredTasks = filteredTasks.sort((a: ExtendedTask, b: ExtendedTask) => 
+        b.title.localeCompare(a.title)
+      );
+    }
 
     const taskList = document.getElementById('taskList');
     if (!taskList) return;

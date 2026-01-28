@@ -11,4 +11,6 @@ export declare class RenderModals {
     openEditTitleModal(taskId: number): void;
     closeEditTitleModal(): void;
     saveEditTitle(taskId: number): void;
+    openModal(title: string, content: string): void;
+    closeModal(): void;
 }

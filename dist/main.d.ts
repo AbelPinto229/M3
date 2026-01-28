@@ -11,6 +11,8 @@ declare global {
         currentUserId: number;
         saveAndRender: () => void;
         checkPermission: (action: string) => boolean;
+        taskSortState: string;
+        userFilter: string;
     }
 }
 export declare function initializeApp(): void;

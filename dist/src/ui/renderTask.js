@@ -26,7 +26,15 @@ export class RenderTask {
             type: document.getElementById('filterType')?.value || '',
             tag: document.getElementById('filterTag')?.value || '',
         };
-        const filteredTasks = this.searchService.filterTasks(this.taskService.getTasks(), searchCriteria, this.tagService);
+        let filteredTasks = this.searchService.filterTasks(this.taskService.getTasks(), searchCriteria, this.tagService);
+        // Apply sorting based on sort state
+        const sortState = window.taskSortState || 'none';
+        if (sortState === 'asc') {
+            filteredTasks = filteredTasks.sort((a, b) => a.title.localeCompare(b.title));
+        }
+        else if (sortState === 'desc') {
+            filteredTasks = filteredTasks.sort((a, b) => b.title.localeCompare(a.title));
+        }
         const taskList = document.getElementById('taskList');
         if (!taskList)
             return;

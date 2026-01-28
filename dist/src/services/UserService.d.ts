@@ -7,7 +7,7 @@ export declare class UserService {
     getUserById(id: number): User | undefined;
     getUserByEmail(email: string): User | undefined;
     getActiveUsers(): User[];
-    addUser(email: string, role: string | UserRole): User | null;
+    addUser(email: string, name: string, role: string | UserRole, photo?: string): User | null;
     toggleUserStatus(id: number): void;
     deleteUser(id: number): void;
 }
