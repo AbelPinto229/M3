@@ -36,14 +36,20 @@ export class RenderUser {
             const canDelete = window.checkPermission?.('delete_user');
             // Use user photo if available, otherwise show initial avatar
             const photoHTML = u.photo ? `<img src="${u.photo}" alt="${u.name}" class="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-slate-200">` : `<div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">${u.name.charAt(0).toUpperCase()}</div>`;
+            // Count assigned tasks for this user
+            const allTasks = window.taskService.getTasks?.() || [];
+            const assignedTaskCount = allTasks.filter((t) => t.assigned && t.assigned.includes(u.email)).length;
             return `
       <tr class="group hover:bg-slate-50 transition-colors cursor-pointer" onclick="window.renderUser.showUserDetails(${u.id})">
         <td class="py-3 font-medium text-slate-700 flex items-center gap-3">
           ${photoHTML}
-          <span>${u.name} <span class="text-[8px] px-1.5 py-0.5 rounded border font-black inline-block ml-1 ${roleColors[u.role] || 'bg-slate-50'}">${u.role}</span></span>
+          <div class="flex flex-col gap-1">
+            <span>${u.name} <span class="text-[8px] px-1.5 py-0.5 rounded border font-black inline-block ml-1 ${roleColors[u.role] || 'bg-slate-50'}">${u.role}</span></span>
+            <span class="text-[11px] text-slate-500 font-normal">Tarefas atribuídas: ${assignedTaskCount}</span>
+          </div>
         </td>
         <td class="py-3 text-center" onclick="event.stopPropagation()">
-          <button ${canToggle ? '' : 'disabled'} onclick="${canToggle ? `window.renderUser.toggleUserStatus(${u.id})` : 'return false'}" class="text-[9px] font-bold px-2 py-1 rounded-full border ${u.active ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-100 text-slate-400 border-slate-200'} ${!canToggle ? 'opacity-50 cursor-not-allowed' : ''}">${u.active ? 'ACTIVE' : 'INACTIVE'}</button>
+          <button ${canToggle ? '' : 'disabled'} onclick="${canToggle ? `window.renderUser.toggleUserStatus(${u.id})` : 'return false'}" class="text-[9px] font-bold px-2 py-1 rounded-full border ${u.active ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-100 text-slate-400 border-slate-200'} ${!canToggle ? 'opacity-50 cursor-not-allowed' : ''}">${u.active ? 'ATIVO' : 'INATIVO'}</button>
         </td>
         <td class="py-3 text-right" onclick="event.stopPropagation()">
           <button ${window.checkPermission?.('edit_user') ? '' : 'disabled'} onclick="${window.checkPermission?.('edit_user') ? `window.renderUser.editUser(${u.id})` : 'return false'}" class="text-slate-300 hover:text-indigo-600 transition-colors ${!window.checkPermission?.('edit_user') ? 'opacity-50 cursor-not-allowed' : ''} mr-2">
@@ -69,14 +75,14 @@ export class RenderUser {
             return;
         // Prevent managers from toggling admin users
         if (window.currentUserRole === 'MANAGER' && user.role === 'ADMIN') {
-            window.notificationService.addNotification('Managers cannot modify admin users!', 'warning');
+            window.notificationService.addNotification('Gerentes não podem modificar utilizadores administradores!', 'warning');
             return;
         }
         this.userService.toggleUserStatus(id);
         const updatedUser = this.userService.getUserById(id);
-        const newStatus = updatedUser?.active ? 'ACTIVE' : 'INACTIVE';
-        window.notificationService.addNotification(`${user.name} is now ${newStatus}!`, 'success');
-        window.logService.addLog(`User ${user.name} status: ${newStatus}`);
+        const newStatus = updatedUser?.active ? 'ATIVO' : 'INATIVO';
+        window.notificationService.addNotification(`${user.name} agora está ${newStatus}!`, 'success');
+        window.logService.addLog(`Utilizador ${user.name} estado: ${newStatus}`);
         window.saveAndRender();
     }
     // Opens confirmation modal to delete user
@@ -86,14 +92,14 @@ export class RenderUser {
             return;
         // Prevent managers from deleting admin users
         if (window.currentUserRole === 'MANAGER' && user.role === 'ADMIN') {
-            window.notificationService.addNotification('Managers cannot delete admin users!', 'warning');
+            window.notificationService.addNotification('Gerentes não podem eliminar utilizadores administradores!', 'warning');
             return;
         }
         // Trigger confirmation modal
-        window.renderModals.openConfirmModal(`Delete ${user.email}?`, () => {
+        window.renderModals.openConfirmModal(`Eliminar ${user.email}?`, () => {
             this.userService.deleteUser(id);
-            window.notificationService.addNotification(`${user.name} deleted!`, 'success');
-            window.logService.addLog(`User ${user.name} deleted`);
+            window.notificationService.addNotification(`${user.name} eliminado!`, 'success');
+            window.logService.addLog(`Utilizador ${user.name} eliminado`);
             window.saveAndRender();
         });
     }
@@ -108,7 +114,7 @@ export class RenderUser {
         const assignedTasks = window.taskService.getTasks().filter((t) => t.assigned && Array.isArray(t.assigned) && t.assigned.some((email) => String(email) === String(user.email)));
         const tasksListHTML = assignedTasks.length > 0
             ? assignedTasks.map((t) => `<li class="text-sm text-slate-700">• ${t.title} <span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">${t.status}</span></li>`).join('')
-            : '<li class="text-sm text-slate-500 italic">No tasks assigned</li>';
+            : '<li class="text-sm text-slate-500 italic">Nenhuma tarefa atribuída</li>';
         const detailsContent = `
       <div class="space-y-4">
         ${photoHTML}
@@ -118,31 +124,31 @@ export class RenderUser {
             <p class="text-lg font-semibold text-slate-900">${user.id}</p>
           </div>
           <div>
-            <p class="text-sm font-bold text-slate-600">ROLE</p>
+            <p class="text-sm font-bold text-slate-600">FUNÇÃO</p>
             <p class="text-lg font-semibold text-slate-900">${user.role}</p>
           </div>
         </div>
         <div>
-          <p class="text-sm font-bold text-slate-600">NAME</p>
+          <p class="text-sm font-bold text-slate-600">NOME</p>
           <p class="text-lg font-semibold text-slate-900">${user.name}</p>
         </div>
         <div>
-          <p class="text-sm font-bold text-slate-600">EMAIL</p>
+          <p class="text-sm font-bold text-slate-600">E-MAIL</p>
           <p class="text-lg font-semibold text-slate-900">${user.email}</p>
         </div>
         <div>
-          <p class="text-sm font-bold text-slate-600">STATUS</p>
-          <p class="text-lg font-semibold ${user.active ? 'text-emerald-600' : 'text-slate-400'}">${user.active ? 'ACTIVE' : 'INACTIVE'}</p>
+          <p class="text-sm font-bold text-slate-600">ESTADO</p>
+          <p class="text-lg font-semibold ${user.active ? 'text-emerald-600' : 'text-slate-400'}">${user.active ? 'ATIVO' : 'INATIVO'}</p>
         </div>
         <div>
-          <p class="text-sm font-bold text-slate-600">ASSIGNED TASKS (${assignedTasks.length})</p>
+          <p class="text-sm font-bold text-slate-600">TAREFAS ATRIBUÍDAS (${assignedTasks.length})</p>
           <ul class="mt-2 space-y-1">
             ${tasksListHTML}
           </ul>
         </div>
       </div>
     `;
-        window.renderModals.openModal(`Details of ${user.name}`, detailsContent);
+        window.renderModals.openModal(`Detalhes de ${user.name}`, detailsContent);
     }
     // Opens modal to edit user information (name, email, role, photo)
     editUser(id) {

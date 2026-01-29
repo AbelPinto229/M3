@@ -10,6 +10,7 @@ import { AttachmentService } from '../services/AttachmentService.js';
 import { processTask } from '../utils/TaskUtils.js';
 
 const TASK_PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+const PRIORITY_DISPLAY_MAP: Record<string, string> = { 'LOW': 'Baixa', 'MEDIUM': 'Média', 'HIGH': 'Alta', 'CRITICAL': 'Crítica' };
 
 export class RenderTask {
   private activeTaskModalId: number | null = null;
@@ -74,11 +75,17 @@ export class RenderTask {
     if (t.priority === 'HIGH') priorityColorClass = 'text-orange-500 font-bold';
     if (t.priority === 'CRITICAL') priorityColorClass = 'text-red-600 font-bold';
 
+    // Map task type and priority to Portuguese display text
+    const typeMap: Record<string, string> = { 'bug': 'Erro', 'feature': 'Funcionalidade', 'task': 'Tarefa' };
+    const priorityMap: Record<string, string> = { 'LOW': 'Baixa', 'MEDIUM': 'Média', 'HIGH': 'Alta', 'CRITICAL': 'Crítica' };
+    const displayType = typeMap[t.type?.toLowerCase()] || t.type;
+    const displayPriority = priorityMap[t.priority || 'LOW'] || (t.priority || 'Baixa');
+
     return `
       <tr class="group hover:bg-slate-50 transition-colors border-b border-slate-100">
         <td class="py-4 px-2 cursor-pointer" onclick="window.renderTask.openTaskModal(${t.id})">
           <p class="font-bold text-slate-700 ${t.status === TaskStatus.COMPLETED ? 'line-through opacity-40' : ''}">${t.title}</p>
-          <span class="text-[8px] ${priorityColorClass} block uppercase tracking-tighter mt-1">${t.type} | ${t.priority || 'LOW'} ${t.deadline ? '| Expires: ' + t.deadline : ''}</span>
+          <span class="text-[8px] ${priorityColorClass} block uppercase tracking-tighter mt-1">${displayType} | ${displayPriority} ${t.deadline ? '| Expira: ' + t.deadline : ''}</span>
         </td>
         <td class="py-4 text-center align-middle">
           <button onclick="event.stopPropagation(); window.renderTask.cycleTaskStatus(${t.id})" ${((window as any).currentUserRole === 'VIEWER') ? 'disabled' : ''} class="text-[9px] font-bold px-3 py-1.5 rounded-md border min-w-[100px] inline-block ${statusColor} ${((window as any).currentUserRole === 'VIEWER') ? 'opacity-50 cursor-not-allowed' : ''}">${t.status.toUpperCase()}</button>
@@ -87,14 +94,14 @@ export class RenderTask {
           <div class="flex flex-row items-center justify-end gap-1 h-full">
             ${((window as any).checkPermission?.('assign_task')) ? `
             <select onchange="event.stopPropagation(); window.renderTask.manualAssign(${t.id}, this.value)" class="text-[10px] h-6 px-2 rounded-md border bg-white min-w-[100px]">
-              <option value="">Assign...</option>
+              <option value="">Atribuir...</option>
               ${this.userService
                 .getActiveUsers()
                 .map(u => `<option value="${u.email}" ${t.assigned?.includes(u.email) ? 'selected' : ''}>${u.name}</option>`)
                 .join('')}
             </select>` : ''}
             <select onchange="event.stopPropagation(); window.renderTask.setTaskPriority(${t.id}, this.value)" class="text-[10px] h-6 px-2 rounded-md border bg-white min-w-[70px]" ${!((window as any).checkPermission?.('edit_task')) ? 'disabled' : ''}>
-              ${TASK_PRIORITIES.map(p => `<option value="${p}" ${t.priority === p ? 'selected' : ''}>${p}</option>`).join('')}
+              ${TASK_PRIORITIES.map(p => `<option value="${p}" ${t.priority === p ? 'selected' : ''}>${PRIORITY_DISPLAY_MAP[p] || p}</option>`).join('')}
             </select>
             ${((window as any).checkPermission?.('edit_title')) ? `
             <button onclick="event.stopPropagation(); window.renderTask.editTaskTitle(${t.id})" class="text-slate-300 hover:text-indigo-600 p-1.5 rounded-md">
@@ -120,28 +127,34 @@ export class RenderTask {
     const task = this.taskService.getTaskById(taskId);
     if (!task) return;
 
+    // Map type and priority to Portuguese
+    const typeMap: Record<string, string> = { 'bug': 'Erro', 'feature': 'Funcionalidade', 'task': 'Tarefa' };
+    const priorityMap: Record<string, string> = { 'LOW': 'Baixa', 'MEDIUM': 'Média', 'HIGH': 'Alta', 'CRITICAL': 'Crítica' };
+    const displayType = typeMap[task.type?.toLowerCase()] || task.type;
+    const displayPriority = priorityMap[task.priority || 'LOW'] || (task.priority || 'Baixa');
+
     const isViewer = (window as any).currentUserRole === 'VIEWER';
     const modalHtml = `
       <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border border-slate-100">
         <h3 class="font-bold mb-2">${task.title}</h3>
-        <p class="text-[10px] text-slate-400 mb-4">Type: ${task.type} | Priority: ${task.priority || 'LOW'}</p>
+        <p class="text-[10px] text-slate-400 mb-4">Tipo: ${displayType} | Prioridade: ${displayPriority}</p>
         ${!isViewer ? `
         <div class="mb-4">
-          <h4 class="font-bold text-xs mb-1">Tags:</h4>
+          <h4 class="font-bold text-xs mb-1">Etiquetas:</h4>
           <div id="taskTagsList" class="flex flex-wrap gap-1 mb-2"></div>
-          <input type="text" id="tagInput" class="w-full px-2 py-1 border rounded text-[10px]" placeholder="New tag..." onkeypress="if(event.key==='Enter'){ window.renderTask.addTag(); }">
+          <input type="text" id="tagInput" class="w-full px-2 py-1 border rounded text-[10px]" placeholder="Nova etiqueta..." onkeypress="if(event.key==='Enter'){ window.renderTask.addTag(); }">
         </div>
-        ` : '<div class="mb-4"><h4 class="font-bold text-xs mb-1">Tags:</h4><div id="taskTagsList" class="flex flex-wrap gap-1 mb-2"></div></div>'}
+        ` : '<div class="mb-4"><h4 class="font-bold text-xs mb-1">Etiquetas:</h4><div id="taskTagsList" class="flex flex-wrap gap-1 mb-2"></div></div>'}
         <div id="taskComments" class="max-h-32 overflow-y-auto mb-2 border-t pt-2"></div>
-        ${!isViewer ? `<input type="text" id="newCommentInput" class="w-full px-2 py-1 border rounded text-[10px]" placeholder="Comment..." onkeypress="if(event.key==='Enter'){ window.renderTask.addComment(); }">` : '<p class="text-[10px] text-slate-400 italic">Viewer - No permission to comment</p>'}
+        ${!isViewer ? `<input type="text" id="newCommentInput" class="w-full px-2 py-1 border rounded text-[10px]" placeholder="Comentário..." onkeypress="if(event.key==='Enter'){ window.renderTask.addComment(); }">` : '<p class="text-[10px] text-slate-400 italic">Visualizador - Sem permissão para comentar</p>'}
         ${!isViewer ? `
         <div class="mt-4">
-          <h4 class="font-bold text-xs mb-1">Attachments:</h4>
+          <h4 class="font-bold text-xs mb-1">Anexos:</h4>
           <div id="taskAttachments" class="max-h-24 overflow-y-auto"></div>
           <input type="file" id="newAttachmentInput" class="mt-1 text-xs" onchange="window.renderTask.addAttachment(event)">
         </div>
-        ` : '<div class="mt-4"><h4 class="font-bold text-xs mb-1">Attachments:</h4><div id="taskAttachments" class="max-h-24 overflow-y-auto"></div></div>'}
-        <div class="flex justify-end mt-4"><button onclick="window.renderTask.closeTaskModal()" class="px-4 py-2 bg-gray-200 rounded text-xs">Close</button></div>
+        ` : '<div class="mt-4"><h4 class="font-bold text-xs mb-1">Anexos:</h4><div id="taskAttachments" class="max-h-24 overflow-y-auto"></div></div>'}
+        <div class="flex justify-end mt-4"><button onclick="window.renderTask.closeTaskModal()" class="px-4 py-2 bg-gray-200 rounded text-xs">Fechar</button></div>
       </div>`;
 
     const container = document.createElement('div');
@@ -222,7 +235,7 @@ export class RenderTask {
   addComment(): void {
     // VIEWER role cannot add comments
     if ((window as any).currentUserRole === 'VIEWER') {
-      (window as any).notificationService.addNotification('No permission to comment!', 'warning');
+      (window as any).notificationService.addNotification('Sem permissão para comentar!', 'warning');
       return;
     }
 
@@ -287,7 +300,7 @@ export class RenderTask {
   cycleTaskStatus(id: number): void {
     // VIEWER cannot change task status
     if ((window as any).currentUserRole === 'VIEWER') {
-      (window as any).notificationService.addNotification('No permission to change status!', 'warning');
+      (window as any).notificationService.addNotification('Sem permissão para alterar o estado!', 'warning');
       return;
     }
 
@@ -322,7 +335,7 @@ export class RenderTask {
   deleteTask(id: number): void {
     const task = this.taskService.getTaskById(id);
     if (!task) return;
-    (window as any).renderModals.openConfirmModal(`Delete task?`, () => {
+    (window as any).renderModals.openConfirmModal(`Eliminar tarefa?`, () => {
       this.taskService.deleteTask(id);
       (window as any).notificationService.addNotification(`Tarefa "${task.title}" eliminada!`, 'success');
       (window as any).saveAndRender();
@@ -335,7 +348,7 @@ export class RenderTask {
     if (!task) return;
     task.assigned = email ? [email] : [];
     if (email) {
-      (window as any).logService.addLog(`Task "${task.title}" assigned to ${email}`);
+      (window as any).logService.addLog(`Tarefa "${task.title}" atribuída a ${email}`);
       (window as any).notificationService.addNotification(`Tarefa "${task.title}" atribuída a ${email}!`, 'success');
     }
     (window as any).saveAndRender();
@@ -347,7 +360,7 @@ export class RenderTask {
     if (!task) return;
     this.taskService.updateTaskPriority(taskId, p);
     (window as any).priorityService.setPriority(taskId, p as any);
-    (window as any).logService.addLog(`Task "${task.title}" priority -> ${p}`);
+    (window as any).logService.addLog(`Tarefa "${task.title}" prioridade -> ${p}`);
     (window as any).notificationService.addNotification(`Prioridade alterada: ${p.toUpperCase()}`, 'success');
     (window as any).saveAndRender();
   }

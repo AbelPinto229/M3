@@ -12,9 +12,9 @@ export interface ExtendedTask extends Task {
 
 export class TaskService {
   private tasks: ExtendedTask[] = [
-    { id: 1, title: 'Review class 2 slides', type: 'task', status: 'Created', priority: 'MEDIUM', deadline: '2026-02-05', assigned: ['0'] },
-    { id: 2, title: 'Do guided exercises', type: 'task', status: 'In Progress', priority: 'HIGH', deadline: '2026-02-03', assigned: ['1', '3'] },
-    { id: 3, title: 'Do autonomous exercises', type: 'task', status: 'Created', priority: 'LOW', deadline: '2026-02-10', assigned: [] }
+    { id: 1, title: 'Revisar diapositivos da aula 2', type: 'task', status: 'Criado', priority: 'MEDIUM', deadline: '2026-02-05', assigned: ['0'] },
+    { id: 2, title: 'Fazer exercícios orientados', type: 'task', status: 'Em Progresso', priority: 'HIGH', deadline: '2026-02-03', assigned: ['1', '3'] },
+    { id: 3, title: 'Fazer exercícios autónomos', type: 'task', status: 'Criado', priority: 'LOW', deadline: '2026-02-10', assigned: [] }
   ];
   private nextId = 4;
 

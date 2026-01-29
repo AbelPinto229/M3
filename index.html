@@ -33,10 +33,10 @@
             </div>
             <div class="w-px h-6 lg:h-8 bg-slate-200 hidden sm:block"></div>
             <select id="roleSelector" class="text-[9px] lg:text-xs font-bold bg-slate-100 px-2 lg:px-3 py-1 lg:py-1.5 rounded-md border border-slate-200 text-slate-700 uppercase cursor-pointer">
-                <option value="ADMIN">Admin</option>
-                <option value="MANAGER">Manager</option>
-                <option value="MEMBER">Member</option>
-                <option value="VIEWER">Viewer</option>
+                <option value="ADMIN">ADMIN</option>
+                <option value="MANAGER">MANAGER</option>
+                <option value="MEMBER">MEMBER</option>
+                <option value="VIEWER">VIEWER</option>
             </select>
         </div>
     </div>
@@ -133,17 +133,20 @@
                     
                     <div class="flex flex-col lg:flex-row gap-2">
                         <select id="filterStatus" class="bg-slate-50 p-2 text-[9px] font-bold rounded-lg border border-slate-100 flex-1 text-slate-500 uppercase">
-                            <option value="">Status</option>
-                            <option value="Pendente">Pendente</option>
-                            <option value="Em Progresso">Progresso</option>
+                            <option value="">Estado</option>
+                            <option value="Criado">Criado</option>
+                            <option value="Atribuído">Atribuído</option>
+                            <option value="Em Progresso">Em Progresso</option>
+                            <option value="Bloqueado">Bloqueado</option>
                             <option value="Concluído">Concluído</option>
+                            <option value="Arquivado">Arquivado</option>
                         </select>
                         <select id="filterPriority" class="bg-slate-50 p-2 text-[9px] font-bold rounded-lg border border-slate-100 flex-1 text-slate-500 uppercase">
                             <option value="">Prioridade</option>
-                            <option value="LOW">LOW</option>
-                            <option value="MEDIUM">MED</option>
-                            <option value="HIGH">HIGH</option>
-                            <option value="CRITICAL">CRIT</option>
+                            <option value="LOW">Baixa</option>
+                            <option value="MEDIUM">Média</option>
+                            <option value="HIGH">Alta</option>
+                            <option value="CRITICAL">Crítica</option>
                         </select>
                         <input type="text" id="filterTag" placeholder="Tag" 
                             class="flex-1 lg:w-24 p-2 text-[9px] bg-slate-50 border border-slate-100 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500">
@@ -159,9 +162,9 @@
                         class="bg-transparent border-none p-2 text-[11px] font-medium outline-none">
                     <div class="flex flex-col lg:flex-row gap-2 border-t border-slate-200 pt-2">
                         <select id="taskType" class="bg-white p-2 text-[9px] font-bold rounded-lg shadow-sm border border-slate-100 flex-1 text-slate-700">
-                            <option value="bug">BUG</option>
-                            <option value="feature">FEATURE</option>
-                            <option value="task">TASK</option>
+                            <option value="bug">Erro</option>
+                            <option value="feature">Funcionalidade</option>
+                            <option value="task">Tarefa</option>
                         </select>
                         <div class="flex-1 lg:flex-initial">
                             <label class="text-[8px] text-slate-400 font-bold uppercase mb-1 block">Deadline (opcional)</label>

@@ -43,11 +43,11 @@ export class RenderModals {
         modal.className = 'fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]';
         modal.innerHTML = `
       <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
-        <h3 class="font-bold text-lg mb-3">Edit task name</h3>
+        <h3 class="font-bold text-lg mb-3">Editar nome da tarefa</h3>
         <input id="editTitleInput" class="w-full border rounded px-3 py-2 mb-4 text-sm" value="${task.title}">
         <div class="flex justify-end gap-2">
-          <button onclick="window.renderModals.closeEditTitleModal()" class="px-4 py-2 bg-gray-200 rounded text-sm">Cancel</button>
-          <button onclick="window.renderModals.saveEditTitle(${taskId})" class="px-4 py-2 bg-indigo-600 text-white rounded text-sm">Save</button>
+          <button onclick="window.renderModals.closeEditTitleModal()" class="px-4 py-2 bg-gray-200 rounded text-sm">Cancelar</button>
+          <button onclick="window.renderModals.saveEditTitle(${taskId})" class="px-4 py-2 bg-indigo-600 text-white rounded text-sm">Guardar</button>
         </div>
       </div>
     `;
@@ -75,7 +75,7 @@ export class RenderModals {
             return;
         const oldTitle = task.title;
         this.taskService.updateTaskTitle(taskId, newTitle);
-        window.logService.addLog(`Task renamed: "${oldTitle}" -> "${newTitle}"`);
+        window.logService.addLog(`Tarefa renomeada: "${oldTitle}" -> "${newTitle}"`);
         this.closeEditTitleModal();
         window.saveAndRender();
     }
@@ -122,22 +122,22 @@ export class RenderModals {
         modal.className = 'fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]';
         modal.innerHTML = `
       <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
-        <h3 class="font-bold text-lg mb-4">Edit ${user.name}</h3>
+        <h3 class="font-bold text-lg mb-4">Editar ${user.name}</h3>
         <div class="space-y-3 mb-4">
           <div>
-            <label class="text-xs font-bold text-slate-600 block mb-1">PHOTO (optional)</label>
+            <label class="text-xs font-bold text-slate-600 block mb-1">FOTO (opcional)</label>
             <input id="editUserPhoto" type="file" accept="image/*" class="w-full border border-slate-200 rounded px-3 py-2 text-sm cursor-pointer">
           </div>
           <div>
-            <label class="text-xs font-bold text-slate-600 block mb-1">NAME</label>
+            <label class="text-xs font-bold text-slate-600 block mb-1">NOME</label>
             <input id="editUserName" type="text" value="${user.name}" class="w-full border border-slate-200 rounded px-3 py-2 text-sm">
           </div>
           <div>
-            <label class="text-xs font-bold text-slate-600 block mb-1">EMAIL</label>
+            <label class="text-xs font-bold text-slate-600 block mb-1">E-MAIL</label>
             <input id="editUserEmail" type="email" value="${user.email}" class="w-full border border-slate-200 rounded px-3 py-2 text-sm">
           </div>
           <div>
-            <label class="text-xs font-bold text-slate-600 block mb-1">ROLE</label>
+            <label class="text-xs font-bold text-slate-600 block mb-1">FUNÇÃO</label>
             <select id="editUserRole" class="w-full border border-slate-200 rounded px-3 py-2 text-sm">
               <option value="ADMIN" ${user.role === 'ADMIN' ? 'selected' : ''}>ADMIN</option>
               <option value="MANAGER" ${user.role === 'MANAGER' ? 'selected' : ''}>MANAGER</option>
@@ -147,8 +147,8 @@ export class RenderModals {
           </div>
         </div>
         <div class="flex justify-end gap-2">
-          <button onclick="window.renderModals.closeEditUserModal()" class="px-4 py-2 bg-gray-200 rounded text-sm">Cancel</button>
-          <button onclick="window.renderModals.saveEditUser(${userId})" class="px-4 py-2 bg-indigo-600 text-white rounded text-sm">Save</button>
+          <button onclick="window.renderModals.closeEditUserModal()" class="px-4 py-2 bg-gray-200 rounded text-sm">Cancelar</button>
+          <button onclick="window.renderModals.saveEditUser(${userId})" class="px-4 py-2 bg-indigo-600 text-white rounded text-sm">Guardar</button>
         </div>
       </div>
     `;
@@ -167,13 +167,13 @@ export class RenderModals {
         const roleSelect = document.getElementById('editUserRole');
         const photoInput = document.getElementById('editUserPhoto');
         if (!nameInput?.value || !emailInput?.value || !roleSelect?.value) {
-            window.notificationService.addNotification('Please fill in all fields!', 'warning');
+            window.notificationService.addNotification('Por favor, preencha todos os campos!', 'warning');
             return;
         }
         // Prevent managers from editing admin users
         const userBeingEdited = window.userService.getUserById(userId);
         if (window.currentUserRole === 'MANAGER' && userBeingEdited?.role === 'ADMIN') {
-            window.notificationService.addNotification('Managers cannot modify admin users!', 'warning');
+            window.notificationService.addNotification('Gerentes não podem modificar utilizadores administradores!', 'warning');
             return;
         }
         const updateData = {
@@ -200,13 +200,13 @@ export class RenderModals {
     performUserUpdate(userId, updateData) {
         const result = window.userService.updateUser(userId, updateData);
         if (result) {
-            window.notificationService.addNotification('User updated successfully!', 'success');
-            window.logService.addLog(`User ${result.name} updated`);
+            window.notificationService.addNotification('Utilizador atualizado com sucesso!', 'success');
+            window.logService.addLog(`Utilizador ${result.name} atualizado`);
             this.closeEditUserModal();
             window.saveAndRender();
         }
         else {
-            window.notificationService.addNotification('Error updating user. Email may already be in use!', 'warning');
+            window.notificationService.addNotification('Erro ao atualizar utilizador. O e-mail pode já estar em uso!', 'warning');
         }
     }
 }
