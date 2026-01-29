@@ -90,10 +90,11 @@ View comprehensive task information:
 - Tags
 
 ### Task Status Management
-- **Three-State Cycle**: Aberta (Open) → Em Progresso (In Progress) → Concluído (Completed)
+- **Six Status Types**: Criado → Atribuído → Em Progresso → Bloqueado → Concluído → Arquivado
 - Status button shows color-coded indicators
 - Click status button to cycle through states
 - Status changes logged automatically
+- Full Portuguese localization of all status values
 
 ### Task Sorting
 - **Three-Way Toggle Sort**:
@@ -144,11 +145,14 @@ View comprehensive task information:
 ## 📊 Dashboard & Statistics
 
 ### Real-Time Statistics
-- **Total Tasks**: Count of all tasks in the system
-- **Open Tasks**: Count of tasks with "Aberta" status
+- **Total Tasks**: Count of all tasks in the system with live updates
+- **Completed Tasks**: Count of tasks with "Concluído" status
+- **Active Tasks**: Count of tasks in progress or active states
 - **Total Users**: Count of all registered users
 - **Active Users**: Count of users with active status
+- **Assigned Task Counter**: Shows "Tarefas atribuídas: X" on each user card
 - Progress indicators showing completion rates
+- Statistics automatically update in Portuguese
 
 ### System Logs
 - Activity log showing all system events
@@ -182,14 +186,33 @@ View comprehensive task information:
 
 ---
 
+## 🌍 Internationalization
+
+### Portuguese Localization
+- **Full UI Translation**: Complete Portuguese interface for all buttons, labels, modals
+- **Task Statuses**: Criado, Atribuído, Em Progresso, Bloqueado, Concluído, Arquivado
+- **Task Types**: Tarefa, Erro, Funcionalidade
+- **Priorities**: Baixa, Média, Alta, Crítica
+- **Dashboard**: Statistics display in Portuguese
+- **Notifications**: All notifications in Portuguese
+- **User Interface**: All modals, menus, and controls fully localized
+
+### English Components
+- **Role Names**: Kept in English (ADMIN, MANAGER, MEMBER, VIEWER) for consistency
+- **System IDs**: Email addresses and user IDs remain unchanged
+
+---
+
 ## 💾 Data Management
 
-### Automatic Backup
-- BackupService creates backups on every operation
-- Data persistence across sessions
-- Backup file management
+### Export Functionality
+- **Export Button**: Located in navbar ("Exportar")
+- **JSON Export**: Downloads complete system data as JSON backup
+- **Timestamp Filenames**: Automatically named `backup-YYYY-MM-DD.json`
+- **Complete Data**: Exports users, tasks, and assignments
+- **Success Notification**: Confirmation after export
 
-### History & Logging
+### Automatic Logging
 - HistoryLog tracks all system events
 - Detailed action logging
 - Timestamp tracking
@@ -232,32 +255,39 @@ View comprehensive task information:
 ### Service-Based Architecture
 14 core services manage all functionality:
 
-1. **UserService** - User CRUD operations
-2. **TaskService** - Task management
-3. **CommentService** - Task comments
-4. **AttachmentService** - File management
-5. **TagService** - Tag management
-6. **SearchService** - Search functionality
-7. **StatisticsService** - Dashboard statistics
-8. **DeadlineService** - Deadline tracking
-9. **PriorityService** - Priority management
-10. **AssignmentService** - Task assignments
-11. **BackupService** - Data backup
-12. **AutomationService** - Automated rules
-13. **NotificationService** - User notifications
-14. **HistoryLog** - Activity logging
+1. **UserService** - User CRUD operations with email validation
+2. **TaskService** - Task management with 6 status types
+3. **CommentService** - Task comments and collaboration
+4. **AttachmentService** - File attachment management
+5. **TagService** - Tag management and filtering
+6. **SearchService** - Advanced search with narrowSearch() method
+7. **StatisticsService** - Real-time dashboard statistics
+8. **DeadlineService** - Deadline tracking and expiration
+9. **PriorityService** - Priority level management
+10. **AssignmentService** - Task assignment handling
+11. **BackupService** - JSON data export functionality
+12. **AutomationRulesService** - Automated business rules and automation
+13. **NotificationService** - User notifications and alerts
+14. **HistoryLog** - Activity logging and audit trail
 
 ### Modular UI Renderers
-- **RenderUser** - User list and details
-- **RenderTask** - Task list and modals
-- **RenderModals** - Modal dialogs
+- **RenderUser** - User list with task counter, user details modal
+- **RenderTask** - Task list, modals, and task operations
+- **RenderModals** - Modal dialogs for editing and viewing
 
 ### Technology Stack
-- **Language**: TypeScript
-- **Compilation**: tsc (TypeScript Compiler)
+- **Language**: TypeScript (ES2022 target)
+- **Compilation**: tsc (TypeScript Compiler) - Exit Code 0
 - **Styling**: Tailwind CSS
-- **Build Target**: ES2022 JavaScript
+- **Layout**: Responsive 3-column design (32% Users, 45% Tasks, 23% Stats)
 - **Data Format**: Base64 for image storage
+- **Type Safety**: Full TypeScript with proper type checking
+
+### Localization
+- **UI Language**: Portuguese
+- **Date Format**: YYYY-MM-DD
+- **Status Values**: Portuguese enums
+- **Type/Priority Display**: Portuguese with internal English values
 
 ---
 
@@ -274,24 +304,24 @@ The application comes with pre-populated demo data:
 - Ezequiel Pinto (MEMBER) - Active
 
 ### Tasks (3)
-1. **Review class 2 slides**
-   - Type: Task
-   - Priority: MEDIUM
-   - Status: Aberta
+1. **Revisar diapositivos da aula 2** (Review class 2 slides)
+   - Type: Tarefa
+   - Priority: Média
+   - Status: Criado
    - Deadline: 2026-02-05
    - Assigned: Administrator
 
-2. **Do guided exercises**
-   - Type: Task
-   - Priority: HIGH
+2. **Fazer exercícios orientados** (Do guided exercises)
+   - Type: Tarefa
+   - Priority: Alta
    - Status: Em Progresso
    - Deadline: 2026-02-03
    - Assigned: Abel & Lionel
 
-3. **Do autonomous exercises**
-   - Type: Task
-   - Priority: LOW
-   - Status: Aberta
+3. **Fazer exercícios autónomos** (Do autonomous exercises)
+   - Type: Tarefa
+   - Priority: Baixa
+   - Status: Criado
    - Deadline: 2026-02-10
    - Unassigned
 
@@ -420,11 +450,24 @@ M3/
 
 ---
 
+## ✅ Recent Updates (January 2026)
+
+- **Complete Portuguese Localization**: Entire UI translated to Portuguese
+- **User Card Task Counter**: Shows "Tarefas atribuídas: X" for each user
+- **Export Functionality**: Added JSON export button with timestamp filenames
+- **Service Refactoring**: Simplified services with cleaner APIs
+- **Automation Rules**: Enhanced AutomationRulesService with business logic
+- **Statistics**: Real-time dashboard with Portuguese status values
+- **Code Quality**: Full TypeScript compilation without errors
+
+---
+
 ## 📞 Support
 
 For issues or feature requests, refer to the project documentation or contact the development team.
 
 ---
 
-**Version**: 1.0.0  
-**Last Updated**: January 28, 2026
+**Version**: 2.0.0  
+**Last Updated**: January 29, 2026  
+**Status**: Production Ready ✅

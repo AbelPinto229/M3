@@ -138,12 +138,17 @@ function renderLogs() {
     logsContainer.innerHTML = logs
         .slice()
         .reverse()
-        .map((log) => `
-      <div class="text-[10px] text-slate-600 leading-relaxed">
-        <span class="text-slate-400">${log.timestamp}</span><br>
-        <span class="text-slate-700 font-medium">${log.message}</span>
-      </div>
-    `)
+        .map((log) => {
+        const time = log.timestamp instanceof Date
+            ? log.timestamp.toLocaleTimeString('pt-PT')
+            : new Date(log.timestamp).toLocaleTimeString('pt-PT');
+        return `
+        <div class="text-[10px] text-slate-600 leading-relaxed">
+          <span class="text-slate-400">${time}</span><br>
+          <span class="text-slate-700 font-medium">${log.message}</span>
+        </div>
+      `;
+    })
         .join('');
 }
 // Helper to update filter button styles
@@ -163,6 +168,7 @@ function setFilterButton(btn, active) {
 function createNewUser(email, name, role, photo) {
     const newUser = window.userService.addUser(email, name, role, photo);
     if (newUser) {
+        window.logService.addLog(`Utilizador ${name} (${email}) criado com role ${role}`);
         window.notificationService.addNotification('Utilizador adicionado!', 'success');
         window.notificationService.notifyAdmins(`Novo utilizador criado: ${email}`);
     }
@@ -292,6 +298,8 @@ function setupEventListeners() {
             if (deadlineInput?.value) {
                 window.deadlineService.setDeadline(newTask.id, new Date(deadlineInput.value));
             }
+            // Log task creation
+            window.logService.addLog(`Tarefa criada: "${newTask.title}" (${typeSelect.value})`);
             // Auto-configure bug tasks
             if (typeSelect.value.toLowerCase() === 'bug') {
                 window.taskService.updateTaskPriority(newTask.id, 'CRITICAL');

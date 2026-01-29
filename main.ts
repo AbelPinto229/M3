@@ -154,15 +154,21 @@ function renderLogs() {
   if (!logsContainer) return;
   
   const logs = (window as any).logService.getLogs();
+  
   logsContainer.innerHTML = logs
     .slice()
     .reverse()
-    .map((log: any) => `
-      <div class="text-[10px] text-slate-600 leading-relaxed">
-        <span class="text-slate-400">${log.timestamp}</span><br>
-        <span class="text-slate-700 font-medium">${log.message}</span>
-      </div>
-    `)
+    .map((log: any) => {
+      const time = log.timestamp instanceof Date 
+        ? log.timestamp.toLocaleTimeString('pt-PT')
+        : new Date(log.timestamp).toLocaleTimeString('pt-PT');
+      return `
+        <div class="text-[10px] text-slate-600 leading-relaxed">
+          <span class="text-slate-400">${time}</span><br>
+          <span class="text-slate-700 font-medium">${log.message}</span>
+        </div>
+      `;
+    })
     .join('');
 }
 
@@ -183,6 +189,7 @@ function createNewUser(email: string, name: string, role: string, photo?: string
   const newUser = (window as any).userService.addUser(email, name, role, photo);
   
   if (newUser) {
+    (window as any).logService.addLog(`Utilizador ${name} (${email}) criado com role ${role}`);
     (window as any).notificationService.addNotification('Utilizador adicionado!', 'success');
     (window as any).notificationService.notifyAdmins(`Novo utilizador criado: ${email}`);
   } else {
@@ -330,6 +337,9 @@ function setupEventListeners() {
       if (deadlineInput?.value) {
         (window as any).deadlineService.setDeadline(newTask.id, new Date(deadlineInput.value));
       }
+      
+      // Log task creation
+      (window as any).logService.addLog(`Tarefa criada: "${newTask.title}" (${typeSelect.value})`);
       
       // Auto-configure bug tasks
       if (typeSelect.value.toLowerCase() === 'bug') {
