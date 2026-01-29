@@ -155,11 +155,14 @@ View comprehensive task information:
 - Statistics automatically update in Portuguese
 
 ### System Logs
-- Activity log showing all system events
-- User creation/modification logs
-- Task status change logs
-- Timeline-based log display
-- Scrollable log history
+- **Real-Time Activity Log**: Timeline of all system events and actions
+- **Automatic Logging**: User creation, task creation, status changes, assignments, and more
+- **Timestamped Entries**: Each log entry includes Portuguese-formatted timestamp
+- **User Creation Logs**: Records new user details (name, email, role)
+- **Task Logs**: Logs all task creations with type information
+- **Action Logs**: Status changes, priority updates, assignments, user status changes
+- **Scrollable History**: Maintains full history with scrollable display
+- **Latest First**: Most recent actions displayed at the top
 
 ---
 
@@ -458,6 +461,8 @@ M3/
 - **Service Refactoring**: Simplified services with cleaner APIs
 - **Automation Rules**: Enhanced AutomationRulesService with business logic
 - **Statistics**: Real-time dashboard with Portuguese status values
+- **Comprehensive Logging**: All user creations and task creations now logged automatically
+- **Log Timestamp Formatting**: Portuguese-formatted timestamps in system logs
 - **Code Quality**: Full TypeScript compilation without errors
 
 ---
@@ -468,6 +473,6 @@ For issues or feature requests, refer to the project documentation or contact th
 
 ---
 
-**Version**: 2.0.0  
+**Version**: 2.1.0  
 **Last Updated**: January 29, 2026  
 **Status**: Production Ready ✅
