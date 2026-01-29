@@ -1,4 +1,3 @@
-// @ts-nocheck
 // ===== TASK RENDERER - All task-related rendering =====
 
 import { TaskService, ExtendedTask } from '../services/TaskService.js';
@@ -91,7 +90,7 @@ export class RenderTask {
               <option value="">Assign...</option>
               ${this.userService
                 .getActiveUsers()
-                .map(u => `<option value="${u.email}" ${t.assigned?.includes(u.email) ? 'selected' : ''}>${u.email.split('@')[0]}</option>`)
+                .map(u => `<option value="${u.email}" ${t.assigned?.includes(u.email) ? 'selected' : ''}>${u.name}</option>`)
                 .join('')}
             </select>` : ''}
             <select onchange="event.stopPropagation(); window.renderTask.setTaskPriority(${t.id}, this.value)" class="text-[10px] h-6 px-2 rounded-md border bg-white min-w-[70px]" ${!((window as any).checkPermission?.('edit_task')) ? 'disabled' : ''}>
@@ -223,7 +222,7 @@ export class RenderTask {
   addComment(): void {
     // VIEWER role cannot add comments
     if ((window as any).currentUserRole === 'VIEWER') {
-      window.services.notificationService.addNotification('No permission to comment!', 'warning');
+      (window as any).notificationService.addNotification('No permission to comment!', 'warning');
       return;
     }
 
@@ -243,7 +242,7 @@ export class RenderTask {
     }
     
     this.commentService.addComment(this.activeTaskModalId, userId, input.value);
-    window.services.notificationService.addNotification('Comentário adicionado!', 'success');
+    (window as any).notificationService.addNotification('Comentário adicionado!', 'success');
     input.value = '';
     this.renderTaskModalContent();
   }
@@ -270,7 +269,7 @@ export class RenderTask {
         size: file.size,
         url: e.target?.result as string,
       });
-      window.services.notificationService.addNotification(`Ficheiro "${file.name}" anexado!`, 'success');
+      (window as any).notificationService.addNotification(`Ficheiro "${file.name}" anexado!`, 'success');
       this.renderTaskModalContent();
     };
     reader.readAsDataURL(file);
@@ -279,7 +278,7 @@ export class RenderTask {
   // Removes an attachment from the task
   deleteAttachment(id: number): void {
     this.attachmentService.removeAttachment(id);
-    window.services.notificationService.addNotification('Ficheiro removido!', 'success');
+    (window as any).notificationService.addNotification('Ficheiro removido!', 'success');
     this.renderTaskModalContent();
   }
 
@@ -288,7 +287,7 @@ export class RenderTask {
   cycleTaskStatus(id: number): void {
     // VIEWER cannot change task status
     if ((window as any).currentUserRole === 'VIEWER') {
-      window.services.notificationService.addNotification('No permission to change status!', 'warning');
+      (window as any).notificationService.addNotification('No permission to change status!', 'warning');
       return;
     }
 
@@ -299,8 +298,8 @@ export class RenderTask {
     const currentIndex = TASK_STATUS_CYCLE.indexOf(task.status as TaskStatus);
     const newStatus = TASK_STATUS_CYCLE[(currentIndex + 1) % TASK_STATUS_CYCLE.length];
     this.taskService.updateTaskStatus(id, newStatus);
-    window.services.logService.addLog(`Status "${task.title}": ${task.status} -> ${newStatus}`);
-    window.services.notificationService.addNotification(`Status alterado: ${task.status} → ${newStatus}`, 'success');
+    (window as any).logService.addLog(`Status "${task.title}": ${task.status} -> ${newStatus}`);
+    (window as any).notificationService.addNotification(`Status alterado: ${task.status} → ${newStatus}`, 'success');
     
     // Process task with type-specific logic (BugTask, Feature, etc)
     if (task.type && ['Bug', 'Feature', 'Task'].includes(task.type)) {
@@ -315,7 +314,7 @@ export class RenderTask {
       processTask(taskObj);
     }
     
-    window.services.automationService.applyRules(task);
+    (window as any).automationService.applyRules(task);
     (window as any).saveAndRender();
   }
 
@@ -323,9 +322,9 @@ export class RenderTask {
   deleteTask(id: number): void {
     const task = this.taskService.getTaskById(id);
     if (!task) return;
-    window.renderModals.openConfirmModal(`Delete task?`, () => {
+    (window as any).renderModals.openConfirmModal(`Delete task?`, () => {
       this.taskService.deleteTask(id);
-      window.services.notificationService.addNotification(`Tarefa "${task.title}" eliminada!`, 'success');
+      (window as any).notificationService.addNotification(`Tarefa "${task.title}" eliminada!`, 'success');
       (window as any).saveAndRender();
     });
   }
@@ -336,8 +335,8 @@ export class RenderTask {
     if (!task) return;
     task.assigned = email ? [email] : [];
     if (email) {
-      window.services.logService.addLog(`Task "${task.title}" assigned to ${email}`);
-      window.services.notificationService.addNotification(`Tarefa "${task.title}" atribuída a ${email}!`, 'success');
+      (window as any).logService.addLog(`Task "${task.title}" assigned to ${email}`);
+      (window as any).notificationService.addNotification(`Tarefa "${task.title}" atribuída a ${email}!`, 'success');
     }
     (window as any).saveAndRender();
   }
@@ -347,14 +346,14 @@ export class RenderTask {
     const task = this.taskService.getTaskById(taskId);
     if (!task) return;
     this.taskService.updateTaskPriority(taskId, p);
-    window.services.priorityService.setPriority(taskId, p as any);
-    window.services.logService.addLog(`Task "${task.title}" priority -> ${p}`);
-    window.services.notificationService.addNotification(`Prioridade alterada: ${p.toUpperCase()}`, 'success');
+    (window as any).priorityService.setPriority(taskId, p as any);
+    (window as any).logService.addLog(`Task "${task.title}" priority -> ${p}`);
+    (window as any).notificationService.addNotification(`Prioridade alterada: ${p.toUpperCase()}`, 'success');
     (window as any).saveAndRender();
   }
 
   // Opens modal to edit task title
   editTaskTitle(taskId: number): void {
-    window.renderModals.openEditTitleModal(taskId);
+    (window as any).renderModals.openEditTitleModal(taskId);
   }
 }

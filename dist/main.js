@@ -1,4 +1,3 @@
-// @ts-nocheck
 // ===== MAIN APPLICATION ENTRY POINT =====
 // This file bootstraps the entire application with all services and UI
 // Import all services
@@ -14,7 +13,7 @@ import { AssignmentService } from './src/services/AssignmentService.js';
 import { SearchService } from './src/services/SearchService.js';
 import { StatisticsService } from './src/services/StatisticService.js';
 import { BackupService } from './src/services/BackupService.js';
-import { AutomationRulesService } from './src/services/AutomationService.js';
+import { AutomationRulesService } from './src/services/AutomationRulesService.js';
 import { NotificationService } from './src/notifications/NotificationService.js';
 // Import UI components
 import { RenderUser } from './src/ui/renderUser.js';
@@ -35,6 +34,21 @@ const statisticsService = new StatisticsService(taskService.getTasks(), userServ
 const searchService = new SearchService(taskService.getTasks());
 const backupService = new BackupService(userService.getUsers(), taskService.getTasks(), assignmentService);
 const notificationService = new NotificationService();
+// ===== EXPOSE SERVICES TO WINDOW =====
+window.userService = userService;
+window.taskService = taskService;
+window.logService = logService;
+window.deadlineService = deadlineService;
+window.priorityService = priorityService;
+window.assignmentService = assignmentService;
+window.commentService = commentService;
+window.attachmentService = attachmentService;
+window.tagService = tagService;
+window.automationService = automationService;
+window.statisticsService = statisticsService;
+window.searchService = searchService;
+window.backupService = backupService;
+window.notificationService = notificationService;
 // ===== INITIALIZE UI RENDERERS =====
 window.renderUser = new RenderUser(userService);
 window.renderTask = new RenderTask(taskService, userService, tagService, searchService, commentService, attachmentService);
@@ -53,12 +67,12 @@ window.checkPermission = function (action) {
         'create_task': ['ADMIN', 'MANAGER'],
         'edit_task': ['ADMIN', 'MANAGER', 'MEMBER'],
         'delete_task': ['ADMIN', 'MANAGER'],
-        'delete_user': ['ADMIN'],
+        'delete_user': ['ADMIN', 'MANAGER'],
         'edit_user': ['ADMIN', 'MANAGER'],
         'assign_task': ['ADMIN', 'MANAGER'],
         'edit_title': ['ADMIN', 'MANAGER'],
         'add_comment': ['ADMIN', 'MANAGER', 'MEMBER'],
-        'toggle_user': ['ADMIN'],
+        'toggle_user': ['ADMIN', 'MANAGER'],
         'view_all': ['ADMIN', 'MANAGER', 'MEMBER', 'VIEWER']
     };
     return permissions[action]?.includes(role) || false;
@@ -75,8 +89,8 @@ export function initializeApp() {
 }
 // Helper to update dashboard stats
 function updateDashboard() {
-    const taskStats = window.services.statisticsService.calculateTaskStats();
-    const userStats = window.services.statisticsService.calculateUserStats();
+    const taskStats = window.statisticsService.calculateTaskStats();
+    const userStats = window.statisticsService.calculateUserStats();
     // Count tasks by status (using English status names from TaskStatus enum)
     const inProgressCount = taskStats.byStatus['In Progress'] || 0;
     const pendingCount = taskStats.byStatus['Created'] || taskStats.byStatus['Assigned'] || 0;
@@ -108,7 +122,7 @@ function setProgressBar(id, width) {
 }
 // Helper to save and render
 export function saveAndRender() {
-    window.services.backupService.createBackup();
+    window.backupService.createBackup();
     updateDashboard();
     window.renderUser.render();
     window.renderTask.render();
@@ -121,7 +135,7 @@ function renderLogs() {
     const logsContainer = document.getElementById('logs');
     if (!logsContainer)
         return;
-    const logs = window.services.logService.getLogs();
+    const logs = window.logService.getLogs();
     logsContainer.innerHTML = logs
         .slice()
         .reverse()
@@ -148,13 +162,13 @@ function setFilterButton(btn, active) {
 }
 // Helper to create a user
 function createNewUser(email, name, role, photo) {
-    const newUser = window.services.userService.addUser(email, name, role, photo);
+    const newUser = window.userService.addUser(email, name, role, photo);
     if (newUser) {
-        window.services.notificationService.addNotification('Utilizador adicionado!', 'success');
-        window.services.notificationService.notifyAdmins(`Novo utilizador criado: ${email}`);
+        window.notificationService.addNotification('Utilizador adicionado!', 'success');
+        window.notificationService.notifyAdmins(`Novo utilizador criado: ${email}`);
     }
     else {
-        window.services.notificationService.addNotification('Email já existe!', 'warning');
+        window.notificationService.addNotification('Email já existe!', 'warning');
     }
 }
 // Setup search and filter listeners
@@ -185,13 +199,14 @@ function setupSearchAndFilterListeners() {
         const nextIndex = (states.indexOf(current) + 1) % states.length;
         window.taskSortState = states[nextIndex];
         const texts = { 'asc': '↑ A-Z', 'desc': '↓ Z-A', 'none': 'Sort A-Z' };
-        sortAZBtn.textContent = texts[window.taskSortState];
+        if (sortAZBtn)
+            sortAZBtn.textContent = texts[window.taskSortState];
         window.renderTask.render();
     });
     clearCompletedBtn?.addEventListener('click', () => {
-        const completedTasks = window.services.taskService.getTasks().filter((t) => t.status === 'Completed');
-        completedTasks.forEach((t) => window.services.taskService.deleteTask(t.id));
-        window.services.notificationService.addNotification(`${completedTasks.length} tarefas removidas!`, 'success');
+        const completedTasks = window.taskService.getTasks().filter((t) => t.status === 'Completed');
+        completedTasks.forEach((t) => window.taskService.deleteTask(t.id));
+        window.notificationService.addNotification(`${completedTasks.length} tarefas removidas!`, 'success');
         saveAndRender();
     });
     // User filter buttons
@@ -219,7 +234,7 @@ function setupEventListeners() {
         addUserForm.addEventListener('submit', (e) => {
             e.preventDefault();
             if (!window.checkPermission('create_user')) {
-                window.services.notificationService.addNotification('Sem permissão para criar utilizadores!', 'warning');
+                window.notificationService.addNotification('Sem permissão para criar utilizadores!', 'warning');
                 return;
             }
             const nameInput = document.getElementById('userName');
@@ -250,7 +265,7 @@ function setupEventListeners() {
         addTaskForm.addEventListener('submit', (e) => {
             e.preventDefault();
             if (!window.checkPermission('create_task')) {
-                window.services.notificationService.addNotification('Sem permissão para criar tarefas!', 'warning');
+                window.notificationService.addNotification('Sem permissão para criar tarefas!', 'warning');
                 return;
             }
             const titleInput = document.getElementById('taskTitle');
@@ -258,20 +273,20 @@ function setupEventListeners() {
             const deadlineInput = document.getElementById('taskDeadline');
             if (!titleInput?.value || !typeSelect?.value)
                 return;
-            const newTask = window.services.taskService.addTask(titleInput.value, typeSelect.value, deadlineInput?.value);
+            const newTask = window.taskService.addTask(titleInput.value, typeSelect.value, deadlineInput?.value);
             if (deadlineInput?.value) {
-                window.services.deadlineService.setDeadline(newTask.id, new Date(deadlineInput.value));
+                window.deadlineService.setDeadline(newTask.id, new Date(deadlineInput.value));
             }
             // Auto-configure bug tasks
             if (typeSelect.value.toLowerCase() === 'bug') {
-                window.services.taskService.updateTaskPriority(newTask.id, 'CRITICAL');
-                const admin = window.services.userService.getUsers().find((u) => u.role === 'ADMIN' || u.role === 'MANAGER');
+                window.taskService.updateTaskPriority(newTask.id, 'CRITICAL');
+                const admin = window.userService.getUsers().find((u) => u.role === 'ADMIN' || u.role === 'MANAGER');
                 if (admin) {
                     newTask.assigned = [admin.email];
-                    window.services.logService.addLog(`Bug task "${newTask.title}" atribuído a ${admin.email}`);
+                    window.logService.addLog(`Bug task "${newTask.title}" atribuído a ${admin.email}`);
                 }
             }
-            window.services.notificationService.addNotification('Tarefa criada!');
+            window.notificationService.addNotification('Tarefa criada!');
             addTaskForm.reset();
             saveAndRender();
         });

@@ -1,4 +1,3 @@
-// @ts-nocheck
 // ===== MAIN APPLICATION ENTRY POINT =====
 // This file bootstraps the entire application with all services and UI
 
@@ -15,7 +14,7 @@ import { AssignmentService } from './src/services/AssignmentService.js';
 import { SearchService } from './src/services/SearchService.js';
 import { StatisticsService } from './src/services/StatisticService.js';
 import { BackupService } from './src/services/BackupService.js';
-import { AutomationRulesService } from './src/services/AutomationService.js';
+import { AutomationRulesService } from './src/services/AutomationRulesService.js';
 import { NotificationService } from './src/notifications/NotificationService.js';
 
 // Import UI components
@@ -39,35 +38,50 @@ const searchService = new SearchService(taskService.getTasks());
 const backupService = new BackupService(userService.getUsers(), taskService.getTasks(), assignmentService);
 const notificationService = new NotificationService();
 
+// ===== EXPOSE SERVICES TO WINDOW =====
+(window as any).userService = userService;
+(window as any).taskService = taskService;
+(window as any).logService = logService;
+(window as any).deadlineService = deadlineService;
+(window as any).priorityService = priorityService;
+(window as any).assignmentService = assignmentService;
+(window as any).commentService = commentService;
+(window as any).attachmentService = attachmentService;
+(window as any).tagService = tagService;
+(window as any).automationService = automationService;
+(window as any).statisticsService = statisticsService;
+(window as any).searchService = searchService;
+(window as any).backupService = backupService;
+(window as any).notificationService = notificationService;
 
 // ===== INITIALIZE UI RENDERERS =====
-window.renderUser = new RenderUser(userService);
-window.renderTask = new RenderTask(taskService, userService, tagService, searchService, commentService, attachmentService);
-window.renderModals = new RenderModals(taskService, userService);
+(window as any).renderUser = new RenderUser(userService);
+(window as any).renderTask = new RenderTask(taskService, userService, tagService, searchService, commentService, attachmentService);
+(window as any).renderModals = new RenderModals(taskService, userService);
 
 // ===== INITIALIZE CURRENT USER =====
 // Set current logged-in user to admin (id: 0)
-window.currentUserId = 0;
-window.currentUserRole = 'ADMIN';
+(window as any).currentUserId = 0;
+(window as any).currentUserRole = 'ADMIN';
 
 // ===== SORT STATE =====
-window.taskSortState = 'none'; // none | asc | desc
+(window as any).taskSortState = 'none'; // none | asc | desc
 
 // ===== PERMISSION SYSTEM =====
-window.checkPermission = function(action) {
-  const role = window.currentUserRole;
+(window as any).checkPermission = function(action) {
+  const role = (window as any).currentUserRole;
   
   const permissions = {
     'create_user': ['ADMIN', 'MANAGER'],
     'create_task': ['ADMIN', 'MANAGER'],
     'edit_task': ['ADMIN', 'MANAGER', 'MEMBER'],
     'delete_task': ['ADMIN', 'MANAGER'],
-    'delete_user': ['ADMIN'],
+    'delete_user': ['ADMIN', 'MANAGER'],
     'edit_user': ['ADMIN', 'MANAGER'],
     'assign_task': ['ADMIN', 'MANAGER'],
     'edit_title': ['ADMIN', 'MANAGER'],
     'add_comment': ['ADMIN', 'MANAGER', 'MEMBER'],
-    'toggle_user': ['ADMIN'],
+    'toggle_user': ['ADMIN', 'MANAGER'],
     'view_all': ['ADMIN', 'MANAGER', 'MEMBER', 'VIEWER']
   };
   
@@ -79,8 +93,8 @@ export function initializeApp() {
   setupEventListeners();
   setupSearchAndFilterListeners();
   updateDashboard();
-  window.renderUser.render();
-  window.renderTask.render();
+  (window as any).renderUser.render();
+  (window as any).renderTask.render();
   renderLogs();
   
   console.log('Application initialized successfully');
@@ -88,8 +102,8 @@ export function initializeApp() {
 
 // Helper to update dashboard stats
 function updateDashboard() {
-  const taskStats = window.services.statisticsService.calculateTaskStats();
-  const userStats = window.services.statisticsService.calculateUserStats();
+  const taskStats = (window as any).statisticsService.calculateTaskStats();
+  const userStats = (window as any).statisticsService.calculateUserStats();
 
   // Count tasks by status (using English status names from TaskStatus enum)
   const inProgressCount = taskStats.byStatus['In Progress'] || 0;
@@ -125,22 +139,22 @@ function setProgressBar(id, width) {
 
 // Helper to save and render
 export function saveAndRender() {
-  window.services.backupService.createBackup();
+  (window as any).backupService.createBackup();
   updateDashboard();
-  window.renderUser.render();
-  window.renderTask.render();
+  (window as any).renderUser.render();
+  (window as any).renderTask.render();
   renderLogs();
 }
 
 // Expose saveAndRender to window
-window.saveAndRender = saveAndRender;
+(window as any).saveAndRender = saveAndRender;
 
 // Helper to render logs
 function renderLogs() {
   const logsContainer = document.getElementById('logs');
   if (!logsContainer) return;
   
-  const logs = window.services.logService.getLogs();
+  const logs = (window as any).logService.getLogs();
   logsContainer.innerHTML = logs
     .slice()
     .reverse()
@@ -166,14 +180,14 @@ function setFilterButton(btn, active) {
 }
 
 // Helper to create a user
-function createNewUser(email, name, role, photo) {
-  const newUser = window.services.userService.addUser(email, name, role, photo);
+function createNewUser(email: string, name: string, role: string, photo?: string) {
+  const newUser = (window as any).userService.addUser(email, name, role, photo);
   
   if (newUser) {
-    window.services.notificationService.addNotification('Utilizador adicionado!', 'success');
-    window.services.notificationService.notifyAdmins(`Novo utilizador criado: ${email}`);
+    (window as any).notificationService.addNotification('Utilizador adicionado!', 'success');
+    (window as any).notificationService.notifyAdmins(`Novo utilizador criado: ${email}`);
   } else {
-    window.services.notificationService.addNotification('Email já existe!', 'warning');
+    (window as any).notificationService.addNotification('Email já existe!', 'warning');
   }
 }
 
@@ -183,7 +197,7 @@ function setupSearchAndFilterListeners() {
   const roleSelector = document.getElementById('roleSelector');
   if (roleSelector) {
     roleSelector.addEventListener('change', (e) => {
-      window.currentUserRole = (e.target as HTMLSelectElement).value;
+      (window as any).currentUserRole = (e.target as HTMLSelectElement).value;
       saveAndRender();
     });
   }
@@ -196,7 +210,7 @@ function setupSearchAndFilterListeners() {
   const sortAZBtn = document.getElementById('sortTasksAZ');
   const clearCompletedBtn = document.getElementById('clearCompleted');
 
-  const updateTaskRender = () => window.renderTask.render();
+  const updateTaskRender = () => (window as any).renderTask.render();
   
   searchInput?.addEventListener('input', updateTaskRender);
   filterStatus?.addEventListener('change', updateTaskRender);
@@ -210,14 +224,14 @@ function setupSearchAndFilterListeners() {
     (window as any).taskSortState = states[nextIndex];
     
     const texts = { 'asc': '↑ A-Z', 'desc': '↓ Z-A', 'none': 'Sort A-Z' };
-    sortAZBtn.textContent = texts[(window as any).taskSortState];
-    window.renderTask.render();
+    if (sortAZBtn) sortAZBtn.textContent = texts[(window as any).taskSortState];
+    (window as any).renderTask.render();
   });
   
   clearCompletedBtn?.addEventListener('click', () => {
-    const completedTasks = window.services.taskService.getTasks().filter((t) => t.status === 'Completed');
-    completedTasks.forEach((t) => window.services.taskService.deleteTask(t.id));
-    window.services.notificationService.addNotification(`${completedTasks.length} tarefas removidas!`, 'success');
+    const completedTasks = (window as any).taskService.getTasks().filter((t: any) => t.status === 'Completed');
+    completedTasks.forEach((t: any) => (window as any).taskService.deleteTask(t.id));
+    (window as any).notificationService.addNotification(`${completedTasks.length} tarefas removidas!`, 'success');
     saveAndRender();
   });
 
@@ -227,18 +241,18 @@ function setupSearchAndFilterListeners() {
   const filterInactiveBtn = document.getElementById('filterInactiveUsers');
   const userSearchInput = document.getElementById('searchUser');
 
-  const setUserFilter = (filter) => {
+  const setUserFilter = (filter: string) => {
     (window as any).userFilter = filter;
     setFilterButton(filterAllBtn, filter === 'all');
     setFilterButton(filterActiveBtn, filter === 'active');
     setFilterButton(filterInactiveBtn, filter === 'inactive');
-    window.renderUser.render();
+    (window as any).renderUser.render();
   };
 
   filterAllBtn?.addEventListener('click', () => setUserFilter('all'));
   filterActiveBtn?.addEventListener('click', () => setUserFilter('active'));
   filterInactiveBtn?.addEventListener('click', () => setUserFilter('inactive'));
-  userSearchInput?.addEventListener('input', () => window.renderUser.render());
+  userSearchInput?.addEventListener('input', () => (window as any).renderUser.render());
   
   (window as any).userFilter = 'all';
 }
@@ -250,15 +264,15 @@ function setupEventListeners() {
     addUserForm.addEventListener('submit', (e) => {
       e.preventDefault();
       
-      if (!window.checkPermission('create_user')) {
-        window.services.notificationService.addNotification('Sem permissão para criar utilizadores!', 'warning');
+      if (!(window as any).checkPermission('create_user')) {
+        (window as any).notificationService.addNotification('Sem permissão para criar utilizadores!', 'warning');
         return;
       }
       
-      const nameInput = document.getElementById('userName');
-      const emailInput = document.getElementById('userEmail');
-      const roleSelect = document.getElementById('userRole');
-      const photoInput = document.getElementById('userPhoto');
+      const nameInput = document.getElementById('userName') as HTMLInputElement;
+      const emailInput = document.getElementById('userEmail') as HTMLInputElement;
+      const roleSelect = document.getElementById('userRole') as HTMLSelectElement;
+      const photoInput = document.getElementById('userPhoto') as HTMLInputElement;
       
       if (!nameInput?.value || !emailInput?.value || !roleSelect?.value) return;
       
@@ -266,14 +280,14 @@ function setupEventListeners() {
       if (photoInput?.files?.length) {
         const reader = new FileReader();
         reader.onload = (event) => {
-          createNewUser(emailInput.value, nameInput.value, roleSelect.value, event.target?.result);
-          addUserForm.reset();
+          createNewUser(emailInput.value, nameInput.value, roleSelect.value, event.target?.result as string);
+          (addUserForm as HTMLFormElement).reset();
           saveAndRender();
         };
         reader.readAsDataURL(photoInput.files[0]);
       } else {
         createNewUser(emailInput.value, nameInput.value, roleSelect.value);
-        addUserForm.reset();
+        (addUserForm as HTMLFormElement).reset();
         saveAndRender();
       }
     });
@@ -284,35 +298,35 @@ function setupEventListeners() {
     addTaskForm.addEventListener('submit', (e) => {
       e.preventDefault();
       
-      if (!window.checkPermission('create_task')) {
-        window.services.notificationService.addNotification('Sem permissão para criar tarefas!', 'warning');
+      if (!(window as any).checkPermission('create_task')) {
+        (window as any).notificationService.addNotification('Sem permissão para criar tarefas!', 'warning');
         return;
       }
       
-      const titleInput = document.getElementById('taskTitle');
-      const typeSelect = document.getElementById('taskType');
-      const deadlineInput = document.getElementById('taskDeadline');
+      const titleInput = document.getElementById('taskTitle') as HTMLInputElement;
+      const typeSelect = document.getElementById('taskType') as HTMLSelectElement;
+      const deadlineInput = document.getElementById('taskDeadline') as HTMLInputElement;
       
       if (!titleInput?.value || !typeSelect?.value) return;
       
-      const newTask = window.services.taskService.addTask(titleInput.value, typeSelect.value, deadlineInput?.value);
+      const newTask = (window as any).taskService.addTask(titleInput.value, typeSelect.value, deadlineInput?.value);
       
       if (deadlineInput?.value) {
-        window.services.deadlineService.setDeadline(newTask.id, new Date(deadlineInput.value));
+        (window as any).deadlineService.setDeadline(newTask.id, new Date(deadlineInput.value));
       }
       
       // Auto-configure bug tasks
       if (typeSelect.value.toLowerCase() === 'bug') {
-        window.services.taskService.updateTaskPriority(newTask.id, 'CRITICAL');
-        const admin = window.services.userService.getUsers().find((u) => u.role === 'ADMIN' || u.role === 'MANAGER');
+        (window as any).taskService.updateTaskPriority(newTask.id, 'CRITICAL');
+        const admin = (window as any).userService.getUsers().find((u: any) => u.role === 'ADMIN' || u.role === 'MANAGER');
         if (admin) {
           newTask.assigned = [admin.email];
-          window.services.logService.addLog(`Bug task "${newTask.title}" atribuído a ${admin.email}`);
+          (window as any).logService.addLog(`Bug task "${newTask.title}" atribuído a ${admin.email}`);
         }
       }
       
-      window.services.notificationService.addNotification('Tarefa criada!');
-      addTaskForm.reset();
+      (window as any).notificationService.addNotification('Tarefa criada!');
+      (addTaskForm as HTMLFormElement).reset();
       saveAndRender();
     });
   }

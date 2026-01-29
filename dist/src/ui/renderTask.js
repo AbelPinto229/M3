@@ -1,4 +1,3 @@
-// @ts-nocheck
 // ===== TASK RENDERER - All task-related rendering =====
 import { TaskStatus } from '../tasks/TaskStatus.js';
 import { processTask } from '../utils/TaskUtils.js';
@@ -75,7 +74,7 @@ export class RenderTask {
               <option value="">Assign...</option>
               ${this.userService
             .getActiveUsers()
-            .map(u => `<option value="${u.email}" ${t.assigned?.includes(u.email) ? 'selected' : ''}>${u.email.split('@')[0]}</option>`)
+            .map(u => `<option value="${u.email}" ${t.assigned?.includes(u.email) ? 'selected' : ''}>${u.name}</option>`)
             .join('')}
             </select>` : ''}
             <select onchange="event.stopPropagation(); window.renderTask.setTaskPriority(${t.id}, this.value)" class="text-[10px] h-6 px-2 rounded-md border bg-white min-w-[70px]" ${!(window.checkPermission?.('edit_task')) ? 'disabled' : ''}>
@@ -193,7 +192,7 @@ export class RenderTask {
     addComment() {
         // VIEWER role cannot add comments
         if (window.currentUserRole === 'VIEWER') {
-            window.services.notificationService.addNotification('No permission to comment!', 'warning');
+            window.notificationService.addNotification('No permission to comment!', 'warning');
             return;
         }
         if (!this.activeTaskModalId)
@@ -212,7 +211,7 @@ export class RenderTask {
                 userId = assignedUser.id;
         }
         this.commentService.addComment(this.activeTaskModalId, userId, input.value);
-        window.services.notificationService.addNotification('Comentário adicionado!', 'success');
+        window.notificationService.addNotification('Comentário adicionado!', 'success');
         input.value = '';
         this.renderTaskModalContent();
     }
@@ -238,7 +237,7 @@ export class RenderTask {
                 size: file.size,
                 url: e.target?.result,
             });
-            window.services.notificationService.addNotification(`Ficheiro "${file.name}" anexado!`, 'success');
+            window.notificationService.addNotification(`Ficheiro "${file.name}" anexado!`, 'success');
             this.renderTaskModalContent();
         };
         reader.readAsDataURL(file);
@@ -246,7 +245,7 @@ export class RenderTask {
     // Removes an attachment from the task
     deleteAttachment(id) {
         this.attachmentService.removeAttachment(id);
-        window.services.notificationService.addNotification('Ficheiro removido!', 'success');
+        window.notificationService.addNotification('Ficheiro removido!', 'success');
         this.renderTaskModalContent();
     }
     // ===== TASK ACTIONS =====
@@ -254,7 +253,7 @@ export class RenderTask {
     cycleTaskStatus(id) {
         // VIEWER cannot change task status
         if (window.currentUserRole === 'VIEWER') {
-            window.services.notificationService.addNotification('No permission to change status!', 'warning');
+            window.notificationService.addNotification('No permission to change status!', 'warning');
             return;
         }
         const TASK_STATUS_CYCLE = [TaskStatus.CREATED, TaskStatus.ASSIGNED, TaskStatus.IN_PROGRESS, TaskStatus.BLOCKED, TaskStatus.COMPLETED, TaskStatus.ARCHIVED];
@@ -264,8 +263,8 @@ export class RenderTask {
         const currentIndex = TASK_STATUS_CYCLE.indexOf(task.status);
         const newStatus = TASK_STATUS_CYCLE[(currentIndex + 1) % TASK_STATUS_CYCLE.length];
         this.taskService.updateTaskStatus(id, newStatus);
-        window.services.logService.addLog(`Status "${task.title}": ${task.status} -> ${newStatus}`);
-        window.services.notificationService.addNotification(`Status alterado: ${task.status} → ${newStatus}`, 'success');
+        window.logService.addLog(`Status "${task.title}": ${task.status} -> ${newStatus}`);
+        window.notificationService.addNotification(`Status alterado: ${task.status} → ${newStatus}`, 'success');
         // Process task with type-specific logic (BugTask, Feature, etc)
         if (task.type && ['Bug', 'Feature', 'Task'].includes(task.type)) {
             const taskObj = {
@@ -278,7 +277,7 @@ export class RenderTask {
             };
             processTask(taskObj);
         }
-        window.services.automationService.applyRules(task);
+        window.automationService.applyRules(task);
         window.saveAndRender();
     }
     // Opens confirmation modal to delete task
@@ -288,7 +287,7 @@ export class RenderTask {
             return;
         window.renderModals.openConfirmModal(`Delete task?`, () => {
             this.taskService.deleteTask(id);
-            window.services.notificationService.addNotification(`Tarefa "${task.title}" eliminada!`, 'success');
+            window.notificationService.addNotification(`Tarefa "${task.title}" eliminada!`, 'success');
             window.saveAndRender();
         });
     }
@@ -299,8 +298,8 @@ export class RenderTask {
             return;
         task.assigned = email ? [email] : [];
         if (email) {
-            window.services.logService.addLog(`Task "${task.title}" assigned to ${email}`);
-            window.services.notificationService.addNotification(`Tarefa "${task.title}" atribuída a ${email}!`, 'success');
+            window.logService.addLog(`Task "${task.title}" assigned to ${email}`);
+            window.notificationService.addNotification(`Tarefa "${task.title}" atribuída a ${email}!`, 'success');
         }
         window.saveAndRender();
     }
@@ -310,9 +309,9 @@ export class RenderTask {
         if (!task)
             return;
         this.taskService.updateTaskPriority(taskId, p);
-        window.services.priorityService.setPriority(taskId, p);
-        window.services.logService.addLog(`Task "${task.title}" priority -> ${p}`);
-        window.services.notificationService.addNotification(`Prioridade alterada: ${p.toUpperCase()}`, 'success');
+        window.priorityService.setPriority(taskId, p);
+        window.logService.addLog(`Task "${task.title}" priority -> ${p}`);
+        window.notificationService.addNotification(`Prioridade alterada: ${p.toUpperCase()}`, 'success');
         window.saveAndRender();
     }
     // Opens modal to edit task title

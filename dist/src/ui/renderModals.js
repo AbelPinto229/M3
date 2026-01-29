@@ -1,4 +1,3 @@
-// @ts-nocheck
 // ===== MODAL RENDERER - Generic modal rendering (confirmation, edit, etc) =====
 export class RenderModals {
     taskService;
@@ -76,7 +75,7 @@ export class RenderModals {
             return;
         const oldTitle = task.title;
         this.taskService.updateTaskTitle(taskId, newTitle);
-        window.services.logService.addLog(`Task renamed: "${oldTitle}" -> "${newTitle}"`);
+        window.logService.addLog(`Task renamed: "${oldTitle}" -> "${newTitle}"`);
         this.closeEditTitleModal();
         window.saveAndRender();
     }
@@ -168,7 +167,13 @@ export class RenderModals {
         const roleSelect = document.getElementById('editUserRole');
         const photoInput = document.getElementById('editUserPhoto');
         if (!nameInput?.value || !emailInput?.value || !roleSelect?.value) {
-            window.services.notificationService.addNotification('Please fill in all fields!', 'warning');
+            window.notificationService.addNotification('Please fill in all fields!', 'warning');
+            return;
+        }
+        // Prevent managers from editing admin users
+        const userBeingEdited = window.userService.getUserById(userId);
+        if (window.currentUserRole === 'MANAGER' && userBeingEdited?.role === 'ADMIN') {
+            window.notificationService.addNotification('Managers cannot modify admin users!', 'warning');
             return;
         }
         const updateData = {
@@ -193,15 +198,15 @@ export class RenderModals {
     }
     // Performs the actual user update and handles success/error responses
     performUserUpdate(userId, updateData) {
-        const result = window.services.userService.updateUser(userId, updateData);
+        const result = window.userService.updateUser(userId, updateData);
         if (result) {
-            window.services.notificationService.addNotification('User updated successfully!', 'success');
-            window.services.logService.addLog(`User ${result.name} updated`);
+            window.notificationService.addNotification('User updated successfully!', 'success');
+            window.logService.addLog(`User ${result.name} updated`);
             this.closeEditUserModal();
             window.saveAndRender();
         }
         else {
-            window.services.notificationService.addNotification('Error updating user. Email may already be in use!', 'warning');
+            window.notificationService.addNotification('Error updating user. Email may already be in use!', 'warning');
         }
     }
 }

@@ -1,4 +1,3 @@
-// @ts-nocheck
 // ===== USER RENDERER - All user-related rendering =====
 export class RenderUser {
     userService;
@@ -65,7 +64,19 @@ export class RenderUser {
     // ===== USER ACTIONS =====
     // Toggles user active/inactive status
     toggleUserStatus(id) {
+        const user = this.userService.getUserById(id);
+        if (!user)
+            return;
+        // Prevent managers from toggling admin users
+        if (window.currentUserRole === 'MANAGER' && user.role === 'ADMIN') {
+            window.notificationService.addNotification('Managers cannot modify admin users!', 'warning');
+            return;
+        }
         this.userService.toggleUserStatus(id);
+        const updatedUser = this.userService.getUserById(id);
+        const newStatus = updatedUser?.active ? 'ACTIVE' : 'INACTIVE';
+        window.notificationService.addNotification(`${user.name} is now ${newStatus}!`, 'success');
+        window.logService.addLog(`User ${user.name} status: ${newStatus}`);
         window.saveAndRender();
     }
     // Opens confirmation modal to delete user
@@ -73,9 +84,16 @@ export class RenderUser {
         const user = this.userService.getUserById(id);
         if (!user)
             return;
+        // Prevent managers from deleting admin users
+        if (window.currentUserRole === 'MANAGER' && user.role === 'ADMIN') {
+            window.notificationService.addNotification('Managers cannot delete admin users!', 'warning');
+            return;
+        }
         // Trigger confirmation modal
         window.renderModals.openConfirmModal(`Delete ${user.email}?`, () => {
             this.userService.deleteUser(id);
+            window.notificationService.addNotification(`${user.name} deleted!`, 'success');
+            window.logService.addLog(`User ${user.name} deleted`);
             window.saveAndRender();
         });
     }
@@ -86,6 +104,11 @@ export class RenderUser {
             return;
         // Use user photo or generate avatar with user initial
         const photoHTML = user.photo ? `<img src="${user.photo}" alt="${user.name}" class="w-20 h-20 rounded-full object-cover border-2 border-slate-200 mx-auto mb-4">` : `<div class="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">${user.name.charAt(0).toUpperCase()}</div>`;
+        // Get tasks assigned to this user (by email, not ID)
+        const assignedTasks = window.taskService.getTasks().filter((t) => t.assigned && Array.isArray(t.assigned) && t.assigned.some((email) => String(email) === String(user.email)));
+        const tasksListHTML = assignedTasks.length > 0
+            ? assignedTasks.map((t) => `<li class="text-sm text-slate-700">• ${t.title} <span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">${t.status}</span></li>`).join('')
+            : '<li class="text-sm text-slate-500 italic">No tasks assigned</li>';
         const detailsContent = `
       <div class="space-y-4">
         ${photoHTML}
@@ -110,6 +133,12 @@ export class RenderUser {
         <div>
           <p class="text-sm font-bold text-slate-600">STATUS</p>
           <p class="text-lg font-semibold ${user.active ? 'text-emerald-600' : 'text-slate-400'}">${user.active ? 'ACTIVE' : 'INACTIVE'}</p>
+        </div>
+        <div>
+          <p class="text-sm font-bold text-slate-600">ASSIGNED TASKS (${assignedTasks.length})</p>
+          <ul class="mt-2 space-y-1">
+            ${tasksListHTML}
+          </ul>
         </div>
       </div>
     `;
