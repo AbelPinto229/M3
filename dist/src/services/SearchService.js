@@ -4,20 +4,20 @@ export class SearchService {
     constructor(tasks) {
         this.tasks = tasks;
     }
-    // Searches tasks by title with case-insensitive matching
+    // searches tasks by title with case-insensitive matching
     searchByTitle(text) {
         return this.tasks.filter((t) => t.title.toLowerCase().includes(text.toLowerCase()));
     }
-    // Retrieves all tasks assigned to a specific user
+    // retrieves all tasks assigned to a specific user
     searchByUser(userId, assignmentService) {
         const taskIds = assignmentService.getTasksFromUser(userId);
         return this.tasks.filter((t) => taskIds.includes(t.id));
     }
-    // Filters tasks by their status
+    // filters tasks by their status
     searchByStatus(status) {
         return this.tasks.filter((t) => t.status === status);
     }
-    // Performs comprehensive search across title, status, and user with duplicate removal
+    // performs comprehensive search across title, status, and user with duplicate removal
     globalSearch(query, assignmentService) {
         const byTitle = this.searchByTitle(query);
         const byStatus = this.searchByStatus(query);
@@ -29,7 +29,7 @@ export class SearchService {
         const all = [...byTitle, ...byStatus, ...byUser];
         return Array.from(new Set(all)); // Remove duplicates
     }
-    // Filters tasks by multiple criteria (title, status, priority, type, tags)
+    // filters tasks by multiple criteria (title, status, priority, type, tags)
     filterTasks(tasks, criteria, tagService) {
         return tasks.filter(task => {
             const matchTitle = task.title.toLowerCase().includes(criteria.text.toLowerCase());

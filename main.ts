@@ -39,24 +39,6 @@ const searchService = new SearchService(taskService.getTasks());
 const backupService = new BackupService(userService.getUsers(), taskService.getTasks(), assignmentService);
 const notificationService = new NotificationService();
 
-// ===== EXPOSE SERVICES TO WINDOW =====
-// Create centralized service container
-window.services = {
-  userService,
-  taskService,
-  logService,
-  tagService,
-  searchService,
-  automationService,
-  priorityService,
-  assignmentService,
-  deadlineService,
-  commentService,
-  attachmentService,
-  statisticsService,
-  backupService,
-  notificationService
-};
 
 // ===== INITIALIZE UI RENDERERS =====
 window.renderUser = new RenderUser(userService);
@@ -75,7 +57,7 @@ window.taskSortState = 'none'; // none | asc | desc
 window.checkPermission = function(action) {
   const role = window.currentUserRole;
   
-  const permissions: Record<string, string[]> = {
+  const permissions = {
     'create_user': ['ADMIN', 'MANAGER'],
     'create_task': ['ADMIN', 'MANAGER'],
     'edit_task': ['ADMIN', 'MANAGER', 'MEMBER'],
@@ -200,7 +182,7 @@ function setupSearchAndFilterListeners() {
   // Role selector
   const roleSelector = document.getElementById('roleSelector');
   if (roleSelector) {
-    roleSelector.addEventListener('change', (e: Event) => {
+    roleSelector.addEventListener('change', (e) => {
       window.currentUserRole = (e.target as HTMLSelectElement).value;
       saveAndRender();
     });
@@ -227,14 +209,14 @@ function setupSearchAndFilterListeners() {
     const nextIndex = (states.indexOf(current) + 1) % states.length;
     (window as any).taskSortState = states[nextIndex];
     
-    const texts: Record<string, string> = { 'asc': '↑ A-Z', 'desc': '↓ Z-A', 'none': 'Sort A-Z' };
+    const texts = { 'asc': '↑ A-Z', 'desc': '↓ Z-A', 'none': 'Sort A-Z' };
     sortAZBtn.textContent = texts[(window as any).taskSortState];
     window.renderTask.render();
   });
   
   clearCompletedBtn?.addEventListener('click', () => {
-    const completedTasks = window.services.taskService.getTasks().filter((t: any) => t.status === 'Completed');
-    completedTasks.forEach((t: any) => window.services.taskService.deleteTask(t.id));
+    const completedTasks = window.services.taskService.getTasks().filter((t) => t.status === 'Completed');
+    completedTasks.forEach((t) => window.services.taskService.deleteTask(t.id));
     window.services.notificationService.addNotification(`${completedTasks.length} tarefas removidas!`, 'success');
     saveAndRender();
   });
@@ -245,7 +227,7 @@ function setupSearchAndFilterListeners() {
   const filterInactiveBtn = document.getElementById('filterInactiveUsers');
   const userSearchInput = document.getElementById('searchUser');
 
-  const setUserFilter = (filter: string) => {
+  const setUserFilter = (filter) => {
     (window as any).userFilter = filter;
     setFilterButton(filterAllBtn, filter === 'all');
     setFilterButton(filterActiveBtn, filter === 'active');
@@ -284,7 +266,7 @@ function setupEventListeners() {
       if (photoInput?.files?.length) {
         const reader = new FileReader();
         reader.onload = (event) => {
-          createNewUser(emailInput.value, nameInput.value, roleSelect.value, event.target?.result as string);
+          createNewUser(emailInput.value, nameInput.value, roleSelect.value, event.target?.result);
           addUserForm.reset();
           saveAndRender();
         };
@@ -322,7 +304,7 @@ function setupEventListeners() {
       // Auto-configure bug tasks
       if (typeSelect.value.toLowerCase() === 'bug') {
         window.services.taskService.updateTaskPriority(newTask.id, 'CRITICAL');
-        const admin = window.services.userService.getUsers().find((u: any) => u.role === 'ADMIN' || u.role === 'MANAGER');
+        const admin = window.services.userService.getUsers().find((u) => u.role === 'ADMIN' || u.role === 'MANAGER');
         if (admin) {
           newTask.assigned = [admin.email];
           window.services.logService.addLog(`Bug task "${newTask.title}" atribuído a ${admin.email}`);

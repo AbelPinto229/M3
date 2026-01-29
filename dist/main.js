@@ -35,24 +35,6 @@ const statisticsService = new StatisticsService(taskService.getTasks(), userServ
 const searchService = new SearchService(taskService.getTasks());
 const backupService = new BackupService(userService.getUsers(), taskService.getTasks(), assignmentService);
 const notificationService = new NotificationService();
-// ===== EXPOSE SERVICES TO WINDOW =====
-// Create centralized service container
-window.services = {
-    userService,
-    taskService,
-    logService,
-    tagService,
-    searchService,
-    automationService,
-    priorityService,
-    assignmentService,
-    deadlineService,
-    commentService,
-    attachmentService,
-    statisticsService,
-    backupService,
-    notificationService
-};
 // ===== INITIALIZE UI RENDERERS =====
 window.renderUser = new RenderUser(userService);
 window.renderTask = new RenderTask(taskService, userService, tagService, searchService, commentService, attachmentService);
