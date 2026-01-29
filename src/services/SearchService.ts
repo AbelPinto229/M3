@@ -38,7 +38,7 @@ export class SearchService {
   }
 
   // filters tasks by multiple criteria (title, status, priority, type, tags)
-  filterTasks(tasks: Task[], criteria: {
+  narrowSearch(tasks: Task[], criteria: {
     text: string;
     status: string;
     priority: string;

@@ -102,8 +102,8 @@ export function initializeApp() {
 
 // Helper to update dashboard stats
 function updateDashboard() {
-  const taskStats = (window as any).statisticsService.calculateTaskStats();
-  const userStats = (window as any).statisticsService.calculateUserStats();
+  const taskStats = (window as any).statisticsService.countTasks();
+  const userStats = (window as any).statisticsService.countUsers();
 
   // Count tasks by status (using Portuguese status names from TaskStatus enum)
   const inProgressCount = taskStats.byStatus['Em Progresso'] || 0;
@@ -139,7 +139,6 @@ function setProgressBar(id, width) {
 
 // Helper to save and render
 export function saveAndRender() {
-  (window as any).backupService.createBackup();
   updateDashboard();
   (window as any).renderUser.render();
   (window as any).renderTask.render();
@@ -233,6 +232,23 @@ function setupSearchAndFilterListeners() {
     completedTasks.forEach((t: any) => (window as any).taskService.deleteTask(t.id));
     (window as any).notificationService.addNotification(`${completedTasks.length} tarefas removidas!`, 'success');
     saveAndRender();
+  });
+
+  // Export button
+  const exportBtn = document.getElementById('exportBtn');
+  exportBtn?.addEventListener('click', () => {
+    const exportedData = (window as any).backupService.exportAll();
+    const jsonString = JSON.stringify(exportedData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `backup-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    (window as any).notificationService.addNotification('Dados exportados com sucesso!', 'success');
   });
 
   // User filter buttons

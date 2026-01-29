@@ -31,32 +31,5 @@ export class BackupService {
       assignments: this.exportAssignments()
     };
   }
-
-  // Creates a new backup with current timestamp and stores it
-  createBackup(): BackupData {
-    const backup: BackupData = {
-      timestamp: new Date(),
-      users: this.exportUsers(),
-      tasks: this.exportTasks(),
-      assignments: this.exportAssignments()
-    };
-    this.backups.push(backup);
-    return backup;
-  }
-
-  // Retrieves a copy of all stored backups
-  getBackups(): BackupData[] {
-    return [...this.backups];
-  }
-
-  // Retrieves the most recent backup or undefined if no backups exist
-  getLastBackup(): BackupData | undefined {
-    return this.backups[this.backups.length - 1];
-  }
-
-  // Clears all stored backups
-  clearBackups(): void {
-    this.backups = [];
-  }
 }
 

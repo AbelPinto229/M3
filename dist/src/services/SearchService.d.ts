@@ -7,7 +7,7 @@ export declare class SearchService {
     searchByUser(userId: number, assignmentService: any): Task[];
     searchByStatus(status: string): Task[];
     globalSearch(query: string, assignmentService: any): Task[];
-    filterTasks(tasks: Task[], criteria: {
+    narrowSearch(tasks: Task[], criteria: {
         text: string;
         status: string;
         priority: string;

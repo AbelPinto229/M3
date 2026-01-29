@@ -17,11 +17,9 @@ export declare class StatisticsService {
     private tasks;
     private users;
     constructor(tasks: Task[], users: User[]);
-    countUsers(): number;
-    countTasks(): number;
+    countUsers(): UserStats;
+    countTasks(): TaskStats;
     countCompletedTasks(): number;
     countActiveTasks(): number;
     tasksByStatus(): Record<string, number>;
-    calculateTaskStats(): TaskStats;
-    calculateUserStats(): UserStats;
 }

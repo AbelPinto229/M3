@@ -24,28 +24,5 @@ export class BackupService {
             assignments: this.exportAssignments()
         };
     }
-    // Creates a new backup with current timestamp and stores it
-    createBackup() {
-        const backup = {
-            timestamp: new Date(),
-            users: this.exportUsers(),
-            tasks: this.exportTasks(),
-            assignments: this.exportAssignments()
-        };
-        this.backups.push(backup);
-        return backup;
-    }
-    // Retrieves a copy of all stored backups
-    getBackups() {
-        return [...this.backups];
-    }
-    // Retrieves the most recent backup or undefined if no backups exist
-    getLastBackup() {
-        return this.backups[this.backups.length - 1];
-    }
-    // Clears all stored backups
-    clearBackups() {
-        this.backups = [];
-    }
 }
 //# sourceMappingURL=BackupService.js.map

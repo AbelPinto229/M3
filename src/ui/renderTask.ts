@@ -34,7 +34,7 @@ export class RenderTask {
       tag: (document.getElementById('filterTag') as HTMLInputElement)?.value || '',
     };
 
-    let filteredTasks = this.searchService.filterTasks(
+    let filteredTasks = this.searchService.narrowSearch(
       this.taskService.getTasks(),
       searchCriteria,
       this.tagService

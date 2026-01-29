@@ -30,7 +30,7 @@ export class SearchService {
         return Array.from(new Set(all)); // Remove duplicates
     }
     // filters tasks by multiple criteria (title, status, priority, type, tags)
-    filterTasks(tasks, criteria, tagService) {
+    narrowSearch(tasks, criteria, tagService) {
         return tasks.filter(task => {
             const matchTitle = task.title.toLowerCase().includes(criteria.text.toLowerCase());
             const matchStatus = criteria.status === "" || task.status === criteria.status;

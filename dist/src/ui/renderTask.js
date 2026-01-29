@@ -28,7 +28,7 @@ export class RenderTask {
             type: document.getElementById('filterType')?.value || '',
             tag: document.getElementById('filterTag')?.value || '',
         };
-        let filteredTasks = this.searchService.filterTasks(this.taskService.getTasks(), searchCriteria, this.tagService);
+        let filteredTasks = this.searchService.narrowSearch(this.taskService.getTasks(), searchCriteria, this.tagService);
         // Apply sorting based on sort state
         const sortState = window.taskSortState || 'none';
         if (sortState === 'asc') {

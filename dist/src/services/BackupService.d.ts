@@ -20,8 +20,4 @@ export declare class BackupService {
         tasks: Task[];
         assignments: any;
     };
-    createBackup(): BackupData;
-    getBackups(): BackupData[];
-    getLastBackup(): BackupData | undefined;
-    clearBackups(): void;
 }
