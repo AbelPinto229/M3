@@ -10,7 +10,7 @@ export function processTask(task) {
             if (task.status === TaskStatus.IN_PROGRESS) {
                 console.warn(`Bug "${task.title}" em progresso!`);
             }
-            if (task.status === TaskStatus.PENDING) {
+            if (task.status === TaskStatus.ASSIGNED) {
                 task.moveTo(TaskStatus.IN_PROGRESS);
                 console.log(`Bug "${task.title}" iniciado.`);
             }
@@ -18,7 +18,7 @@ export function processTask(task) {
         case "feature":
             console.log(`[LOG] Processando feature: ${task.title}`);
             // More flexible rules for features
-            if (task.status === TaskStatus.PENDING) {
+            if (task.status === TaskStatus.ASSIGNED) {
                 task.moveTo(TaskStatus.IN_PROGRESS);
                 console.log(`Feature "${task.title}" em progresso.`);
             }
@@ -26,9 +26,11 @@ export function processTask(task) {
         case "task":
         default:
             console.log(`[LOG] Processando tarefa genérica: ${task.title}`);
-            if (!task.completed) {
-                task.moveTo(TaskStatus.IN_PROGRESS);
-                console.log(`Tarefa "${task.title}" em andamento.`);
+            if (!task.completed && task.status !== TaskStatus.COMPLETED && task.status !== TaskStatus.ARCHIVED) {
+                if (task.status === TaskStatus.ASSIGNED) {
+                    task.moveTo(TaskStatus.IN_PROGRESS);
+                    console.log(`Tarefa "${task.title}" em andamento.`);
+                }
             }
             break;
     }

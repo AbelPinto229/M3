@@ -1,5 +1,3 @@
-// src/security/UserRole.ts
-// User roles enum
 export var UserRole;
 (function (UserRole) {
     UserRole[UserRole["ADMIN"] = 0] = "ADMIN";

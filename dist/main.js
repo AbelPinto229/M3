@@ -29,7 +29,7 @@ const assignmentService = new AssignmentService();
 const commentService = new CommentService();
 const attachmentService = new AttachmentService();
 const tagService = new TagService();
-const automationService = new AutomationRulesService(assignmentService, deadlineService);
+const automationService = new AutomationRulesService(assignmentService, deadlineService, priorityService);
 const statisticsService = new StatisticsService(taskService.getTasks(), userService.getUsers());
 const searchService = new SearchService(taskService.getTasks());
 const backupService = new BackupService(userService.getUsers(), taskService.getTasks(), assignmentService);
@@ -93,10 +93,10 @@ export function initializeApp() {
 function updateDashboard() {
     const taskStats = window.services.statisticsService.calculateTaskStats();
     const userStats = window.services.statisticsService.calculateUserStats();
-    // Count tasks by status
-    const inProgressCount = taskStats.byStatus['Em Progresso'] || 0;
-    const pendingCount = taskStats.byStatus['Pendente'] || 0;
-    const completedCount = taskStats.byStatus['Concluído'] || 0;
+    // Count tasks by status (using English status names from TaskStatus enum)
+    const inProgressCount = taskStats.byStatus['In Progress'] || 0;
+    const pendingCount = taskStats.byStatus['Created'] || taskStats.byStatus['Assigned'] || 0;
+    const completedCount = taskStats.byStatus['Completed'] || 0;
     setElementText('totalTasks', taskStats.total);
     setElementText('pendingTasks', taskStats.pending);
     setElementText('inProgressTasks', inProgressCount);
@@ -275,6 +275,7 @@ function setupEventListeners() {
                         const newUser = window.services.userService.addUser(emailInput.value, nameInput.value, roleSelect.value, photoBase64);
                         if (newUser) {
                             window.services.notificationService.addNotification('Utilizador adicionado!', 'success');
+                            window.services.notificationService.notifyAdmins(`Novo utilizador criado: ${emailInput.value}`);
                         }
                         else {
                             window.services.notificationService.addNotification('Email já existe!', 'warning');
@@ -289,6 +290,7 @@ function setupEventListeners() {
                     const newUser = window.services.userService.addUser(emailInput.value, nameInput.value, roleSelect.value);
                     if (newUser) {
                         window.services.notificationService.addNotification('Utilizador adicionado!', 'success');
+                        window.services.notificationService.notifyAdmins(`Novo utilizador criado: ${emailInput.value}`);
                     }
                     else {
                         window.services.notificationService.addNotification('Email já existe!', 'warning');
@@ -315,6 +317,10 @@ function setupEventListeners() {
             const deadlineInput = document.getElementById('taskDeadline');
             if (titleInput?.value && typeSelect?.value) {
                 const newTask = window.services.taskService.addTask(titleInput.value, typeSelect.value, deadlineInput?.value);
+                // Set deadline if provided
+                if (deadlineInput?.value) {
+                    window.services.deadlineService.setDeadline(newTask.id, new Date(deadlineInput.value));
+                }
                 // Apply automation rules for bug tasks
                 if (typeSelect.value.toLowerCase() === 'bug') {
                     // Set priority to CRITICAL

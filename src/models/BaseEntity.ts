@@ -1,5 +1,4 @@
 // BASE ENTITY - Base class for all entities
-
 export class BaseEntity {
     protected id: number;
     protected createdAt: Date;
@@ -9,12 +8,12 @@ export class BaseEntity {
         this.createdAt = new Date(); // Creation timestamp
     }
 
-    // Get entity ID
+    // show id of entities but in this case is herded by UserClass
     getId(): number {
         return this.id;
     }
 
-    // Get creation date
+    // show the date of the creation of the entity
     getCreatedAt(): Date {
         return this.createdAt;
     }

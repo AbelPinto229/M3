@@ -1,7 +1,9 @@
-// src/tasks/TaskStatus.ts
 // Enum that defines all possible states of a task
 export enum TaskStatus {
-    PENDING = "Pending",
+    CREATED = "Created",
+    ASSIGNED = "Assigned",
     IN_PROGRESS = "In Progress",
-    COMPLETED = "Completed"
+    BLOCKED = "Blocked",
+    COMPLETED = "Completed",
+    ARCHIVED = "Archived"
 }

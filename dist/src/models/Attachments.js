@@ -1,4 +1,4 @@
-// src/attachments/Attachment.ts
+// ATTACHMENT MODEL - Represents an attachment linked to a task
 export class Attachment {
     id;
     taskId;

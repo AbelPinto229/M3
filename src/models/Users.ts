@@ -6,5 +6,5 @@ export interface User {
   name: string;
   role: string;
   active: boolean;
-  photo?: string; // Base64 encoded image
+  photo?: string; 
 }

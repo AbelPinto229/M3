@@ -1,5 +1,8 @@
 export declare enum TaskStatus {
-    PENDING = "Pendente",
-    IN_PROGRESS = "Em Progresso",
-    COMPLETED = "Conclu\u00EDdo"
+    CREATED = "Created",
+    ASSIGNED = "Assigned",
+    IN_PROGRESS = "In Progress",
+    BLOCKED = "Blocked",
+    COMPLETED = "Completed",
+    ARCHIVED = "Archived"
 }

@@ -1,34 +1,34 @@
 import { TaskStatus } from './TaskStatus.js';
-// Função genérica que processa qualquer tarefa de forma diferente
+// function that processes any task differently
 export function processTask(task) {
     const type = task.getType();
     switch (type) {
         case "bug":
-            console.log(`[LOG] Processando bug: ${task.title}`);
-            // Regras mais rígidas
-            if (task.status === TaskStatus.PENDING) {
-                console.warn(`Bug "${task.title}" está pendente!`);
+            console.log(`[LOG] Processing bug: ${task.title}`);
+            // check the status and throw a warning in console
+            if (task.status === TaskStatus.ASSIGNED) {
+                console.warn(`Bug "${task.title}" is assigned!`);
             }
-            if (task.status === TaskStatus.PENDING) {
+            if (task.status === TaskStatus.ASSIGNED) {
                 task.moveTo(TaskStatus.IN_PROGRESS);
-                console.log(`Bug "${task.title}" iniciado.`);
+                console.log(`Bug "${task.title}" started.`);
             }
-            // Aqui você poderia disparar notificações extras
             break;
         case "feature":
-            console.log(`[LOG] Processando feature: ${task.title}`);
-            // Regras mais flexíveis
-            if (task.status === TaskStatus.PENDING) {
+            console.log(`[LOG] Processing feature: ${task.title}`);
+            // check the status and throw a warning in console
+            if (task.status === TaskStatus.ASSIGNED) {
                 task.moveTo(TaskStatus.IN_PROGRESS);
-                console.log(`Feature "${task.title}" iniciada.`);
+                console.log(`Feature "${task.title}" started.`);
             }
             break;
         case "task":
         default:
-            console.log(`[LOG] Processando tarefa genérica: ${task.title}`);
-            if (!task.completed) {
+            console.log(`[LOG] Processing generic task: ${task.title}`);
+            // check the status and throw a warning in console
+            if (!task.completed && task.status === TaskStatus.ASSIGNED) {
                 task.moveTo(TaskStatus.IN_PROGRESS);
-                console.log(`Tarefa "${task.title}" em andamento.`);
+                console.log(`Task "${task.title}" in progress.`);
             }
             break;
     }

@@ -19,6 +19,7 @@ export class RenderTask {
         this.attachmentService = attachmentService;
     }
     render() {
+        // Get filter criteria from UI inputs
         const searchCriteria = {
             text: document.getElementById('searchTask')?.value || '',
             status: document.getElementById('filterStatus')?.value || '',
@@ -43,12 +44,14 @@ export class RenderTask {
             .join('');
     }
     renderTaskRow(t) {
+        // Apply color styling based on task status
         const statusColor = t.status === TaskStatus.COMPLETED
             ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
             : t.status === TaskStatus.IN_PROGRESS
                 ? 'bg-amber-50 text-amber-600 border-amber-100'
                 : 'bg-blue-50 text-blue-600 border-blue-100';
         let priorityColorClass = 'text-slate-400';
+        // Set priority colors: medium (amber), high (orange), critical (red)
         if (t.priority === 'MEDIUM')
             priorityColorClass = 'text-amber-500 font-bold';
         if (t.priority === 'HIGH')
@@ -59,7 +62,7 @@ export class RenderTask {
       <tr class="group hover:bg-slate-50 transition-colors border-b border-slate-100">
         <td class="py-4 px-2 cursor-pointer" onclick="window.renderTask.openTaskModal(${t.id})">
           <p class="font-bold text-slate-700 ${t.status === TaskStatus.COMPLETED ? 'line-through opacity-40' : ''}">${t.title}</p>
-          <span class="text-[8px] ${priorityColorClass} block uppercase tracking-tighter mt-1">${t.type} | ${t.priority || 'LOW'} ${t.deadline ? '| Expira: ' + t.deadline : ''}</span>
+          <span class="text-[8px] ${priorityColorClass} block uppercase tracking-tighter mt-1">${t.type} | ${t.priority || 'LOW'} ${t.deadline ? '| Expires: ' + t.deadline : ''}</span>
         </td>
         <td class="py-4 text-center align-middle">
           <button onclick="event.stopPropagation(); window.renderTask.cycleTaskStatus(${t.id})" ${(window.currentUserRole === 'VIEWER') ? 'disabled' : ''} class="text-[9px] font-bold px-3 py-1.5 rounded-md border min-w-[100px] inline-block ${statusColor} ${(window.currentUserRole === 'VIEWER') ? 'opacity-50 cursor-not-allowed' : ''}">${t.status.toUpperCase()}</button>
@@ -68,7 +71,7 @@ export class RenderTask {
           <div class="flex flex-row items-center justify-end gap-1 h-full">
             ${(window.checkPermission?.('assign_task')) ? `
             <select onchange="event.stopPropagation(); window.renderTask.manualAssign(${t.id}, this.value)" class="text-[10px] h-6 px-2 rounded-md border bg-white min-w-[100px]">
-              <option value="">Atribuir...</option>
+              <option value="">Assign...</option>
               ${this.userService
             .getActiveUsers()
             .map(u => `<option value="${u.email}" ${t.assigned?.includes(u.email) ? 'selected' : ''}>${u.email.split('@')[0]}</option>`)
@@ -94,6 +97,7 @@ export class RenderTask {
       </tr>`;
     }
     // ===== TASK MODAL =====
+    // Opens detailed task modal with tags, comments, and attachments
     openTaskModal(taskId) {
         this.activeTaskModalId = taskId;
         const task = this.taskService.getTaskById(taskId);
@@ -103,24 +107,24 @@ export class RenderTask {
         const modalHtml = `
       <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border border-slate-100">
         <h3 class="font-bold mb-2">${task.title}</h3>
-        <p class="text-[10px] text-slate-400 mb-4">Tipo: ${task.type} | Prioridade: ${task.priority || 'LOW'}</p>
+        <p class="text-[10px] text-slate-400 mb-4">Type: ${task.type} | Priority: ${task.priority || 'LOW'}</p>
         ${!isViewer ? `
         <div class="mb-4">
           <h4 class="font-bold text-xs mb-1">Tags:</h4>
           <div id="taskTagsList" class="flex flex-wrap gap-1 mb-2"></div>
-          <input type="text" id="tagInput" class="w-full px-2 py-1 border rounded text-[10px]" placeholder="Nova tag..." onkeypress="if(event.key==='Enter'){ window.renderTask.addTag(); }">
+          <input type="text" id="tagInput" class="w-full px-2 py-1 border rounded text-[10px]" placeholder="New tag..." onkeypress="if(event.key==='Enter'){ window.renderTask.addTag(); }">
         </div>
         ` : '<div class="mb-4"><h4 class="font-bold text-xs mb-1">Tags:</h4><div id="taskTagsList" class="flex flex-wrap gap-1 mb-2"></div></div>'}
         <div id="taskComments" class="max-h-32 overflow-y-auto mb-2 border-t pt-2"></div>
-        ${!isViewer ? `<input type="text" id="newCommentInput" class="w-full px-2 py-1 border rounded text-[10px]" placeholder="Comentar..." onkeypress="if(event.key==='Enter'){ window.renderTask.addComment(); }">` : '<p class="text-[10px] text-slate-400 italic">Visualizador - Sem permissão para comentar</p>'}
+        ${!isViewer ? `<input type="text" id="newCommentInput" class="w-full px-2 py-1 border rounded text-[10px]" placeholder="Comment..." onkeypress="if(event.key==='Enter'){ window.renderTask.addComment(); }">` : '<p class="text-[10px] text-slate-400 italic">Viewer - No permission to comment</p>'}
         ${!isViewer ? `
         <div class="mt-4">
-          <h4 class="font-bold text-xs mb-1">Anexos:</h4>
+          <h4 class="font-bold text-xs mb-1">Attachments:</h4>
           <div id="taskAttachments" class="max-h-24 overflow-y-auto"></div>
           <input type="file" id="newAttachmentInput" class="mt-1 text-xs" onchange="window.renderTask.addAttachment(event)">
         </div>
-        ` : '<div class="mt-4"><h4 class="font-bold text-xs mb-1">Anexos:</h4><div id="taskAttachments" class="max-h-24 overflow-y-auto"></div></div>'}
-        <div class="flex justify-end mt-4"><button onclick="window.renderTask.closeTaskModal()" class="px-4 py-2 bg-gray-200 rounded text-xs">Fechar</button></div>
+        ` : '<div class="mt-4"><h4 class="font-bold text-xs mb-1">Attachments:</h4><div id="taskAttachments" class="max-h-24 overflow-y-auto"></div></div>'}
+        <div class="flex justify-end mt-4"><button onclick="window.renderTask.closeTaskModal()" class="px-4 py-2 bg-gray-200 rounded text-xs">Close</button></div>
       </div>`;
         const container = document.createElement('div');
         container.id = 'taskModalContainer';
@@ -129,12 +133,14 @@ export class RenderTask {
         document.body.appendChild(container);
         this.renderTaskModalContent();
     }
+    // Closes task modal and resets active task ID
     closeTaskModal() {
         const modal = document.getElementById('taskModalContainer');
         if (modal)
             modal.remove();
         this.activeTaskModalId = null;
     }
+    // Renders tags, comments, and attachments inside the task modal
     renderTaskModalContent() {
         if (!this.activeTaskModalId)
             return;
@@ -165,6 +171,7 @@ export class RenderTask {
         }
     }
     // ===== TAG MANAGEMENT =====
+    // Adds a new tag to the active task
     addTag() {
         if (!this.activeTaskModalId)
             return;
@@ -173,6 +180,7 @@ export class RenderTask {
         input.value = '';
         this.renderTaskModalContent();
     }
+    // Removes a tag from the active task
     removeTag(tag) {
         if (!this.activeTaskModalId)
             return;
@@ -180,10 +188,11 @@ export class RenderTask {
         this.renderTaskModalContent();
     }
     // ===== COMMENT MANAGEMENT =====
+    // Adds a comment to the task (permission-based)
     addComment() {
         // VIEWER role cannot add comments
         if (window.currentUserRole === 'VIEWER') {
-            window.services.notificationService.addNotification('Sem permissão para comentar!', 'warning');
+            window.services.notificationService.addNotification('No permission to comment!', 'warning');
             return;
         }
         if (!this.activeTaskModalId)
@@ -202,14 +211,17 @@ export class RenderTask {
                 userId = assignedUser.id;
         }
         this.commentService.addComment(this.activeTaskModalId, userId, input.value);
+        window.services.notificationService.addNotification('Comentário adicionado!', 'success');
         input.value = '';
         this.renderTaskModalContent();
     }
+    // Deletes a comment and refreshes modal content
     deleteComment(id) {
         this.commentService.deleteComment(id);
         this.renderTaskModalContent();
     }
     // ===== ATTACHMENT MANAGEMENT =====
+    // Reads file as base64 and adds it as task attachment
     addAttachment(event) {
         if (!this.activeTaskModalId)
             return;
@@ -225,22 +237,26 @@ export class RenderTask {
                 size: file.size,
                 url: e.target?.result,
             });
+            window.services.notificationService.addNotification(`Ficheiro "${file.name}" anexado!`, 'success');
             this.renderTaskModalContent();
         };
         reader.readAsDataURL(file);
     }
+    // Removes an attachment from the task
     deleteAttachment(id) {
         this.attachmentService.removeAttachment(id);
+        window.services.notificationService.addNotification('Ficheiro removido!', 'success');
         this.renderTaskModalContent();
     }
     // ===== TASK ACTIONS =====
+    // Cycles task through PENDING -> IN_PROGRESS -> COMPLETED
     cycleTaskStatus(id) {
         // VIEWER cannot change task status
         if (window.currentUserRole === 'VIEWER') {
-            window.services.notificationService.addNotification('Sem permissão para alterar status!', 'warning');
+            window.services.notificationService.addNotification('No permission to change status!', 'warning');
             return;
         }
-        const TASK_STATUS_CYCLE = [TaskStatus.PENDING, TaskStatus.IN_PROGRESS, TaskStatus.COMPLETED];
+        const TASK_STATUS_CYCLE = [TaskStatus.CREATED, TaskStatus.ASSIGNED, TaskStatus.IN_PROGRESS, TaskStatus.BLOCKED, TaskStatus.COMPLETED, TaskStatus.ARCHIVED];
         const task = this.taskService.getTaskById(id);
         if (!task)
             return;
@@ -248,6 +264,7 @@ export class RenderTask {
         const newStatus = TASK_STATUS_CYCLE[(currentIndex + 1) % TASK_STATUS_CYCLE.length];
         this.taskService.updateTaskStatus(id, newStatus);
         window.services.logService.addLog(`Status "${task.title}": ${task.status} -> ${newStatus}`);
+        window.services.notificationService.addNotification(`Status alterado: ${task.status} → ${newStatus}`, 'success');
         // Process task with type-specific logic (BugTask, Feature, etc)
         if (task.type && ['Bug', 'Feature', 'Task'].includes(task.type)) {
             const taskObj = {
@@ -263,32 +280,41 @@ export class RenderTask {
         window.services.automationService.applyRules(task);
         window.saveAndRender();
     }
+    // Opens confirmation modal to delete task
     deleteTask(id) {
         const task = this.taskService.getTaskById(id);
         if (!task)
             return;
-        window.renderModals.openConfirmModal(`Remover tarefa?`, () => {
+        window.renderModals.openConfirmModal(`Delete task?`, () => {
             this.taskService.deleteTask(id);
+            window.services.notificationService.addNotification(`Tarefa "${task.title}" eliminada!`, 'success');
             window.saveAndRender();
         });
     }
+    // Assigns task to a user via email
     manualAssign(taskId, email) {
         const task = this.taskService.getTaskById(taskId);
         if (!task)
             return;
         task.assigned = email ? [email] : [];
-        if (email)
-            window.services.logService.addLog(`Tarefa "${task.title}" atribuída a ${email}`);
+        if (email) {
+            window.services.logService.addLog(`Task "${task.title}" assigned to ${email}`);
+            window.services.notificationService.addNotification(`Tarefa "${task.title}" atribuída a ${email}!`, 'success');
+        }
         window.saveAndRender();
     }
+    // Updates task priority and logs the change
     setTaskPriority(taskId, p) {
         const task = this.taskService.getTaskById(taskId);
         if (!task)
             return;
         this.taskService.updateTaskPriority(taskId, p);
-        window.services.logService.addLog(`Tarefa "${task.title}" prioridade -> ${p}`);
+        window.services.priorityService.setPriority(taskId, p);
+        window.services.logService.addLog(`Task "${task.title}" priority -> ${p}`);
+        window.services.notificationService.addNotification(`Prioridade alterada: ${p.toUpperCase()}`, 'success');
         window.saveAndRender();
     }
+    // Opens modal to edit task title
     editTaskTitle(taskId) {
         window.renderModals.openEditTitleModal(taskId);
     }

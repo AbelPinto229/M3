@@ -2,22 +2,22 @@ import { Task } from "../models/Task";
 
 // DEADLINE SERVICE - Manages task deadlines and expiration tracking
 export class DeadlineService {
-  // Maps task IDs to their deadline dates
+  // create a map with id as key and deadline date as value
   private deadlines: Map<number, Date> = new Map();
 
-  // Sets or updates the deadline for a specific task
+  // set and update deadline for a task using task id and date
   setDeadline(taskId: number, date: Date) {
     this.deadlines.set(taskId, date);
   }
 
-  // Checks if a task deadline has passed the current time
+  // check if task expired by comparing current date with deadline, if date.now is higher that deadline return true, if not false
   isExpired(taskId: number): boolean {
     const deadline = this.deadlines.get(taskId);
     if (!deadline) return false;
     return deadline.getTime() < Date.now();
   }
 
-  // Retrieves all task IDs that have expired deadlines
+  // check all task with same logic of isExpired but push to array all expired ids and return the array
   getExpiredTasks(): number[] {
     const expired: number[] = [];
     this.deadlines.forEach((date, taskId) => {

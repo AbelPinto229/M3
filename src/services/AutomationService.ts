@@ -4,11 +4,13 @@ import { Task } from "../models/Task";
 import { TaskStatus } from '../tasks/TaskStatus.js';
 import { AssignmentService } from './AssignmentService.js';
 import { DeadlineService } from './DeadlineService.js';
+import { PriorityService } from './PriorityService.js';
 
 export class AutomationRulesService {
   constructor(
     private assignmentService: AssignmentService,
-    private deadlineService: DeadlineService
+    private deadlineService: DeadlineService,
+    private priorityService: PriorityService
   ) {}
 
   // Applies all automation rules to a task (completion, blocked, expiration checks)
@@ -16,6 +18,7 @@ export class AutomationRulesService {
     this.ruleTaskCompleted(task);
     this.ruleTaskBlocked(task);
     this.ruleTaskExpired(task);
+    this.ruleCheckAllExpiredTasks();
   }
 
   // Applies all automation rules to a user (inactive status check)
@@ -44,6 +47,18 @@ export class AutomationRulesService {
     if (this.deadlineService.isExpired(task.id) && task.status !== TaskStatus.COMPLETED) {
       task.status = 'BLOCKED';
       console.log(`RULE: Task "${task.title}" expired and was blocked.`);
+    }
+  }
+
+  // Rule: Check all expired tasks periodically
+  private ruleCheckAllExpiredTasks() {
+    const expiredTasks = this.deadlineService.getExpiredTasks();
+    const highPriorityTasks = this.priorityService.getHighPriorityTasks();
+    if (expiredTasks.length > 0) {
+      console.log(`RULE: ${expiredTasks.length} task(s) have expired deadlines.`);
+    }
+    if (highPriorityTasks.length > 0) {
+      console.log(`RULE: ${highPriorityTasks.length} high-priority task(s) detected.`);
     }
   }
 

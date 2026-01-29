@@ -242,6 +242,7 @@ export class RenderTask {
     }
     
     this.commentService.addComment(this.activeTaskModalId, userId, input.value);
+    window.services.notificationService.addNotification('Comentário adicionado!', 'success');
     input.value = '';
     this.renderTaskModalContent();
   }
@@ -268,6 +269,7 @@ export class RenderTask {
         size: file.size,
         url: e.target?.result as string,
       });
+      window.services.notificationService.addNotification(`Ficheiro "${file.name}" anexado!`, 'success');
       this.renderTaskModalContent();
     };
     reader.readAsDataURL(file);
@@ -276,6 +278,7 @@ export class RenderTask {
   // Removes an attachment from the task
   deleteAttachment(id: number): void {
     this.attachmentService.removeAttachment(id);
+    window.services.notificationService.addNotification('Ficheiro removido!', 'success');
     this.renderTaskModalContent();
   }
 
@@ -288,7 +291,7 @@ export class RenderTask {
       return;
     }
 
-    const TASK_STATUS_CYCLE = [TaskStatus.PENDING, TaskStatus.IN_PROGRESS, TaskStatus.COMPLETED];
+    const TASK_STATUS_CYCLE = [TaskStatus.CREATED, TaskStatus.ASSIGNED, TaskStatus.IN_PROGRESS, TaskStatus.BLOCKED, TaskStatus.COMPLETED, TaskStatus.ARCHIVED];
     const task = this.taskService.getTaskById(id);
     if (!task) return;
 
@@ -296,6 +299,7 @@ export class RenderTask {
     const newStatus = TASK_STATUS_CYCLE[(currentIndex + 1) % TASK_STATUS_CYCLE.length];
     this.taskService.updateTaskStatus(id, newStatus);
     window.services.logService.addLog(`Status "${task.title}": ${task.status} -> ${newStatus}`);
+    window.services.notificationService.addNotification(`Status alterado: ${task.status} → ${newStatus}`, 'success');
     
     // Process task with type-specific logic (BugTask, Feature, etc)
     if (task.type && ['Bug', 'Feature', 'Task'].includes(task.type)) {
@@ -320,6 +324,7 @@ export class RenderTask {
     if (!task) return;
     window.renderModals.openConfirmModal(`Delete task?`, () => {
       this.taskService.deleteTask(id);
+      window.services.notificationService.addNotification(`Tarefa "${task.title}" eliminada!`, 'success');
       (window as any).saveAndRender();
     });
   }
@@ -329,7 +334,10 @@ export class RenderTask {
     const task = this.taskService.getTaskById(taskId);
     if (!task) return;
     task.assigned = email ? [email] : [];
-    if (email) window.services.logService.addLog(`Task "${task.title}" assigned to ${email}`);
+    if (email) {
+      window.services.logService.addLog(`Task "${task.title}" assigned to ${email}`);
+      window.services.notificationService.addNotification(`Tarefa "${task.title}" atribuída a ${email}!`, 'success');
+    }
     (window as any).saveAndRender();
   }
 
@@ -338,7 +346,9 @@ export class RenderTask {
     const task = this.taskService.getTaskById(taskId);
     if (!task) return;
     this.taskService.updateTaskPriority(taskId, p);
+    window.services.priorityService.setPriority(taskId, p as any);
     window.services.logService.addLog(`Task "${task.title}" priority -> ${p}`);
+    window.services.notificationService.addNotification(`Prioridade alterada: ${p.toUpperCase()}`, 'success');
     (window as any).saveAndRender();
   }
 

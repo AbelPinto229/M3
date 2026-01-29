@@ -1,46 +1,44 @@
 import { BaseEntity } from './BaseEntity.js';
 import { UserRole } from '../security/UserRole.js';
 
-/**
- * Class representing a system user
- * Inherits from BaseEntity for id and createdAt
- * Encapsulates properties with getters/setters
- */
+// USER CLASS - Represents a user in the system
 export class UserClass extends BaseEntity {
-    private _email!: string;       // user email
-    private _active!: boolean;     // active or inactive
-    private _role!: UserRole;      // user role
+    private _email!: string;       
+    private _active!: boolean;     
+    private _role!: UserRole;      
 
     constructor(id: number, email: string, role: UserRole) {
-        super(id);                 // initializes id and createdAt from BaseEntity
-        this.email = email;        // uses setter for validation
-        this._role = role;         // initial role
-        this._active = true;       // user starts active
+        super(id);                 
+        this.email = email;        
+        this._role = role;         
+        this._active = true;       
     }
 
     // ===========================
     // GETTERS AND SETTERS
     // ===========================
 
+    //read email as public and return the private _email
     get email(): string {
         return this._email;
     }
 
+    //if email is invalid throw error
     set email(value: string) {
         if (!this.validateEmail(value)) {
             throw new Error(`Invalid email: ${value}`);
         }
         this._email = value;
     }
-
+    //read user status and show atual status, if its true show active, if its false show inactive
     get active(): boolean {
         return this._active;
     }
-
+    //read user role and show the role assigned
     get role(): UserRole {
         return this._role;
     }
-
+    //if role is invalid or undefined throw error
     set role(value: UserRole) {
         if (value === undefined || value === null) {
             throw new Error('Invalid role');
@@ -48,20 +46,16 @@ export class UserClass extends BaseEntity {
         this._role = value;
     }
 
-    // ===========================
-    // BUSINESS METHODS
-    // ===========================
 
-    /**
-     * Activates or deactivates the user
-     */
+    //Activates or deactivates the user
+    
     toggleActive(): void {
         this._active = !this._active;
     }
 
-    /**
-     * Simple email validation
-     */
+    
+     //Simple email validation, to guaranteed something is written after @ and .
+
     private validateEmail(email: string): boolean {
         const re = /\S+@\S+\.\S+/;
         return re.test(email);

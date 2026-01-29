@@ -11,32 +11,35 @@ export class BugTask implements ITask {
         this.id = id;
         this.title = title;
         this.completed = false;        // starts not completed
-        this.status = TaskStatus.PENDING; // initial status
+        this.status = TaskStatus.CREATED; // initial status
     }
 
-    // Specific type of the task
+    // identify the type, here "bug"
     getType(): string {
         return "bug";
     }
 
-    // Moves the task to another state with validation
+    // moves the task to another state with validation
     moveTo(newStatus: TaskStatus): void {
         const validTransitions: Record<string, string[]> = {
-            [TaskStatus.PENDING]: [TaskStatus.IN_PROGRESS],
-            [TaskStatus.IN_PROGRESS]: [TaskStatus.COMPLETED],
-            [TaskStatus.COMPLETED]: []
+            [TaskStatus.CREATED]: [TaskStatus.ASSIGNED],
+            [TaskStatus.ASSIGNED]: [TaskStatus.IN_PROGRESS],
+            [TaskStatus.IN_PROGRESS]: [TaskStatus.BLOCKED, TaskStatus.COMPLETED],
+            [TaskStatus.BLOCKED]: [TaskStatus.IN_PROGRESS],
+            [TaskStatus.COMPLETED]: [TaskStatus.ARCHIVED],
+            [TaskStatus.ARCHIVED]: []
         };
 
-        // Checks if the transition is allowed
+        // checks if the transition is allowed, have to follow the order, other show error
         if (!validTransitions[this.status]?.includes(newStatus)) {
             throw new Error(`Invalid transition from ${this.status} to ${newStatus}`);
         }
 
-        // Updates the status
+        // updates the status after validation
         this.status = newStatus;
 
-        // If reached COMPLETED, marks as completed
-        if (newStatus === TaskStatus.COMPLETED) {
+        // if reached ARCHIVED (final status), marks as completed
+        if (newStatus === TaskStatus.ARCHIVED) {
             this.completed = true;
         }
     }

@@ -1,21 +1,18 @@
-/*
-Dicas (como implementar):
-*/
-//Começa por pensar: “Onde vou guardar os deadlines?”
-//Cria uma estrutura privada dentro do service (ex: um Map ou objeto)
+// Start by thinking: "Where will I store the deadlines?"
+// Create a private structure inside the service (ex: a Map or object)
 const deadlines = new Map();
-//Usa taskId como chave e date como valor
-//Implementa primeiro apenas o armazenamento (setDeadline)
-//Depois implementa a lógica de tempo (comparar datas)
-//Converte datas para números (timestamp) para facilitar comparações
-//Cria uma função auxiliar para obter a data atual 
+// Use taskId as key and date as value
+// Implement first only the storage (setDeadline)
+// Then implement time logic (compare dates)
+// Convert dates to numbers (timestamp) to ease comparisons
+// Create a helper function to get the current date
 export function setDeadline(taskID, date) {
     deadlines.set(taskID, date);
 }
-//isExpired(taskId) deve:
-//→ buscar a data
-//→ comparar com o tempo atual
-//→ devolver true/false
+// isExpired(taskId) should:
+// → fetch the date
+// → compare with current time
+// → return true/false
 export function isExpired(taskID) {
     const deadline = deadlines.get(taskID);
     if (!deadline)
@@ -23,11 +20,11 @@ export function isExpired(taskID) {
     const now = new Date();
     return now.getTime() > deadline.getTime();
 }
-//getExpiredTasks() deve:
-//→ percorrer todos os deadlines
-//→ filtrar os expirados
-//→ devolver apenas os taskIds ou tasks
-//Implementa por etapas: guardar → comparar → filtrar → devolver 
+// getExpiredTasks() should:
+// → go through all deadlines
+// → filter the expired ones
+// → return only taskIds or tasks
+// Implement by stages: store → compare → filter → return 
 export function getExpiredTasks() {
     const now = new Date();
     const expiredTasks = [];

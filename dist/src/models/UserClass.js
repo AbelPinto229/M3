@@ -1,55 +1,49 @@
 import { BaseEntity } from './BaseEntity.js';
-/**
- * Classe que representa um usuário do sistema
- * Herda de BaseEntity para id e createdAt
- * Encapsula propriedades com getters/setters
- */
+// USER CLASS - Represents a user in the system
 export class UserClass extends BaseEntity {
-    _email; // email do usuário
-    _active; // ativo ou inativo
-    _role; // perfil do usuário
+    _email;
+    _active;
+    _role;
     constructor(id, email, role) {
-        super(id); // inicializa id e createdAt da BaseEntity
-        this.email = email; // usa setter para validação
-        this._role = role; // role inicial
-        this._active = true; // usuário começa ativo
+        super(id);
+        this.email = email;
+        this._role = role;
+        this._active = true;
     }
     // ===========================
-    // GETTERS E SETTERS
+    // GETTERS AND SETTERS
     // ===========================
+    //read email as public and return the private _email
     get email() {
         return this._email;
     }
+    //if email is invalid throw error
     set email(value) {
         if (!this.validateEmail(value)) {
-            throw new Error(`Email inválido: ${value}`);
+            throw new Error(`Invalid email: ${value}`);
         }
         this._email = value;
     }
+    //read user status and show atual status, if its true show active, if its false show inactive
     get active() {
         return this._active;
     }
+    //read user role and show the role assigned
     get role() {
         return this._role;
     }
+    //if role is invalid or undefined throw error
     set role(value) {
         if (value === undefined || value === null) {
-            throw new Error('Role inválido');
+            throw new Error('Invalid role');
         }
         this._role = value;
     }
-    // ===========================
-    // MÉTODOS DE NEGÓCIO
-    // ===========================
-    /**
-     * Ativa ou desativa o usuário
-     */
+    //Activates or deactivates the user
     toggleActive() {
         this._active = !this._active;
     }
-    /**
-     * Validação simples de email
-     */
+    //Simple email validation, to guaranteed something is written after @ and .
     validateEmail(email) {
         const re = /\S+@\S+\.\S+/;
         return re.test(email);

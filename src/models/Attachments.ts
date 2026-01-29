@@ -1,5 +1,4 @@
-// ATTACHMENT MODEL - File attachment class
-
+// ATTACHMENT MODEL - Represents an attachment linked to a task
 export class Attachment {
     constructor(
         public id: number,

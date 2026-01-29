@@ -1,15 +1,16 @@
+// BASE ENTITY - Base class for all entities
 export class BaseEntity {
     id;
     createdAt;
     constructor(id) {
-        this.id = id; // inicializa o id
-        this.createdAt = new Date(); // data/hora de criação
+        this.id = id; // Entity ID
+        this.createdAt = new Date(); // Creation timestamp
     }
-    // Retorna o id da entidade
+    // show id of entities but in this case is herded by UserClass
     getId() {
         return this.id;
     }
-    // Retorna a data de criação da entidade
+    // show the date of the creation of the entity
     getCreatedAt() {
         return this.createdAt;
     }

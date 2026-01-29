@@ -1,11 +1,12 @@
 // ASSIGNMENT SERVICE - Manages task-to-user assignments with bidirectional mapping
 export class AssignmentService {
-  // Maps task IDs to assigned user IDs
+  
+  // create a map with task IDs as keys and assigned user IDs as values to save assignments to users
   private taskToUsers: Map<number, Set<number>> = new Map();
-  // Maps user IDs to assigned task IDs
+  // create a map with user IDs as keys and assigned task IDs as values to save assignments to tasks
   private userToTasks: Map<number, Set<number>> = new Map();
 
-  // Assigns a user to a task, maintaining bidirectional relationship
+  // check if task and user exists, if not create new set and add the assignment to both maps
   assignUser(taskId: number, userId: number) {
     if (!this.taskToUsers.has(taskId)) this.taskToUsers.set(taskId, new Set());
     if (!this.userToTasks.has(userId)) this.userToTasks.set(userId, new Set());
@@ -14,18 +15,18 @@ export class AssignmentService {
     this.userToTasks.get(userId)?.add(taskId);
   }
 
-  // Removes user assignment from a task
+  // removes user assignment from a task and task assignment from a user
   unassignUser(taskId: number, userId: number) {
     this.taskToUsers.get(taskId)?.delete(userId);
     this.userToTasks.get(userId)?.delete(taskId);
   }
 
-  // Retrieves all users assigned to a specific task
+  // retrieves all users assigned to a specific task
   getUsersFromTask(taskId: number): number[] {
     return Array.from(this.taskToUsers.get(taskId) || []);
   }
 
-  // Retrieves all tasks assigned to a specific user
+  // retrieves all tasks assigned to a specific user
   getTasksFromUser(userId: number): number[] {
     return Array.from(this.userToTasks.get(userId) || []);
   }

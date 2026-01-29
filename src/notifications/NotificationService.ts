@@ -2,7 +2,7 @@
 
 export class NotificationService {
 
-    // Display UI notification with auto-fade
+    // display UI notification with auto-fade on screen
     addNotification(message: string, type: 'success' | 'warning' | 'info' = 'success'): void {
         const container = document.getElementById('notifications');
         if (!container) return;
@@ -25,21 +25,20 @@ export class NotificationService {
         }, 3000);
     }
 
-    // Notify specific user (console log)
+    // notify specific user with UI alert
     notifyUser(userId: number, message: string) {
-        console.log(`[NOTIFY] Usuário ${userId}: ${message}`);
+        this.addNotification(`[User ${userId}] ${message}`, 'info');
     }
 
-    // Notify multiple users (console log)
+    // notify multiple users with UI alerts
     notifyGroup(userIds: number[], message: string) {
         userIds.forEach(id => {
-            console.log(`[NOTIFY] Usuário ${id}: ${message}`);
+            this.addNotification(`[User ${id}] ${message}`, 'info');
         });
     }
 
-    // Notify all admins
+    // notify all admins with UI alert
     notifyAdmins(message: string) {
-        const adminIds = [1, 2];
-        this.notifyGroup(adminIds, message);
+        this.addNotification(`[ADMIN] ${message}`, 'warning');
     }
 }

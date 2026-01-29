@@ -7,16 +7,13 @@ export interface ITask {
     completed: boolean;       
     status: TaskStatus;      
 
-    // Returns the task type (ex: "Simple", "Bug", "Feature")
+    // Returns the task type ("Task", "Bug", "Feature")
     getType(): string;
 
     // Changes the task state
     moveTo(status: TaskStatus): void;
 }
 
-/*
-Tips (how to implement):
-*/
 
 // Start by thinking: "Where will I store the deadlines?"
 // Create a private structure inside the service (ex: a Map or object)

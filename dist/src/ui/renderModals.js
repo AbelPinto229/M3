@@ -8,6 +8,7 @@ export class RenderModals {
         this.userService = userService;
     }
     // ===== CONFIRMATION MODAL =====
+    // Opens confirmation dialog with custom message and callback
     openConfirmModal(message, confirmCallback) {
         const msgEl = document.getElementById('modalMessage');
         const modalEl = document.getElementById('confirmModal');
@@ -17,17 +18,20 @@ export class RenderModals {
             modalEl.classList.remove('hidden');
         this.pendingDeleteAction = confirmCallback;
     }
+    // Hides confirmation modal
     closeConfirmModal() {
         const modalEl = document.getElementById('confirmModal');
         if (modalEl)
             modalEl.classList.add('hidden');
     }
+    // Executes pending action and closes modal
     confirmAction() {
         if (this.pendingDeleteAction)
             this.pendingDeleteAction();
         this.closeConfirmModal();
     }
     // ===== EDIT TITLE MODAL =====
+    // Opens modal to edit task title with auto-focus on input
     openEditTitleModal(taskId) {
         const task = this.taskService.getTaskById(taskId);
         if (!task)
@@ -39,11 +43,11 @@ export class RenderModals {
         modal.className = 'fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]';
         modal.innerHTML = `
       <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
-        <h3 class="font-bold text-lg mb-3">Editar nome da tarefa</h3>
+        <h3 class="font-bold text-lg mb-3">Edit task name</h3>
         <input id="editTitleInput" class="w-full border rounded px-3 py-2 mb-4 text-sm" value="${task.title}">
         <div class="flex justify-end gap-2">
-          <button onclick="window.renderModals.closeEditTitleModal()" class="px-4 py-2 bg-gray-200 rounded text-sm">Cancelar</button>
-          <button onclick="window.renderModals.saveEditTitle(${taskId})" class="px-4 py-2 bg-indigo-600 text-white rounded text-sm">Salvar</button>
+          <button onclick="window.renderModals.closeEditTitleModal()" class="px-4 py-2 bg-gray-200 rounded text-sm">Cancel</button>
+          <button onclick="window.renderModals.saveEditTitle(${taskId})" class="px-4 py-2 bg-indigo-600 text-white rounded text-sm">Save</button>
         </div>
       </div>
     `;
@@ -52,11 +56,13 @@ export class RenderModals {
             document.getElementById('editTitleInput')?.focus();
         }, 50);
     }
+    // Removes edit title modal from DOM
     closeEditTitleModal() {
         const modal = document.getElementById('editTitleModal');
         if (modal)
             modal.remove();
     }
+    // Saves updated task title and logs the change
     saveEditTitle(taskId) {
         const input = document.getElementById('editTitleInput');
         if (!input)
@@ -69,11 +75,12 @@ export class RenderModals {
             return;
         const oldTitle = task.title;
         this.taskService.updateTaskTitle(taskId, newTitle);
-        window.services.logService.addLog(`Tarefa renomeada: "${oldTitle}" -> "${newTitle}"`);
+        window.services.logService.addLog(`Task renamed: "${oldTitle}" -> "${newTitle}"`);
         this.closeEditTitleModal();
         window.saveAndRender();
     }
     // ===== GENERIC MODAL =====
+    // Opens a generic modal with custom title and content
     openModal(title, content) {
         const modalId = 'genericModal';
         // Close any existing generic modal
@@ -90,18 +97,20 @@ export class RenderModals {
           ${content}
         </div>
         <div class="flex justify-end gap-2">
-          <button onclick="window.renderModals.closeModal()" class="px-4 py-2 bg-gray-200 rounded text-sm">Fechar</button>
+          <button onclick="window.renderModals.closeModal()" class="px-4 py-2 bg-gray-200 rounded text-sm">Close</button>
         </div>
       </div>
     `;
         document.body.appendChild(modal);
     }
+    // Removes generic modal from DOM
     closeModal() {
         const modal = document.getElementById('genericModal');
         if (modal)
             modal.remove();
     }
     // ===== EDIT USER MODAL =====
+    // Opens modal to edit user details (name, email, role, photo)
     openEditUserModal(userId, user) {
         const modalId = 'editUserModal';
         // Close any existing edit user modal
@@ -113,14 +122,14 @@ export class RenderModals {
         modal.className = 'fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]';
         modal.innerHTML = `
       <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
-        <h3 class="font-bold text-lg mb-4">Editar ${user.name}</h3>
+        <h3 class="font-bold text-lg mb-4">Edit ${user.name}</h3>
         <div class="space-y-3 mb-4">
           <div>
-            <label class="text-xs font-bold text-slate-600 block mb-1">FOTO (opcional)</label>
+            <label class="text-xs font-bold text-slate-600 block mb-1">PHOTO (optional)</label>
             <input id="editUserPhoto" type="file" accept="image/*" class="w-full border border-slate-200 rounded px-3 py-2 text-sm cursor-pointer">
           </div>
           <div>
-            <label class="text-xs font-bold text-slate-600 block mb-1">NOME</label>
+            <label class="text-xs font-bold text-slate-600 block mb-1">NAME</label>
             <input id="editUserName" type="text" value="${user.name}" class="w-full border border-slate-200 rounded px-3 py-2 text-sm">
           </div>
           <div>
@@ -138,25 +147,27 @@ export class RenderModals {
           </div>
         </div>
         <div class="flex justify-end gap-2">
-          <button onclick="window.renderModals.closeEditUserModal()" class="px-4 py-2 bg-gray-200 rounded text-sm">Cancelar</button>
-          <button onclick="window.renderModals.saveEditUser(${userId})" class="px-4 py-2 bg-indigo-600 text-white rounded text-sm">Salvar</button>
+          <button onclick="window.renderModals.closeEditUserModal()" class="px-4 py-2 bg-gray-200 rounded text-sm">Cancel</button>
+          <button onclick="window.renderModals.saveEditUser(${userId})" class="px-4 py-2 bg-indigo-600 text-white rounded text-sm">Save</button>
         </div>
       </div>
     `;
         document.body.appendChild(modal);
     }
+    // Removes edit user modal from DOM
     closeEditUserModal() {
         const modal = document.getElementById('editUserModal');
         if (modal)
             modal.remove();
     }
+    // Validates and saves updated user data (handles photo upload)
     saveEditUser(userId) {
         const nameInput = document.getElementById('editUserName');
         const emailInput = document.getElementById('editUserEmail');
         const roleSelect = document.getElementById('editUserRole');
         const photoInput = document.getElementById('editUserPhoto');
         if (!nameInput?.value || !emailInput?.value || !roleSelect?.value) {
-            window.services.notificationService.addNotification('Por favor, preencha todos os campos!', 'warning');
+            window.services.notificationService.addNotification('Please fill in all fields!', 'warning');
             return;
         }
         const updateData = {
@@ -179,16 +190,17 @@ export class RenderModals {
             this.performUserUpdate(userId, updateData);
         }
     }
+    // Performs the actual user update and handles success/error responses
     performUserUpdate(userId, updateData) {
         const result = window.services.userService.updateUser(userId, updateData);
         if (result) {
-            window.services.notificationService.addNotification('Utilizador atualizado!', 'success');
-            window.services.logService.addLog(`Utilizador ${result.name} atualizado`);
+            window.services.notificationService.addNotification('User updated successfully!', 'success');
+            window.services.logService.addLog(`User ${result.name} updated`);
             this.closeEditUserModal();
             window.saveAndRender();
         }
         else {
-            window.services.notificationService.addNotification('Erro ao atualizar utilizador. Email pode já estar em uso!', 'warning');
+            window.services.notificationService.addNotification('Error updating user. Email may already be in use!', 'warning');
         }
     }
 }
