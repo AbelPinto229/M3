@@ -2,9 +2,14 @@
 
 A comprehensive TypeScript-based task and user management application with role-based access control, built with modern web technologies.
 
+
 **Live Demo**: https://abelpinto229.github.io/M3/
 
 **Repository**: https://github.com/abelpinto229/M3
+
+**Branch**: Main
+
+**Nome**: Abel Pinto
 
 ## 📋 Overview
 
@@ -321,7 +326,7 @@ The application comes with pre-populated demo data:
    - Priority: Alta
    - Status: Em Progresso
    - Deadline: 2026-02-03
-   - Assigned: Abel & Lionel
+   - Assigned: Abel
 
 3. **Fazer exercícios autónomos** (Do autonomous exercises)
    - Type: Tarefa
