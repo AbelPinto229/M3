@@ -4,6 +4,8 @@ A comprehensive TypeScript-based task and user management application with role-
 
 **Live Demo**: https://abelpinto229.github.io/M3/
 
+**Repository**: https://github.com/abelpinto229/M3
+
 ## 📋 Overview
 
 M3 (PROJETO M3) - Task & User Management System is a full-featured management system designed to help teams organize users, manage tasks, track progress, and collaborate efficiently. It features a sophisticated permission system with four distinct roles, comprehensive task tracking, and user administration capabilities.
