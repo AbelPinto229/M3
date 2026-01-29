@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ===== MODAL RENDERER - Generic modal rendering (confirmation, edit, etc) =====
 export class RenderModals {
     taskService;

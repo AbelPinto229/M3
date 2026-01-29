@@ -5,25 +5,25 @@ import { TagService } from "./TagService";
 export class SearchService {
   constructor(private tasks: Task[]) {}
 
-  // Searches tasks by title with case-insensitive matching
+  // searches tasks by title with case-insensitive matching
   searchByTitle(text: string): Task[] {
     return this.tasks.filter((t) =>
       t.title.toLowerCase().includes(text.toLowerCase()),
     );
   }
 
-  // Retrieves all tasks assigned to a specific user
+  // retrieves all tasks assigned to a specific user
   searchByUser(userId: number, assignmentService: any): Task[] {
     const taskIds = assignmentService.getTasksFromUser(userId);
     return this.tasks.filter((t) => taskIds.includes(t.id));
   }
 
-  // Filters tasks by their status
+  // filters tasks by their status
   searchByStatus(status: string): Task[] {
     return this.tasks.filter((t) => t.status === status);
   }
 
-  // Performs comprehensive search across title, status, and user with duplicate removal
+  // performs comprehensive search across title, status, and user with duplicate removal
   globalSearch(query: string, assignmentService: any): Task[] {
     const byTitle = this.searchByTitle(query);
     const byStatus = this.searchByStatus(query);
@@ -37,7 +37,7 @@ export class SearchService {
     return Array.from(new Set(all)); // Remove duplicates
   }
 
-  // Filters tasks by multiple criteria (title, status, priority, type, tags)
+  // filters tasks by multiple criteria (title, status, priority, type, tags)
   filterTasks(tasks: Task[], criteria: {
     text: string;
     status: string;

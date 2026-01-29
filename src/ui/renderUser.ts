@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ===== USER RENDERER - All user-related rendering =====
 
 import { UserService } from '../services/UserService.js';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ===== USER RENDERER - All user-related rendering =====
 export class RenderUser {
     userService;

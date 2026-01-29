@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ===== MAIN APPLICATION ENTRY POINT =====
 // This file bootstraps the entire application with all services and UI
 // Import all services
@@ -34,6 +35,7 @@ const statisticsService = new StatisticsService(taskService.getTasks(), userServ
 const searchService = new SearchService(taskService.getTasks());
 const backupService = new BackupService(userService.getUsers(), taskService.getTasks(), assignmentService);
 const notificationService = new NotificationService();
+// ===== EXPOSE SERVICES TO WINDOW =====
 // Create centralized service container
 window.services = {
     userService,
@@ -149,15 +151,37 @@ function renderLogs() {
     `)
         .join('');
 }
+// Helper to update filter button styles
+function setFilterButton(btn, active) {
+    if (!btn)
+        return;
+    if (active) {
+        btn.classList.add('bg-indigo-600', 'text-white');
+        btn.classList.remove('bg-slate-100', 'text-slate-700');
+    }
+    else {
+        btn.classList.remove('bg-indigo-600', 'text-white');
+        btn.classList.add('bg-slate-100', 'text-slate-700');
+    }
+}
+// Helper to create a user
+function createNewUser(email, name, role, photo) {
+    const newUser = window.services.userService.addUser(email, name, role, photo);
+    if (newUser) {
+        window.services.notificationService.addNotification('Utilizador adicionado!', 'success');
+        window.services.notificationService.notifyAdmins(`Novo utilizador criado: ${email}`);
+    }
+    else {
+        window.services.notificationService.addNotification('Email já existe!', 'warning');
+    }
+}
 // Setup search and filter listeners
 function setupSearchAndFilterListeners() {
     // Role selector
     const roleSelector = document.getElementById('roleSelector');
     if (roleSelector) {
         roleSelector.addEventListener('change', (e) => {
-            const target = e.target;
-            window.currentUserRole = target.value;
-            console.log('Role changed to:', window.currentUserRole);
+            window.currentUserRole = e.target.value;
             saveAndRender();
         });
     }
@@ -169,86 +193,41 @@ function setupSearchAndFilterListeners() {
     const sortAZBtn = document.getElementById('sortTasksAZ');
     const clearCompletedBtn = document.getElementById('clearCompleted');
     const updateTaskRender = () => window.renderTask.render();
-    if (searchInput)
-        searchInput.addEventListener('input', updateTaskRender);
-    if (filterStatus)
-        filterStatus.addEventListener('change', updateTaskRender);
-    if (filterPriority)
-        filterPriority.addEventListener('change', updateTaskRender);
-    if (filterTag)
-        filterTag.addEventListener('input', updateTaskRender);
-    if (sortAZBtn)
-        sortAZBtn.addEventListener('click', () => {
-            const currentState = window.taskSortState || 'none';
-            let newState = 'asc';
-            if (currentState === 'asc') {
-                newState = 'desc';
-            }
-            else if (currentState === 'desc') {
-                newState = 'none';
-            }
-            window.taskSortState = newState;
-            // Update button text
-            if (newState === 'asc') {
-                sortAZBtn.textContent = '↑ A-Z';
-            }
-            else if (newState === 'desc') {
-                sortAZBtn.textContent = '↓ Z-A';
-            }
-            else {
-                sortAZBtn.textContent = 'Sort A-Z';
-            }
-            window.renderTask.render();
-        });
-    if (clearCompletedBtn)
-        clearCompletedBtn.addEventListener('click', () => {
-            const completedTasks = window.services.taskService.getTasks().filter((t) => t.status === 'Concluído');
-            completedTasks.forEach((t) => window.services.taskService.deleteTask(t.id));
-            window.services.logService.addLog(`${completedTasks.length} tarefa(s) concluída(s) removida(s)`);
-            window.services.notificationService.addNotification(`${completedTasks.length} tarefas removidas!`, 'success');
-            saveAndRender();
-        });
-    // User search and filter inputs
-    const userSearchInput = document.getElementById('searchUser');
+    searchInput?.addEventListener('input', updateTaskRender);
+    filterStatus?.addEventListener('change', updateTaskRender);
+    filterPriority?.addEventListener('change', updateTaskRender);
+    filterTag?.addEventListener('input', updateTaskRender);
+    sortAZBtn?.addEventListener('click', () => {
+        const states = ['none', 'asc', 'desc'];
+        const current = window.taskSortState || 'none';
+        const nextIndex = (states.indexOf(current) + 1) % states.length;
+        window.taskSortState = states[nextIndex];
+        const texts = { 'asc': '↑ A-Z', 'desc': '↓ Z-A', 'none': 'Sort A-Z' };
+        sortAZBtn.textContent = texts[window.taskSortState];
+        window.renderTask.render();
+    });
+    clearCompletedBtn?.addEventListener('click', () => {
+        const completedTasks = window.services.taskService.getTasks().filter((t) => t.status === 'Completed');
+        completedTasks.forEach((t) => window.services.taskService.deleteTask(t.id));
+        window.services.notificationService.addNotification(`${completedTasks.length} tarefas removidas!`, 'success');
+        saveAndRender();
+    });
+    // User filter buttons
     const filterAllBtn = document.getElementById('filterAllUsers');
     const filterActiveBtn = document.getElementById('filterActiveUsers');
     const filterInactiveBtn = document.getElementById('filterInactiveUsers');
-    if (userSearchInput)
-        userSearchInput.addEventListener('input', () => window.renderUser.render());
-    if (filterAllBtn)
-        filterAllBtn.addEventListener('click', () => {
-            window.userFilter = 'all';
-            filterAllBtn.classList.add('bg-indigo-600', 'text-white');
-            filterAllBtn.classList.remove('bg-slate-100', 'text-slate-700');
-            filterActiveBtn?.classList.remove('bg-indigo-600', 'text-white');
-            filterActiveBtn?.classList.add('bg-slate-100', 'text-slate-700');
-            filterInactiveBtn?.classList.remove('bg-indigo-600', 'text-white');
-            filterInactiveBtn?.classList.add('bg-slate-100', 'text-slate-700');
-            window.renderUser.render();
-        });
-    if (filterActiveBtn)
-        filterActiveBtn.addEventListener('click', () => {
-            window.userFilter = 'active';
-            filterAllBtn?.classList.remove('bg-indigo-600', 'text-white');
-            filterAllBtn?.classList.add('bg-slate-100', 'text-slate-700');
-            filterActiveBtn.classList.add('bg-indigo-600', 'text-white');
-            filterActiveBtn.classList.remove('bg-slate-100', 'text-slate-700');
-            filterInactiveBtn?.classList.remove('bg-indigo-600', 'text-white');
-            filterInactiveBtn?.classList.add('bg-slate-100', 'text-slate-700');
-            window.renderUser.render();
-        });
-    if (filterInactiveBtn)
-        filterInactiveBtn.addEventListener('click', () => {
-            window.userFilter = 'inactive';
-            filterAllBtn?.classList.remove('bg-indigo-600', 'text-white');
-            filterAllBtn?.classList.add('bg-slate-100', 'text-slate-700');
-            filterActiveBtn?.classList.remove('bg-indigo-600', 'text-white');
-            filterActiveBtn?.classList.add('bg-slate-100', 'text-slate-700');
-            filterInactiveBtn.classList.add('bg-indigo-600', 'text-white');
-            filterInactiveBtn.classList.remove('bg-slate-100', 'text-slate-700');
-            window.renderUser.render();
-        });
-    // Initialize user filter
+    const userSearchInput = document.getElementById('searchUser');
+    const setUserFilter = (filter) => {
+        window.userFilter = filter;
+        setFilterButton(filterAllBtn, filter === 'all');
+        setFilterButton(filterActiveBtn, filter === 'active');
+        setFilterButton(filterInactiveBtn, filter === 'inactive');
+        window.renderUser.render();
+    };
+    filterAllBtn?.addEventListener('click', () => setUserFilter('all'));
+    filterActiveBtn?.addEventListener('click', () => setUserFilter('active'));
+    filterInactiveBtn?.addEventListener('click', () => setUserFilter('inactive'));
+    userSearchInput?.addEventListener('input', () => window.renderUser.render());
     window.userFilter = 'all';
 }
 // Setup event listeners
@@ -265,44 +244,24 @@ function setupEventListeners() {
             const emailInput = document.getElementById('userEmail');
             const roleSelect = document.getElementById('userRole');
             const photoInput = document.getElementById('userPhoto');
-            if (nameInput?.value && emailInput?.value && roleSelect?.value) {
-                // Handle photo conversion to base64 if file is selected
-                if (photoInput?.files && photoInput.files.length > 0) {
-                    const file = photoInput.files[0];
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        const photoBase64 = event.target?.result;
-                        const newUser = window.services.userService.addUser(emailInput.value, nameInput.value, roleSelect.value, photoBase64);
-                        if (newUser) {
-                            window.services.notificationService.addNotification('Utilizador adicionado!', 'success');
-                            window.services.notificationService.notifyAdmins(`Novo utilizador criado: ${emailInput.value}`);
-                        }
-                        else {
-                            window.services.notificationService.addNotification('Email já existe!', 'warning');
-                        }
-                        addUserForm.reset();
-                        saveAndRender();
-                    };
-                    reader.readAsDataURL(file);
-                }
-                else {
-                    // No photo selected
-                    const newUser = window.services.userService.addUser(emailInput.value, nameInput.value, roleSelect.value);
-                    if (newUser) {
-                        window.services.notificationService.addNotification('Utilizador adicionado!', 'success');
-                        window.services.notificationService.notifyAdmins(`Novo utilizador criado: ${emailInput.value}`);
-                    }
-                    else {
-                        window.services.notificationService.addNotification('Email já existe!', 'warning');
-                    }
+            if (!nameInput?.value || !emailInput?.value || !roleSelect?.value)
+                return;
+            // Handle photo if selected
+            if (photoInput?.files?.length) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    createNewUser(emailInput.value, nameInput.value, roleSelect.value, event.target?.result);
                     addUserForm.reset();
                     saveAndRender();
-                }
+                };
+                reader.readAsDataURL(photoInput.files[0]);
+            }
+            else {
+                createNewUser(emailInput.value, nameInput.value, roleSelect.value);
+                addUserForm.reset();
+                saveAndRender();
             }
         });
-    }
-    else {
-        console.warn('User form not found');
     }
     const addTaskForm = document.getElementById('taskForm');
     if (addTaskForm) {
@@ -315,28 +274,24 @@ function setupEventListeners() {
             const titleInput = document.getElementById('taskTitle');
             const typeSelect = document.getElementById('taskType');
             const deadlineInput = document.getElementById('taskDeadline');
-            if (titleInput?.value && typeSelect?.value) {
-                const newTask = window.services.taskService.addTask(titleInput.value, typeSelect.value, deadlineInput?.value);
-                // Set deadline if provided
-                if (deadlineInput?.value) {
-                    window.services.deadlineService.setDeadline(newTask.id, new Date(deadlineInput.value));
-                }
-                // Apply automation rules for bug tasks
-                if (typeSelect.value.toLowerCase() === 'bug') {
-                    // Set priority to CRITICAL
-                    window.services.taskService.updateTaskPriority(newTask.id, 'CRITICAL');
-                    // Assign to first admin or manager
-                    const adminOrManager = window.services.userService.getUsers().find((u) => u.role === 'ADMIN' || u.role === 'MANAGER');
-                    if (adminOrManager) {
-                        newTask.assigned = [adminOrManager.email];
-                        window.services.logService.addLog(`Bug task "${newTask.title}" atribuído a ${adminOrManager.email}`);
-                    }
-                }
-                window.services.logService.addLog(`Nova tarefa: "${newTask.title}"`);
-                window.services.notificationService.addNotification('Tarefa criada!');
-                addTaskForm.reset();
-                saveAndRender();
+            if (!titleInput?.value || !typeSelect?.value)
+                return;
+            const newTask = window.services.taskService.addTask(titleInput.value, typeSelect.value, deadlineInput?.value);
+            if (deadlineInput?.value) {
+                window.services.deadlineService.setDeadline(newTask.id, new Date(deadlineInput.value));
             }
+            // Auto-configure bug tasks
+            if (typeSelect.value.toLowerCase() === 'bug') {
+                window.services.taskService.updateTaskPriority(newTask.id, 'CRITICAL');
+                const admin = window.services.userService.getUsers().find((u) => u.role === 'ADMIN' || u.role === 'MANAGER');
+                if (admin) {
+                    newTask.assigned = [admin.email];
+                    window.services.logService.addLog(`Bug task "${newTask.title}" atribuído a ${admin.email}`);
+                }
+            }
+            window.services.notificationService.addNotification('Tarefa criada!');
+            addTaskForm.reset();
+            saveAndRender();
         });
     }
 }

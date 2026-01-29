@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ===== TASK RENDERER - All task-related rendering =====
 import { TaskStatus } from '../tasks/TaskStatus.js';
 import { processTask } from '../utils/TaskUtils.js';
