@@ -105,10 +105,10 @@ function updateDashboard() {
   const taskStats = (window as any).statisticsService.calculateTaskStats();
   const userStats = (window as any).statisticsService.calculateUserStats();
 
-  // Count tasks by status (using English status names from TaskStatus enum)
-  const inProgressCount = taskStats.byStatus['In Progress'] || 0;
-  const pendingCount = taskStats.byStatus['Created'] || taskStats.byStatus['Assigned'] || 0;
-  const completedCount = taskStats.byStatus['Completed'] || 0;
+  // Count tasks by status (using Portuguese status names from TaskStatus enum)
+  const inProgressCount = taskStats.byStatus['Em Progresso'] || 0;
+  const pendingCount = taskStats.byStatus['Criado'] || taskStats.byStatus['Atribuído'] || 0;
+  const completedCount = taskStats.byStatus['Concluído'] || 0;
 
   setElementText('totalTasks', taskStats.total);
   setElementText('pendingTasks', taskStats.pending);
@@ -229,7 +229,7 @@ function setupSearchAndFilterListeners() {
   });
   
   clearCompletedBtn?.addEventListener('click', () => {
-    const completedTasks = (window as any).taskService.getTasks().filter((t: any) => t.status === 'Completed');
+    const completedTasks = (window as any).taskService.getTasks().filter((t: any) => t.status === 'Concluído');
     completedTasks.forEach((t: any) => (window as any).taskService.deleteTask(t.id));
     (window as any).notificationService.addNotification(`${completedTasks.length} tarefas removidas!`, 'success');
     saveAndRender();
