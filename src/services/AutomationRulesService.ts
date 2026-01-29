@@ -71,23 +71,3 @@ export class AutomationRulesService {
     }
   }
 }
-
-// BACKUP SERVICE - Exports and manages data backups
-export class BackupService {
-  constructor(private users: User[], private tasks: Task[], private assignments: any) {}
-
-  // Exports a copy of all users
-  exportUsers() { return [...this.users]; }
-  // Exports a copy of all tasks
-  exportTasks() { return [...this.tasks]; }
-  // Exports a copy of all assignments
-  exportAssignments() { return { ...this.assignments }; }
-  // Exports all data (users, tasks, assignments) as a backup object
-  exportAll() {
-    return {
-      users: this.exportUsers(),
-      tasks: this.exportTasks(),
-      assignments: this.exportAssignments()
-    };
-  }
-}

@@ -16,17 +16,3 @@ export declare class AutomationRulesService {
     private ruleCheckAllExpiredTasks;
     private ruleUserInactive;
 }
-export declare class BackupService {
-    private users;
-    private tasks;
-    private assignments;
-    constructor(users: User[], tasks: Task[], assignments: any);
-    exportUsers(): User[];
-    exportTasks(): Task[];
-    exportAssignments(): any;
-    exportAll(): {
-        users: User[];
-        tasks: Task[];
-        assignments: any;
-    };
-}

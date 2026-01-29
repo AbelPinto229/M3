@@ -59,29 +59,4 @@ export class AutomationRulesService {
         }
     }
 }
-// BACKUP SERVICE - Exports and manages data backups
-export class BackupService {
-    users;
-    tasks;
-    assignments;
-    constructor(users, tasks, assignments) {
-        this.users = users;
-        this.tasks = tasks;
-        this.assignments = assignments;
-    }
-    // Exports a copy of all users
-    exportUsers() { return [...this.users]; }
-    // Exports a copy of all tasks
-    exportTasks() { return [...this.tasks]; }
-    // Exports a copy of all assignments
-    exportAssignments() { return { ...this.assignments }; }
-    // Exports all data (users, tasks, assignments) as a backup object
-    exportAll() {
-        return {
-            users: this.exportUsers(),
-            tasks: this.exportTasks(),
-            assignments: this.exportAssignments()
-        };
-    }
-}
 //# sourceMappingURL=AutomationRulesService.js.map
