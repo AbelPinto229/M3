@@ -23,6 +23,7 @@ import { EntityList } from './src/index.js';
 import { SimpleCache } from './src/utils/SimpleCache.js';
 import { Paginator } from './src/utils/Paginator.js';
 import { Favorites } from './src/utils/Favorites.js';
+import { WatcherSystem } from './src/utils/WatcherSystem.js';
 // ===== INITIALIZE SERVICES =====
 const userService = new UserService();
 const taskService = new TaskService();
@@ -83,18 +84,25 @@ const appContext = {
         this.renderUser.render();
         this.renderTask.render();
         renderLogs();
+    },
+    saveData: function () {
+        updateDashboard();
     }
 };
 // Expose to window
 window.appContext = appContext;
+window.renderModals = appContext.renderModals;
 // ===== PAGINATION STATE =====
 const paginator = new Paginator();
 // ===== FAVORITES STATE =====
 const favoriteTasks = new Favorites();
 const favoriteUsers = new Favorites();
-// Expose favorites to window for global access
+// ===== WATCHER SYSTEM =====
+const watcherSystem = new WatcherSystem();
+// Expose favorites and watcher system to window for global access
 window.favoriteTasks = favoriteTasks;
 window.favoriteUsers = favoriteUsers;
+window.watcherSystem = watcherSystem;
 const taskPaginationState = {
     currentPage: 1,
     pageSize: 5,
@@ -514,7 +522,13 @@ const tagManager = new TagManager();
 tagManager.addTag(task1, 'urgente');
 tagManager.addTag(task1, 'backend');
 console.log(tagManager.getTags(task1));
-// Re-render after adding test data
+// ===== TEST WatcherSystem CLASS =====
+window.watcherSystem.watch(task1, user1);
+window.watcherSystem.watch(task1, user2);
+console.log('Watchers for task1:', window.watcherSystem.getWatchers(task1));
+window.watcherSystem.unwatch(task1, user1);
+console.log('Watchers for task1 after unwatch:', window.watcherSystem.getWatchers(task1));
+//re-render after adding test data
 window.appContext.renderTask.render();
 window.appContext.renderUser.render();
 //# sourceMappingURL=main.js.map

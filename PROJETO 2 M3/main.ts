@@ -27,13 +27,16 @@ import { User } from './src/models/Users.js';
 import { Task } from './src/models/Task.js';
 import { Paginator } from './src/utils/Paginator.js';
 import { Favorites } from './src/utils/Favorites.js';
+import { WatcherSystem } from './src/utils/WatcherSystem.js';
 
 // ===== EXTEND WINDOW TYPE =====
 declare global {
   interface Window {
     appContext: AppContext;
+    renderModals: RenderModals;
     favoriteTasks: Favorites<Task>;
     favoriteUsers: Favorites<User>;
+    watcherSystem: WatcherSystem<Task | User, User>;
     renderTasksWithPagination: (tasks: Task[]) => void;
     renderUsersWithPagination: (users: User[]) => void;
   }
@@ -64,6 +67,7 @@ interface AppContext {
   userFilter: string;
   checkPermission: (action: string) => boolean;
   saveAndRender: () => void;
+  saveData: () => void;
 }
 
 // ===== INITIALIZE SERVICES =====
@@ -129,11 +133,15 @@ const appContext: AppContext = {
     this.renderUser.render();
     this.renderTask.render();
     renderLogs();
+  },
+  saveData: function() {
+    updateDashboard();
   }
 };
 
 // Expose to window
 window.appContext = appContext;
+window.renderModals = appContext.renderModals;
 
 // ===== PAGINATION STATE =====
 const paginator = new Paginator();
@@ -142,9 +150,13 @@ const paginator = new Paginator();
 const favoriteTasks = new Favorites<Task>();
 const favoriteUsers = new Favorites<User>();
 
-// Expose favorites to window for global access
+// ===== WATCHER SYSTEM =====
+const watcherSystem = new WatcherSystem<Task | User, User>();
+
+// Expose favorites and watcher system to window for global access
 window.favoriteTasks = favoriteTasks;
 window.favoriteUsers = favoriteUsers;
+window.watcherSystem = watcherSystem;
 
 interface PaginationState {
   currentPage: number;
@@ -643,6 +655,13 @@ tagManager.addTag(task1, 'urgente');
 tagManager.addTag(task1, 'backend');
 console.log(tagManager.getTags(task1));
 
-// Re-render after adding test data
+// ===== TEST WatcherSystem CLASS =====
+window.watcherSystem.watch(task1, user1);
+window.watcherSystem.watch(task1, user2);
+console.log('Watchers for task1:', window.watcherSystem.getWatchers(task1));
+window.watcherSystem.unwatch(task1, user1);
+console.log('Watchers for task1 after unwatch:', window.watcherSystem.getWatchers(task1));
+
+//re-render after adding test data
 window.appContext.renderTask.render();
 window.appContext.renderUser.render();

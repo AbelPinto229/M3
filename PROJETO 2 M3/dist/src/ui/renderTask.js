@@ -67,12 +67,26 @@ export class RenderTask {
         const displayPriority = priorityMap[t.priority || 'LOW'] || (t.priority || 'Baixa');
         const isFavorite = window.favoriteTasks.exists(t);
         const favoriteStarClass = isFavorite ? 'favorite-star active' : 'favorite-star inactive';
+        const currentUser = window.appContext.userService.getUserById(window.appContext.currentUserId);
+        const watchers = window.watcherSystem.getWatchers(t);
+        const isWatching = currentUser && watchers.includes(currentUser);
+        const watchClass = isWatching ? 'text-blue-600 font-bold' : 'text-slate-400';
+        const watchCount = watchers.length;
         return `
-      <tr class="group hover:bg-slate-50 transition-colors border-b border-slate-100">
-        <td class="py-4 px-2 cursor-pointer flex items-center gap-2" onclick="window.appContext.renderTask.openTaskModal(${t.id})">
-          <span class="${favoriteStarClass}" onclick="event.stopPropagation(); window.appContext.renderTask.toggleTaskFavorite(${t.id})">★</span>
-          <div>
-            <p class="font-bold text-slate-700 ${t.status === TaskStatus.COMPLETED ? 'line-through opacity-40' : ''}">${t.title}</p>
+      <tr class="group hover:bg-slate-50 transition-colors border-b border-slate-100" data-task-id="${t.id}">
+        <td class="py-4 px-2 flex items-center gap-2">
+          <div class="flex flex-col gap-1 items-center">
+            <span class="${favoriteStarClass}" onclick="event.stopPropagation(); window.appContext.renderTask.toggleTaskFavorite(${t.id})">★</span>
+            <button class="${watchClass} cursor-pointer p-1.5 rounded-md" onclick="event.stopPropagation(); window.appContext.renderTask.toggleTaskWatch(${t.id})" data-watch-btn style="display: flex; align-items: center; justify-content: center;">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7C7.523 19 3.732 16.057 2.458 12z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </button>
+            <span class=\"text-xs text-slate-400\" data-watch-count>${watchCount}</span>
+          </div>
+          <div class="flex-1">
+            <p class="font-bold text-slate-700 ${t.status === TaskStatus.COMPLETED ? 'line-through opacity-40' : ''}">\u200b${t.title}</p>
             <span class="text-[8px] ${priorityColorClass} block uppercase tracking-tighter mt-1">${displayType} | ${displayPriority} ${t.deadline ? '| Expira: ' + t.deadline : ''}</span>
           </div>
         </td>
@@ -80,26 +94,14 @@ export class RenderTask {
           <button onclick="event.stopPropagation(); window.appContext.renderTask.cycleTaskStatus(${t.id})" ${((window.appContext.currentUserRole === 'VIEWER')) ? 'disabled' : ''} class="text-[9px] font-bold px-3 py-1.5 rounded-md border min-w-[100px] inline-block ${statusColor} ${((window.appContext.currentUserRole === 'VIEWER')) ? 'opacity-50 cursor-not-allowed' : ''}">${t.status.toUpperCase()}</button>
         </td>
         <td class="py-4 text-right pr-2">
-          <div class="flex flex-row items-center justify-end gap-1 h-full">
-            ${((window.appContext.checkPermission?.('assign_task'))) ? `
-            <select onchange="event.stopPropagation(); window.appContext.renderTask.manualAssign(${t.id}, this.value)" class="text-[10px] h-6 px-2 rounded-md border bg-white min-w-[100px]">
-              <option value="">Atribuir...</option>
-              ${this.userService
-            .getActiveUsers()
-            .map(u => `<option value="${u.email}" ${t.assigned?.includes(u.email) ? 'selected' : ''}>${u.name}</option>`)
-            .join('')}
-            </select>` : ''}
-            <select onchange="event.stopPropagation(); window.appContext.renderTask.setTaskPriority(${t.id}, this.value)" class="text-[10px] h-6 px-2 rounded-md border bg-white min-w-[70px]" ${!((window.appContext.checkPermission?.('edit_task'))) ? 'disabled' : ''}>
-              ${TASK_PRIORITIES.map(p => `<option value="${p}" ${t.priority === p ? 'selected' : ''}>${PRIORITY_DISPLAY_MAP[p] || p}</option>`).join('')}
-            </select>
-            ${((window.appContext.checkPermission?.('edit_title'))) ? `
-            <button onclick="event.stopPropagation(); window.appContext.renderTask.editTaskTitle(${t.id})" class="text-slate-300 hover:text-indigo-600 p-1.5 rounded-md">
+          <div class="flex flex-col gap-1 items-center">
+            <button ${((window.appContext.checkPermission?.('edit_title'))) ? '' : 'disabled'} onclick="event.stopPropagation(); ${((window.appContext.checkPermission?.('edit_title'))) ? `window.appContext.renderTask.openTaskModal(${t.id})` : 'return false'}" class="text-slate-300 hover:text-indigo-600 transition-colors ${!((window.appContext.checkPermission?.('edit_title'))) ? 'opacity-50 cursor-not-allowed' : ''}" title="Editar">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
               </svg>
-            </button>` : ''}
+            </button>
             ${((window.appContext.checkPermission?.('delete_task'))) ? `
-            <button onclick="event.stopPropagation(); window.appContext.renderTask.deleteTask(${t.id})" class="text-slate-300 hover:text-red-500 p-1.5 rounded-md">
+            <button onclick="event.stopPropagation(); window.appContext.renderTask.deleteTask(${t.id})" class="text-slate-300 hover:text-red-500 transition-colors" title="Remover">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
               </svg>
@@ -125,6 +127,32 @@ export class RenderTask {
       <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border border-slate-100">
         <h3 class="font-bold mb-2">${task.title}</h3>
         <p class="text-[10px] text-slate-400 mb-4">Tipo: ${displayType} | Prioridade: ${displayPriority}</p>
+        
+        ${!isViewer ? `
+        <div class="mb-4 space-y-2">
+          <div>
+            <label class="text-xs font-bold text-slate-600 block mb-1">NOME DA TAREFA:</label>
+            <input id="taskTitleInput" type="text" value="${task.title}" class="w-full text-[10px] px-2 py-1.5 rounded-md border bg-white" onkeypress="if(event.key==='Enter'){ window.appContext.renderTask.saveTaskTitle(${taskId}); }">
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-600 block mb-1">ATRIBUIR A:</label>
+            <select id="taskAssignSelect" onchange="window.appContext.renderTask.manualAssign(${taskId}, this.value)" class="w-full text-[10px] px-2 py-1.5 rounded-md border bg-white">
+              <option value="">Sem atribuição</option>
+              ${this.userService
+            .getActiveUsers()
+            .map(u => `<option value="${u.email}" ${task.assigned?.includes(u.email) ? 'selected' : ''}>${u.name}</option>`)
+            .join('')}
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-600 block mb-1">PRIORIDADE:</label>
+            <select id="taskPrioritySelect" onchange="window.appContext.renderTask.setTaskPriority(${taskId}, this.value)" class="w-full text-[10px] px-2 py-1.5 rounded-md border bg-white">
+              ${TASK_PRIORITIES.map(p => `<option value="${p}" ${task.priority === p ? 'selected' : ''}>${PRIORITY_DISPLAY_MAP[p] || p}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        ` : ''}
+        
         ${!isViewer ? `
         <div class="mb-4">
           <h4 class="font-bold text-xs mb-1">Etiquetas:</h4>
@@ -141,7 +169,10 @@ export class RenderTask {
           <input type="file" id="newAttachmentInput" class="mt-1 text-xs" onchange="window.appContext.renderTask.addAttachment(event)">
         </div>
         ` : '<div class="mt-4"><h4 class="font-bold text-xs mb-1">Anexos:</h4><div id="taskAttachments" class="max-h-24 overflow-y-auto"></div></div>'}
-        <div class="flex justify-end mt-4"><button onclick="window.appContext.renderTask.closeTaskModal()" class="px-4 py-2 bg-gray-200 rounded text-xs">Fechar</button></div>
+        <div class="flex justify-end gap-2 mt-4">
+          <button onclick="window.appContext.renderTask.closeTaskModal()" class="px-4 py-2 bg-gray-200 rounded text-xs">Cancelar</button>
+          ${!isViewer ? `<button onclick="window.appContext.renderTask.saveAllTaskChanges(${taskId})" class="px-4 py-2 bg-indigo-600 text-white rounded text-xs">Guardar</button>` : ''}
+        </div>
       </div>`;
         const container = document.createElement('div');
         container.id = 'taskModalContainer';
@@ -331,9 +362,75 @@ export class RenderTask {
         window.appContext.notificationService.addNotification(`Prioridade alterada: ${p.toUpperCase()}`, 'success');
         window.appContext.saveAndRender();
     }
+    // Saves updated task title from modal
+    saveTaskTitle(taskId) {
+        const input = document.getElementById('taskTitleInput');
+        if (!input)
+            return;
+        const newTitle = input.value.trim();
+        if (!newTitle)
+            return;
+        const task = this.taskService.getTaskById(taskId);
+        if (!task)
+            return;
+        const oldTitle = task.title;
+        this.taskService.updateTaskTitle(taskId, newTitle);
+        window.appContext.logService.addLog(`Tarefa renomeada: "${oldTitle}" -> "${newTitle}"`);
+        window.appContext.notificationService.addNotification(`Tarefa renomeada: "${newTitle}"`, 'success');
+        window.appContext.saveAndRender();
+    }
     // Opens modal to edit task title
     editTaskTitle(taskId) {
         window.appContext.renderModals.openEditTitleModal(taskId);
+    }
+    // Saves all changes made in the task modal (title, priority, assignment)
+    saveAllTaskChanges(taskId) {
+        const titleInput = document.getElementById('taskTitleInput');
+        const prioritySelect = document.getElementById('taskPrioritySelect');
+        const assignSelect = document.getElementById('taskAssignSelect');
+        const task = this.taskService.getTaskById(taskId);
+        if (!task)
+            return;
+        let changed = false;
+        // Save title if changed
+        if (titleInput && titleInput.value.trim() !== task.title) {
+            const newTitle = titleInput.value.trim();
+            if (newTitle) {
+                const oldTitle = task.title;
+                this.taskService.updateTaskTitle(taskId, newTitle);
+                window.appContext.logService.addLog(`Tarefa renomeada: "${oldTitle}" -> "${newTitle}"`);
+                changed = true;
+            }
+        }
+        // Save priority if changed
+        if (prioritySelect && prioritySelect.value !== task.priority) {
+            this.taskService.updateTaskPriority(taskId, prioritySelect.value);
+            window.appContext.priorityService.setPriority(taskId, prioritySelect.value);
+            window.appContext.logService.addLog(`Tarefa "${task.title}" prioridade -> ${prioritySelect.value}`);
+            changed = true;
+        }
+        // Save assignment if changed
+        if (assignSelect && assignSelect.value) {
+            const newEmail = assignSelect.value;
+            if (!task.assigned?.includes(newEmail)) {
+                task.assigned = [newEmail];
+                window.appContext.logService.addLog(`Tarefa "${task.title}" atribuída a ${newEmail}`);
+                changed = true;
+            }
+        }
+        else if (assignSelect && !assignSelect.value && task.assigned?.length) {
+            task.assigned = [];
+            window.appContext.logService.addLog(`Tarefa "${task.title}" desatribuída`);
+            changed = true;
+        }
+        if (changed) {
+            window.appContext.notificationService.addNotification('Alterações guardadas com sucesso!', 'success');
+            window.appContext.saveAndRender();
+        }
+        else {
+            window.appContext.notificationService.addNotification('Nenhuma alteração feita.', 'info');
+        }
+        this.closeTaskModal();
     }
     // Toggles task favorite status
     toggleTaskFavorite(taskId) {
@@ -351,6 +448,43 @@ export class RenderTask {
             window.appContext.logService.addLog(`Tarefa "${task.title}" adicionada aos favoritos`);
         }
         window.appContext.saveAndRender();
+    }
+    // Toggles task watch status
+    toggleTaskWatch(taskId) {
+        const task = this.taskService.getTaskById(taskId);
+        if (!task)
+            return;
+        const currentUser = window.appContext.userService.getUserById(window.appContext.currentUserId);
+        if (!currentUser)
+            return;
+        const watchers = window.watcherSystem.getWatchers(task);
+        if (watchers.includes(currentUser)) {
+            window.watcherSystem.unwatch(task, currentUser);
+            window.appContext.notificationService.addNotification(`Deixou de seguir "${task.title}"!`, 'info');
+            window.appContext.logService.addLog(`Deixou de seguir a tarefa "${task.title}"`);
+        }
+        else {
+            window.watcherSystem.watch(task, currentUser);
+            window.appContext.notificationService.addNotification(`Agora está a seguir "${task.title}"!`, 'success');
+            window.appContext.logService.addLog(`Agora está a seguir a tarefa "${task.title}"`);
+        }
+        // Only save data, don't re-render
+        window.appContext.saveData();
+        // Update DOM locally only
+        const taskRow = document.querySelector(`tr[data-task-id="${taskId}"]`);
+        if (taskRow) {
+            const watchButton = taskRow.querySelector('button[data-watch-btn]');
+            const watchCounter = taskRow.querySelector('[data-watch-count]');
+            if (watchButton && watchCounter) {
+                const updatedWatchers = window.watcherSystem.getWatchers(task);
+                const isWatching = updatedWatchers.includes(currentUser);
+                // Update counter
+                watchCounter.textContent = updatedWatchers.length.toString();
+                // Update button styling
+                const newWatchClass = isWatching ? 'text-blue-600 font-bold' : 'text-slate-400';
+                watchButton.className = `${newWatchClass} cursor-pointer p-1.5 rounded-md`;
+            }
+        }
     }
 }
 //# sourceMappingURL=renderTask.js.map

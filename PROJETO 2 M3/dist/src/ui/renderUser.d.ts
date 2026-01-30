@@ -8,5 +8,6 @@ export declare class RenderUser {
     deleteUser(id: number): void;
     showUserDetails(id: number): void;
     editUser(id: number): void;
+    toggleUserWatch(userId: number): void;
     toggleUserFavorite(id: number): void;
 }

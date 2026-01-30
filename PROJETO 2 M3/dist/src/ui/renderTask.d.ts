@@ -28,6 +28,9 @@ export declare class RenderTask {
     deleteTask(id: number): void;
     manualAssign(taskId: number, email: string): void;
     setTaskPriority(taskId: number, p: string): void;
+    saveTaskTitle(taskId: number): void;
     editTaskTitle(taskId: number): void;
+    saveAllTaskChanges(taskId: number): void;
     toggleTaskFavorite(taskId: number): void;
+    toggleTaskWatch(taskId: number): void;
 }

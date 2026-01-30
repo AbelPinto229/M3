@@ -18,11 +18,14 @@ import { RenderModals } from './src/ui/renderModals.js';
 import { User } from './src/models/Users.js';
 import { Task } from './src/models/Task.js';
 import { Favorites } from './src/utils/Favorites.js';
+import { WatcherSystem } from './src/utils/WatcherSystem.js';
 declare global {
     interface Window {
         appContext: AppContext;
+        renderModals: RenderModals;
         favoriteTasks: Favorites<Task>;
         favoriteUsers: Favorites<User>;
+        watcherSystem: WatcherSystem<Task | User, User>;
         renderTasksWithPagination: (tasks: Task[]) => void;
         renderUsersWithPagination: (users: User[]) => void;
     }
@@ -51,6 +54,7 @@ interface AppContext {
     userFilter: string;
     checkPermission: (action: string) => boolean;
     saveAndRender: () => void;
+    saveData: () => void;
 }
 export declare function initializeApp(): void;
 export declare function saveAndRender(): void;

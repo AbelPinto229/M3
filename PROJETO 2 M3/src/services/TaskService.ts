@@ -37,7 +37,7 @@ export class TaskService {
   addTask(title: string, type: string, deadline?: string): ExtendedTask {
     let task: ExtendedTask;
     
-    // Use BugTask for bug-type tasks
+    // use BugTask for bug-type tasks
     if (type.toLowerCase() === 'bug') {
       const bugTask = new BugTask(this.nextId++, title);
       task = {
@@ -61,31 +61,31 @@ export class TaskService {
     return task;
   }
 
-  // Updates task status
+  // updates task status
   updateTaskStatus(id: number, status: string): void {
     const task = this.getTaskById(id);
     if (task) task.status = status;
   }
 
-  // Updates task title
+  // updates task title
   updateTaskTitle(id: number, title: string): void {
     const task = this.getTaskById(id);
     if (task) task.title = title;
   }
 
-  // Updates task priority level
+  // updates task priority level
   updateTaskPriority(id: number, priority: string): void {
     const task = this.getTaskById(id);
     if (task) task.priority = priority;
   }
 
-  // Updates task deadline date
+  // updates task deadline date
   updateTaskDeadline(id: number, deadline: string): void {
     const task = this.getTaskById(id);
     if (task) task.deadline = deadline;
   }
 
-  // Assigns a user to a task by email
+  // assigns a user to a task by email
   assignUser(taskId: number, email: string): void {
     const task = this.getTaskById(taskId);
     if (task) {
@@ -96,7 +96,7 @@ export class TaskService {
     }
   }
 
-  // Removes a user assignment from a task
+  //removes a user assignment from a task
   unassignUser(taskId: number, email: string): void {
     const task = this.getTaskById(taskId);
     if (task && task.assigned) {
@@ -104,7 +104,7 @@ export class TaskService {
     }
   }
 
-  // Deletes a task by ID
+  //deletes a task by ID
   deleteTask(id: number): void {
     this.tasks = this.tasks.filter(t => t.id !== id);
   }

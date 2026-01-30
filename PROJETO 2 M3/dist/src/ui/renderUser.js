@@ -38,13 +38,27 @@ export class RenderUser {
         const canEdit = window.appContext.checkPermission?.('edit_user');
         const isFavorite = window.favoriteUsers.exists(u);
         const favoriteStarClass = isFavorite ? 'favorite-star active' : 'favorite-star inactive';
+        const currentUser = window.appContext.userService.getUserById(window.appContext.currentUserId);
+        const watchers = window.watcherSystem.getWatchers(u);
+        const isWatching = currentUser && watchers.includes(currentUser);
+        const watchClass = isWatching ? 'text-blue-600 font-bold' : 'text-slate-400';
+        const watchCount = watchers.length;
         const photoHTML = u.photo ? `<img src="${u.photo}" alt="${u.name}" class="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-slate-200">` : `<div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">${u.name.charAt(0).toUpperCase()}</div>`;
         const allTasks = window.appContext.taskService.getTasks?.() || [];
         const assignedTaskCount = allTasks.filter((t) => t.assigned && t.assigned.includes(u.email)).length;
         return `
-      <tr class="group hover:bg-slate-50 transition-colors cursor-pointer" onclick="window.appContext.renderUser.showUserDetails(${u.id})">
+      <tr class="group hover:bg-slate-50 transition-colors cursor-pointer" data-user-id="${u.id}" onclick="window.appContext.renderUser.showUserDetails(${u.id})">
         <td class="py-3 font-medium text-slate-700 flex items-center gap-3">
-          <span class="${favoriteStarClass}" onclick="event.stopPropagation(); window.appContext.renderUser.toggleUserFavorite(${u.id})">★</span>
+          <div class="flex flex-col gap-1 items-center pt-1">
+            <span class="${favoriteStarClass}" onclick="event.stopPropagation(); window.appContext.renderUser.toggleUserFavorite(${u.id})">★</span>
+            <button class="${watchClass} cursor-pointer p-1.5 rounded-md" onclick="event.stopPropagation(); window.appContext.renderUser.toggleUserWatch(${u.id})" data-watch-btn style="display: flex; align-items: center; justify-content: center;">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7C7.523 19 3.732 16.057 2.458 12z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </button>
+            <span class=\"text-xs text-slate-400\" data-watch-count>${watchCount}</span>
+          </div>
           ${photoHTML}
           <div class="flex flex-col gap-1">
             <span>${u.name} <span class="text-[8px] px-1.5 py-0.5 rounded border font-black inline-block ml-1 ${roleColors[u.role] || 'bg-slate-50'}">${u.role}</span></span>
@@ -55,16 +69,18 @@ export class RenderUser {
           <button ${canToggle ? '' : 'disabled'} onclick="event.stopPropagation(); ${canToggle ? `window.appContext.renderUser.toggleUserStatus(${u.id})` : 'return false'}" class="text-[9px] font-bold px-2 py-1 rounded-full border ${u.active ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-100 text-slate-400 border-slate-200'} ${!canToggle ? 'opacity-50 cursor-not-allowed' : ''}">${u.active ? 'ATIVO' : 'INATIVO'}</button>
         </td>
         <td class="py-3 text-right" onclick="event.stopPropagation()">
-          <button ${canEdit ? '' : 'disabled'} onclick="${canEdit ? `window.appContext.renderUser.editUser(${u.id})` : 'return false'}" class="text-slate-300 hover:text-indigo-600 transition-colors ${!canEdit ? 'opacity-50 cursor-not-allowed' : ''} mr-2">
-            <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-            </svg>
-          </button>
-          <button ${canDelete ? '' : 'disabled'} onclick="${canDelete ? `window.appContext.renderUser.deleteUser(${u.id})` : 'return false'}" class="text-slate-300 hover:text-red-500 transition-colors ${!canDelete ? 'opacity-50 cursor-not-allowed' : ''}">
-            <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-            </svg>
-          </button>
+          <div class="flex flex-col gap-1 items-center">
+            <button ${canEdit ? '' : 'disabled'} onclick="${canEdit ? `window.appContext.renderUser.editUser(${u.id})` : 'return false'}" class="text-slate-300 hover:text-indigo-600 transition-colors ${!canEdit ? 'opacity-50 cursor-not-allowed' : ''}" title="Editar">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </button>
+            <button ${canDelete ? '' : 'disabled'} onclick="${canDelete ? `window.appContext.renderUser.deleteUser(${u.id})` : 'return false'}" class="text-slate-300 hover:text-red-500 transition-colors ${!canDelete ? 'opacity-50 cursor-not-allowed' : ''}" title="Remover">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </button>
+          </div>
         </td>
       </tr>`;
     }
@@ -157,6 +173,41 @@ export class RenderUser {
         if (!user)
             return;
         window.appContext.renderModals.openEditUserModal(id, user);
+    }
+    // Toggles user watch status
+    toggleUserWatch(userId) {
+        const user = this.userService.getUserById(userId);
+        const currentUser = window.appContext.userService.getUserById(window.appContext.currentUserId);
+        if (!user || !currentUser)
+            return;
+        const watchers = window.watcherSystem.getWatchers(user);
+        if (watchers.includes(currentUser)) {
+            window.watcherSystem.unwatch(user, currentUser);
+            window.appContext.notificationService.addNotification(`Deixou de seguir ${user.name}!`, 'info');
+            window.appContext.logService.addLog(`Deixou de seguir o utilizador "${user.name}"`);
+        }
+        else {
+            window.watcherSystem.watch(user, currentUser);
+            window.appContext.notificationService.addNotification(`Agora está a seguir ${user.name}!`, 'success');
+            window.appContext.logService.addLog(`Agora está a seguir o utilizador "${user.name}"`);
+        }
+        // Only save data, don't re-render
+        window.appContext.saveData();
+        // Update DOM locally only
+        const userRow = document.querySelector(`tr[data-user-id="${userId}"]`);
+        if (userRow) {
+            const watchButton = userRow.querySelector('button[data-watch-btn]');
+            const watchCounter = userRow.querySelector('[data-watch-count]');
+            if (watchButton && watchCounter) {
+                const updatedWatchers = window.watcherSystem.getWatchers(user);
+                const isWatching = updatedWatchers.includes(currentUser);
+                // Update counter
+                watchCounter.textContent = updatedWatchers.length.toString();
+                // Update button styling
+                const newWatchClass = isWatching ? 'text-blue-600 font-bold' : 'text-slate-400';
+                watchButton.className = `${newWatchClass} cursor-pointer p-1.5 rounded-md`;
+            }
+        }
     }
     // Toggles user favorite status
     toggleUserFavorite(id) {
