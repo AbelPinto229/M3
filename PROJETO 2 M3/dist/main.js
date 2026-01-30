@@ -6,7 +6,7 @@ import { TaskService } from './src/services/TaskService.js';
 import { HistoryLog } from './src/logs/HistoryLog.js';
 import { CommentService } from './src/services/CommentService.js';
 import { AttachmentService } from './src/services/AttachmentService.js';
-import { TagService } from './src/services/TagService.js';
+import { TagManager } from './src/utils/TagManager.js';
 import { DeadlineService } from './src/services/DeadlineService.js';
 import { PriorityService } from './src/services/PriorityService.js';
 import { AssignmentService } from './src/services/AssignmentService.js';
@@ -19,6 +19,8 @@ import { NotificationService } from './src/notifications/NotificationService.js'
 import { RenderUser } from './src/ui/renderUser.js';
 import { RenderTask } from './src/ui/renderTask.js';
 import { RenderModals } from './src/ui/renderModals.js';
+import { EntityList } from './src/index.js';
+import { SimpleCache } from './src/utils/SimpleCache.js';
 // ===== INITIALIZE SERVICES =====
 const userService = new UserService();
 const taskService = new TaskService();
@@ -28,7 +30,7 @@ const priorityService = new PriorityService();
 const assignmentService = new AssignmentService();
 const commentService = new CommentService();
 const attachmentService = new AttachmentService();
-const tagService = new TagService();
+const tagService = new TagManager();
 const automationService = new AutomationRulesService(assignmentService, deadlineService, priorityService);
 const statisticsService = new StatisticsService(taskService.getTasks(), userService.getUsers());
 const searchService = new SearchService(taskService.getTasks());
@@ -322,4 +324,43 @@ if (document.readyState === 'loading') {
 else {
     initializeApp();
 }
+// ===== TEST EntityList CLASS =====
+// Create test users and tasks
+const user1 = userService.addUser('test1@example.com', 'Test User 1', 'MEMBER');
+const user2 = userService.addUser('test2@example.com', 'Test User 2', 'MEMBER');
+const task1 = taskService.addTask('Test Task 1', 'Feature');
+// test EntityList with users
+const userList = new EntityList();
+userList.add(user1);
+userList.add(user2);
+// test EntityList with tasks
+const taskList = new EntityList();
+taskList.add(task1);
+console.log('Users in EntityList:', userList.getAll());
+console.log('Tasks in EntityList:', taskList.getAll());
+// ===== TEST SimpleCache CLASS =====
+// cache for users by id
+const userCache = new SimpleCache();
+const userData = user1;
+userCache.set('user123', userData);
+const cachedUser = userCache.get('user123');
+// cache for tasks by id
+const taskCache = new SimpleCache();
+const taskData = task1;
+taskCache.set('task456', taskData);
+const cachedTask = taskCache.get('task456');
+console.log('Cached User:', cachedUser);
+console.log('Cached Task:', cachedTask);
+// ===== TEST Paginator CLASS =====
+import { Paginator } from './src/utils/Paginator.js';
+const paginator = new Paginator();
+const page1 = paginator.paginate(userList.getAll(), 1, 2);
+const page2 = paginator.paginate(userList.getAll(), 2, 2);
+console.log(page1);
+console.log(page2);
+// ===== TEST TagManager CLASS =====
+const tagManager = new TagManager();
+tagManager.addTag(task1, 'urgente');
+tagManager.addTag(task1, 'backend');
+console.log(tagManager.getTags(task1));
 //# sourceMappingURL=main.js.map

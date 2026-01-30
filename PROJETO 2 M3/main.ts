@@ -7,7 +7,7 @@ import { TaskService } from './src/services/TaskService.js';
 import { HistoryLog } from './src/logs/HistoryLog.js';
 import { CommentService } from './src/services/CommentService.js';
 import { AttachmentService } from './src/services/AttachmentService.js';
-import { TagService } from './src/utils/TagManager.js';
+import { TagManager } from './src/utils/TagManager.js';
 import { DeadlineService } from './src/services/DeadlineService.js';
 import { PriorityService } from './src/services/PriorityService.js';
 import { AssignmentService } from './src/services/AssignmentService.js';
@@ -36,7 +36,7 @@ interface AppContext {
   assignmentService: AssignmentService;
   commentService: CommentService;
   attachmentService: AttachmentService;
-  tagService: TagService;
+  tagService: TagManager<any>;
   automationService: AutomationRulesService;
   statisticsService: StatisticsService;
   searchService: SearchService;
@@ -68,7 +68,7 @@ const priorityService = new PriorityService();
 const assignmentService = new AssignmentService();
 const commentService = new CommentService();
 const attachmentService = new AttachmentService();
-const tagService = new TagService();
+const tagService = new TagManager<any>();
 const automationService = new AutomationRulesService(assignmentService, deadlineService, priorityService);
 const statisticsService = new StatisticsService(taskService.getTasks(), userService.getUsers());
 const searchService = new SearchService(taskService.getTasks());
@@ -441,3 +441,9 @@ const page2 = paginator.paginate(userList.getAll(), 2, 2);
 
 console.log(page1);
 console.log(page2);
+
+// ===== TEST TagManager CLASS =====
+const tagManager = new TagManager<any>();
+tagManager.addTag(task1, 'urgente');
+tagManager.addTag(task1, 'backend');
+console.log(tagManager.getTags(task1));

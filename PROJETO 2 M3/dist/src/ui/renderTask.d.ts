@@ -1,6 +1,6 @@
 import { TaskService } from '../services/TaskService.js';
 import { UserService } from '../services/UserService.js';
-import { TagService } from '../services/TagService.js';
+import { TagManager } from '../utils/TagManager.js';
 import { SearchService } from '../services/SearchService.js';
 import { CommentService } from '../services/CommentService.js';
 import { AttachmentService } from '../services/AttachmentService.js';
@@ -12,7 +12,7 @@ export declare class RenderTask {
     private commentService;
     private attachmentService;
     private activeTaskModalId;
-    constructor(taskService: TaskService, userService: UserService, tagService: TagService, searchService: SearchService, commentService: CommentService, attachmentService: AttachmentService);
+    constructor(taskService: TaskService, userService: UserService, tagService: TagManager<any>, searchService: SearchService, commentService: CommentService, attachmentService: AttachmentService);
     render(): void;
     private renderTaskRow;
     openTaskModal(taskId: number): void;

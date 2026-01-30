@@ -2,7 +2,7 @@ export { UserService } from './UserService.js';
 export { TaskService } from './TaskService.js';
 export { CommentService } from './CommentService.js';
 export { AttachmentService } from './AttachmentService.js';
-export { TagService } from './TagService.js';
+export { TagManager } from '../utils/TagManager.js';
 export { DeadlineService } from './DeadlineService.js';
 export { PriorityService } from './PriorityService.js';
 export { AssignmentService } from './AssignmentService.js';

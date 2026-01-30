@@ -1,5 +1,5 @@
 import { Task } from "../models/Task";
-import { TagService } from "./TagService";
+import { TagManager } from "../utils/TagManager";
 
 // SEARCH SERVICE - Provides search and filtering functionality for tasks
 export class SearchService {
@@ -44,7 +44,7 @@ export class SearchService {
     priority: string;
     type: string;
     tag: string;
-  }, tagService: TagService): Task[] {
+  }, tagService: TagManager<any>): Task[] {
     return tasks.filter(task => {
       const matchTitle = task.title.toLowerCase().includes(criteria.text.toLowerCase());
       const matchStatus = criteria.status === "" || task.status === criteria.status;

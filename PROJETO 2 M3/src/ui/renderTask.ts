@@ -2,7 +2,7 @@
 
 import { TaskService, ExtendedTask } from '../services/TaskService.js';
 import { UserService } from '../services/UserService.js';
-import { TagService } from '../services/TagService.js';
+import { TagManager } from '../utils/TagManager.js';
 import { SearchService } from '../services/SearchService.js';
 import { TaskStatus } from '../tasks/TaskStatus.js';
 import { CommentService } from '../services/CommentService.js';
@@ -18,7 +18,7 @@ export class RenderTask {
   constructor(
     private taskService: TaskService,
     private userService: UserService,
-    private tagService: TagService,
+    private tagService: TagManager<any>,
     private searchService: SearchService,
     private commentService: CommentService,
     private attachmentService: AttachmentService

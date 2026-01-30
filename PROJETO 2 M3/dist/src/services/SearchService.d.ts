@@ -1,5 +1,5 @@
 import { Task } from "../models/Task";
-import { TagService } from "./TagService";
+import { TagManager } from "../utils/TagManager";
 export declare class SearchService {
     private tasks;
     constructor(tasks: Task[]);
@@ -13,5 +13,5 @@ export declare class SearchService {
         priority: string;
         type: string;
         tag: string;
-    }, tagService: TagService): Task[];
+    }, tagService: TagManager<any>): Task[];
 }

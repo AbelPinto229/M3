@@ -3,7 +3,7 @@ import { TaskService } from './src/services/TaskService.js';
 import { HistoryLog } from './src/logs/HistoryLog.js';
 import { CommentService } from './src/services/CommentService.js';
 import { AttachmentService } from './src/services/AttachmentService.js';
-import { TagService } from './src/services/TagService.js';
+import { TagManager } from './src/utils/TagManager.js';
 import { DeadlineService } from './src/services/DeadlineService.js';
 import { PriorityService } from './src/services/PriorityService.js';
 import { AssignmentService } from './src/services/AssignmentService.js';
@@ -24,7 +24,7 @@ interface AppContext {
     assignmentService: AssignmentService;
     commentService: CommentService;
     attachmentService: AttachmentService;
-    tagService: TagService;
+    tagService: TagManager<any>;
     automationService: AutomationRulesService;
     statisticsService: StatisticsService;
     searchService: SearchService;

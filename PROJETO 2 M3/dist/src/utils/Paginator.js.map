@@ -1,0 +1,1 @@
+{"version":3,"file":"Paginator.js","sourceRoot":"","sources":["../../../src/utils/Paginator.ts"],"names":[],"mappings":"AACA,sCAAsC;AACtC,MAAM,OAAO,SAAS;IACpB,QAAQ,CAAI,KAAU,EAAE,UAAkB,EAAE,QAAgB;QAC1D,MAAM,UAAU,GAAG,CAAC,UAAU,GAAG,CAAC,CAAC,GAAG,QAAQ,CAAC;QAC/C,OAAO,KAAK,CAAC,KAAK,CAAC,UAAU,EAAE,UAAU,GAAG,QAAQ,CAAC,CAAC;IACxD,CAAC;CACF"}
