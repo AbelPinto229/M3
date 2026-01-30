@@ -1,7 +1,5 @@
-export declare class Favorites<T> {
-    private items;
-    add(item: T): void;
-    remove(item: T): void;
+import { EntityList } from './EntityList.js';
+export declare class Favorites<T> extends EntityList<T> {
     exists(item: T): boolean;
-    getAll(): T[];
+    remove(item: T): void;
 }

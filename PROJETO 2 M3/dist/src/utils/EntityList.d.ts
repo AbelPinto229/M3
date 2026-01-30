@@ -1,5 +1,6 @@
 export declare class EntityList<T> {
-    private items;
+    protected items: T[];
     add(item: T): void;
     getAll(): T[];
+    clear(): void;
 }

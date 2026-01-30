@@ -343,12 +343,14 @@ export class RenderTask {
         if (window.favoriteTasks.exists(task)) {
             window.favoriteTasks.remove(task);
             window.appContext.notificationService.addNotification(`"${task.title}" removida de favoritos!`, 'info');
+            window.appContext.logService.addLog(`Tarefa "${task.title}" removida de favoritos`);
         }
         else {
             window.favoriteTasks.add(task);
             window.appContext.notificationService.addNotification(`"${task.title}" adicionada aos favoritos!`, 'success');
+            window.appContext.logService.addLog(`Tarefa "${task.title}" adicionada aos favoritos`);
         }
-        this.render();
+        window.appContext.saveAndRender();
     }
 }
 //# sourceMappingURL=renderTask.js.map

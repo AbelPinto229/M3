@@ -1,6 +1,6 @@
+import { EntityList } from '../utils/EntityList.js';
 // ===== HISTORY LOG - Application Logging Service =====
-export class HistoryLog {
-    logs = [];
+export class HistoryLog extends EntityList {
     nextId = 1;
     // add a new log entry with timestamp
     addLog(message) {
@@ -9,15 +9,15 @@ export class HistoryLog {
             message,
             timestamp: new Date(),
         };
-        this.logs.push(logEntry);
+        this.add(logEntry);
     }
     // retrieve a copy of all log entries
     getLogs() {
-        return [...this.logs];
+        return [...this.getAll()];
     }
     // clear the array of log entries
     clearLogs() {
-        this.logs = [];
+        this.clear();
     }
 }
 //# sourceMappingURL=HistoryLog.js.map

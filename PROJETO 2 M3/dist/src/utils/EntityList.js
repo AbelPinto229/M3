@@ -7,5 +7,8 @@ export class EntityList {
     getAll() {
         return this.items;
     }
+    clear() {
+        this.items = [];
+    }
 }
 //# sourceMappingURL=EntityList.js.map

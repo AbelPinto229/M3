@@ -166,12 +166,14 @@ export class RenderUser {
         if (window.favoriteUsers.exists(user)) {
             window.favoriteUsers.remove(user);
             window.appContext.notificationService.addNotification(`${user.name} removido de favoritos!`, 'info');
+            window.appContext.logService.addLog(`Utilizador "${user.name}" removido de favoritos`);
         }
         else {
             window.favoriteUsers.add(user);
             window.appContext.notificationService.addNotification(`${user.name} adicionado aos favoritos!`, 'success');
+            window.appContext.logService.addLog(`Utilizador "${user.name}" adicionado aos favoritos`);
         }
-        this.render();
+        window.appContext.saveAndRender();
     }
 }
 //# sourceMappingURL=renderUser.js.map
