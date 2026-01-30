@@ -108,12 +108,18 @@ export class RenderModals {
           ${content}
         </div>
         <div class="flex justify-end gap-2">
-          <button onclick="window.renderModals.closeModal()" class="px-4 py-2 bg-gray-200 rounded text-sm">Close</button>
+          <button class="px-4 py-2 bg-gray-200 rounded text-sm" id="closeGenericModalBtn">Close</button>
         </div>
       </div>
     `;
 
     document.body.appendChild(modal);
+
+    // Attach click listener to close button
+    const closeBtn = document.getElementById('closeGenericModalBtn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => this.closeModal());
+    }
   }
 
   // Removes generic modal from DOM

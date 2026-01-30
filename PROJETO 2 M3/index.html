@@ -13,8 +13,58 @@
             width: 1.5px; background: #e2e8f0;
         }
         input:focus, select:focus { border-color: #4f46e5 !important; background: white !important; }
+        
+        /* Ensure table rows have sufficient height for scrolling */
+        #userListContainer tbody tr,
+        #taskListContainer tbody tr {
+            height: auto;
+            min-height: 60px;
+        }
+        
+        /* Scrollbar styling for containers */
+        #taskListContainer::-webkit-scrollbar, 
+        #userListContainer::-webkit-scrollbar { 
+            width: 8px; 
+        }
+        #taskListContainer::-webkit-scrollbar-track, 
+        #userListContainer::-webkit-scrollbar-track { 
+            background: #f1f5f9; 
+            border-radius: 10px;
+        }
+        #taskListContainer::-webkit-scrollbar-thumb, 
+        #userListContainer::-webkit-scrollbar-thumb { 
+            background: #cbd5e1; 
+            border-radius: 10px;
+        }
+        #taskListContainer::-webkit-scrollbar-thumb:hover, 
+        #userListContainer::-webkit-scrollbar-thumb:hover { 
+            background: #94a3b8;
+        }
+        
+        /* Firefox scrollbar */
+        #taskListContainer, 
+        #userListContainer {
+            scrollbar-color: #cbd5e1 #f1f5f9;
+            scrollbar-width: thin;
+        }
         #logs::-webkit-scrollbar { width: 3px; }
         #logs::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        
+        /* Favorite star styling */
+        .favorite-star {
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: color 0.2s ease;
+        }
+        .favorite-star:hover {
+            transform: scale(1.1);
+        }
+        .favorite-star.active {
+            color: #fbbf24;
+        }
+        .favorite-star.inactive {
+            color: #cbd5e1;
+        }
     </style>
 </head>
 <body class="bg-[#f8fafc] text-slate-900 overflow-y-scroll">
@@ -77,6 +127,7 @@
                     <button id="filterAllUsers" class="text-[9px] font-bold px-2 py-1 rounded-md bg-indigo-600 text-white">Todos</button>
                     <button id="filterActiveUsers" class="text-[9px] font-bold px-2 py-1 rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200">Ativos</button>
                     <button id="filterInactiveUsers" class="text-[9px] font-bold px-2 py-1 rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200">Inativos</button>
+                    <button id="filterFavoriteUsers" class="text-[9px] font-bold px-2 py-1 rounded-md bg-yellow-100 text-yellow-700 hover:bg-yellow-200">⭐ Favoritos</button>
                 </div>
                 
                 <form id="userForm" class="flex flex-col gap-2 p-2 bg-slate-50 rounded-xl border border-slate-100 mb-6">
@@ -100,10 +151,17 @@
                     </div>
                 </form>
 
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto max-h-[500px] overflow-y-auto" id="userListContainer">
                     <table class="w-full text-[10px] lg:text-xs">
                         <tbody id="userList" class="divide-y divide-slate-50"></tbody>
                     </table>
+                </div>
+                
+                <!-- User Pagination Controls -->
+                <div class="flex items-center justify-between mt-4 text-xs">
+                    <button id="userPrevBtn" class="px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 disabled:opacity-50">Anterior</button>
+                    <span id="userPageInfo" class="text-slate-600 font-bold">Página 1</span>
+                    <button id="userNextBtn" class="px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 disabled:opacity-50">Próxima</button>
                 </div>
             </section>
         </div>
@@ -151,6 +209,7 @@
                         </select>
                         <input type="text" id="filterTag" placeholder="Tag" 
                             class="flex-1 lg:w-24 p-2 text-[9px] bg-slate-50 border border-slate-100 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500">
+                        <button id="filterFavoriteTasks" class="text-[9px] font-bold px-2 py-1 rounded-lg bg-yellow-100 text-yellow-700 hover:bg-yellow-200 whitespace-nowrap">⭐ Favoritos</button>
                     </div>
                     <div class="flex gap-2 mt-2">
                         <button id="sortTasksAZ" class="text-[8px] lg:text-[9px] font-bold px-2 py-1 rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200 flex-1">A-Z</button>
@@ -175,10 +234,17 @@
                     </div>
                 </form>
 
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto max-h-[600px] overflow-y-auto" id="taskListContainer">
                     <table class="w-full text-[10px] lg:text-xs">
                         <tbody id="taskList" class="divide-y divide-slate-50"></tbody>
                     </table>
+                </div>
+                
+                <!-- Task Pagination Controls -->
+                <div class="flex items-center justify-between mt-4 text-xs">
+                    <button id="taskPrevBtn" class="px-3 py-1 bg-indigo-200 text-indigo-700 rounded hover:bg-indigo-300 disabled:opacity-50">Anterior</button>
+                    <span id="taskPageInfo" class="text-indigo-600 font-bold">Página 1</span>
+                    <button id="taskNextBtn" class="px-3 py-1 bg-indigo-200 text-indigo-700 rounded hover:bg-indigo-300 disabled:opacity-50">Próxima</button>
                 </div>
             </section>
         </div>

@@ -40,6 +40,12 @@ export class RenderTask {
       this.tagService
     );
 
+    // Apply favorites filter if selected
+    const favoritesFilter = (document.getElementById('filterFavoriteTasks') as HTMLButtonElement)?.classList.contains('bg-yellow-200');
+    if (favoritesFilter) {
+      filteredTasks = filteredTasks.filter((t: ExtendedTask) => window.favoriteTasks.exists(t));
+    }
+
     // Apply sorting based on sort state
     const sortState = window.appContext.taskSortState || 'none';
     if (sortState === 'asc') {
@@ -52,15 +58,11 @@ export class RenderTask {
       );
     }
 
-    const taskList = document.getElementById('taskList');
-    if (!taskList) return;
-
-    taskList.innerHTML = filteredTasks
-      .map((t: ExtendedTask) => this.renderTaskRow(t))
-      .join('');
+    // Use pagination to render tasks
+    window.renderTasksWithPagination(filteredTasks);
   }
 
-  private renderTaskRow(t: ExtendedTask): string {
+  public renderTaskRow(t: ExtendedTask): string {
     // Apply color styling based on task status
     const statusColor =
       t.status === TaskStatus.COMPLETED
@@ -81,11 +83,17 @@ export class RenderTask {
     const displayType = typeMap[t.type?.toLowerCase()] || t.type;
     const displayPriority = priorityMap[t.priority || 'LOW'] || (t.priority || 'Baixa');
 
+    const isFavorite = window.favoriteTasks.exists(t);
+    const favoriteStarClass = isFavorite ? 'favorite-star active' : 'favorite-star inactive';
+
     return `
       <tr class="group hover:bg-slate-50 transition-colors border-b border-slate-100">
-        <td class="py-4 px-2 cursor-pointer" onclick="window.appContext.renderTask.openTaskModal(${t.id})">
-          <p class="font-bold text-slate-700 ${t.status === TaskStatus.COMPLETED ? 'line-through opacity-40' : ''}">${t.title}</p>
-          <span class="text-[8px] ${priorityColorClass} block uppercase tracking-tighter mt-1">${displayType} | ${displayPriority} ${t.deadline ? '| Expira: ' + t.deadline : ''}</span>
+        <td class="py-4 px-2 cursor-pointer flex items-center gap-2" onclick="window.appContext.renderTask.openTaskModal(${t.id})">
+          <span class="${favoriteStarClass}" onclick="event.stopPropagation(); window.appContext.renderTask.toggleTaskFavorite(${t.id})">★</span>
+          <div>
+            <p class="font-bold text-slate-700 ${t.status === TaskStatus.COMPLETED ? 'line-through opacity-40' : ''}">${t.title}</p>
+            <span class="text-[8px] ${priorityColorClass} block uppercase tracking-tighter mt-1">${displayType} | ${displayPriority} ${t.deadline ? '| Expira: ' + t.deadline : ''}</span>
+          </div>
         </td>
         <td class="py-4 text-center align-middle">
           <button onclick="event.stopPropagation(); window.appContext.renderTask.cycleTaskStatus(${t.id})" ${((window.appContext.currentUserRole === 'VIEWER')) ? 'disabled' : ''} class="text-[9px] font-bold px-3 py-1.5 rounded-md border min-w-[100px] inline-block ${statusColor} ${((window.appContext.currentUserRole === 'VIEWER')) ? 'opacity-50 cursor-not-allowed' : ''}">${t.status.toUpperCase()}</button>
@@ -368,5 +376,21 @@ export class RenderTask {
   // Opens modal to edit task title
   editTaskTitle(taskId: number): void {
     window.appContext.renderModals.openEditTitleModal(taskId);
+  }
+
+  // Toggles task favorite status
+  toggleTaskFavorite(taskId: number): void {
+    const task = this.taskService.getTaskById(taskId);
+    if (!task) return;
+    
+    if (window.favoriteTasks.exists(task)) {
+      window.favoriteTasks.remove(task);
+      window.appContext.notificationService.addNotification(`"${task.title}" removida de favoritos!`, 'info');
+    } else {
+      window.favoriteTasks.add(task);
+      window.appContext.notificationService.addNotification(`"${task.title}" adicionada aos favoritos!`, 'success');
+    }
+    
+    this.render();
   }
 }

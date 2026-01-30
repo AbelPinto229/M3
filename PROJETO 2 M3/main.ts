@@ -25,6 +25,19 @@ import { EntityList } from './src/index.js';
 import { SimpleCache } from './src/utils/SimpleCache.js';
 import { User } from './src/models/Users.js';
 import { Task } from './src/models/Task.js';
+import { Paginator } from './src/utils/Paginator.js';
+import { Favorites } from './src/utils/Favorites.js';
+
+// ===== EXTEND WINDOW TYPE =====
+declare global {
+  interface Window {
+    appContext: AppContext;
+    favoriteTasks: Favorites<Task>;
+    favoriteUsers: Favorites<User>;
+    renderTasksWithPagination: (tasks: Task[]) => void;
+    renderUsersWithPagination: (users: User[]) => void;
+  }
+}
 
 // ===== APP CONTEXT TYPE =====
 interface AppContext {
@@ -51,12 +64,6 @@ interface AppContext {
   userFilter: string;
   checkPermission: (action: string) => boolean;
   saveAndRender: () => void;
-}
-
-declare global {
-  interface Window {
-    appContext: AppContext;
-  }
 }
 
 // ===== INITIALIZE SERVICES =====
@@ -127,6 +134,167 @@ const appContext: AppContext = {
 
 // Expose to window
 window.appContext = appContext;
+
+// ===== PAGINATION STATE =====
+const paginator = new Paginator();
+
+// ===== FAVORITES STATE =====
+const favoriteTasks = new Favorites<Task>();
+const favoriteUsers = new Favorites<User>();
+
+// Expose favorites to window for global access
+window.favoriteTasks = favoriteTasks;
+window.favoriteUsers = favoriteUsers;
+
+interface PaginationState {
+  currentPage: number;
+  pageSize: number;
+  filteredItems: any[];
+  allItemsLoaded: any[];
+}
+
+const taskPaginationState: PaginationState = {
+  currentPage: 1,
+  pageSize: 5,
+  filteredItems: [],
+  allItemsLoaded: []
+};
+
+const userPaginationState: PaginationState = {
+  currentPage: 1,
+  pageSize: 5,
+  filteredItems: [],
+  allItemsLoaded: []
+};
+
+// ===== PAGINATION FUNCTIONS FOR TASKS =====
+function renderTasksWithPagination(filteredTasks: any[]) {
+  taskPaginationState.filteredItems = filteredTasks;
+  taskPaginationState.currentPage = 1;
+  taskPaginationState.allItemsLoaded = [];
+  
+  loadTaskPage();
+  updateTaskPaginationControls();
+}
+
+function loadTaskPage() {
+  const paginatedTasks = paginator.paginate(
+    taskPaginationState.filteredItems,
+    taskPaginationState.currentPage,
+    taskPaginationState.pageSize
+  );
+  
+  const taskList = document.getElementById('taskList');
+  if (taskList) {
+    taskList.innerHTML = paginatedTasks
+      .map((task: any) => window.appContext.renderTask.renderTaskRow(task))
+      .join('');
+  }
+  
+  updateTaskPaginationControls();
+}
+
+function updateTaskPaginationControls() {
+  const prevBtn = document.getElementById('taskPrevBtn') as HTMLButtonElement;
+  const nextBtn = document.getElementById('taskNextBtn') as HTMLButtonElement;
+  const pageInfo = document.getElementById('taskPageInfo');
+  
+  const totalPages = Math.ceil(taskPaginationState.filteredItems.length / taskPaginationState.pageSize);
+  
+  if (pageInfo) {
+    pageInfo.textContent = `Página ${taskPaginationState.currentPage} de ${totalPages}`;
+  }
+  
+  if (prevBtn) {
+    prevBtn.disabled = taskPaginationState.currentPage <= 1;
+    prevBtn.onclick = () => {
+      if (taskPaginationState.currentPage > 1) {
+        taskPaginationState.currentPage--;
+        loadTaskPage();
+      }
+    };
+  }
+  
+  if (nextBtn) {
+    nextBtn.disabled = taskPaginationState.currentPage >= totalPages;
+    nextBtn.onclick = () => {
+      if (taskPaginationState.currentPage < totalPages) {
+        taskPaginationState.currentPage++;
+        loadTaskPage();
+      }
+    };
+  }
+}
+
+function setupTaskScrollListener() {
+  // No longer needed with page-based pagination
+}
+
+// ===== PAGINATION FUNCTIONS FOR USERS =====
+function renderUsersWithPagination(filteredUsers: any[]) {
+  userPaginationState.filteredItems = filteredUsers;
+  userPaginationState.currentPage = 1;
+  userPaginationState.allItemsLoaded = [];
+  
+  loadUserPage();
+  updateUserPaginationControls();
+}
+
+function loadUserPage() {
+  const paginatedUsers = paginator.paginate(
+    userPaginationState.filteredItems,
+    userPaginationState.currentPage,
+    userPaginationState.pageSize
+  );
+  
+  const userList = document.getElementById('userList');
+  if (userList) {
+    userList.innerHTML = paginatedUsers
+      .map((user: any) => window.appContext.renderUser.renderUserRow(user))
+      .join('');
+  }
+  
+  updateUserPaginationControls();
+}
+
+function updateUserPaginationControls() {
+  const prevBtn = document.getElementById('userPrevBtn') as HTMLButtonElement;
+  const nextBtn = document.getElementById('userNextBtn') as HTMLButtonElement;
+  const pageInfo = document.getElementById('userPageInfo');
+  
+  const totalPages = Math.ceil(userPaginationState.filteredItems.length / userPaginationState.pageSize);
+  
+  if (pageInfo) {
+    pageInfo.textContent = `Página ${userPaginationState.currentPage} de ${totalPages}`;
+  }
+  
+  if (prevBtn) {
+    prevBtn.disabled = userPaginationState.currentPage <= 1;
+    prevBtn.onclick = () => {
+      if (userPaginationState.currentPage > 1) {
+        userPaginationState.currentPage--;
+        loadUserPage();
+      }
+    };
+  }
+  
+  if (nextBtn) {
+    nextBtn.disabled = userPaginationState.currentPage >= totalPages;
+    nextBtn.onclick = () => {
+      if (userPaginationState.currentPage < totalPages) {
+        userPaginationState.currentPage++;
+        loadUserPage();
+      }
+    };
+  }
+}
+
+function setupUserScrollListener() {
+  // No longer needed with page-based pagination
+}
+// Expose to window
+window.renderTasksWithPagination = renderTasksWithPagination;
+window.renderUsersWithPagination = renderUsersWithPagination;
 
 // ===== APPLICATION INITIALIZATION =====
 export function initializeApp() {
@@ -247,6 +415,7 @@ function setupSearchAndFilterListeners() {
   const filterStatus = document.getElementById('filterStatus');
   const filterPriority = document.getElementById('filterPriority');
   const filterTag = document.getElementById('filterTag');
+  const filterFavoritesBtn = document.getElementById('filterFavoriteTasks');
   const sortAZBtn = document.getElementById('sortTasksAZ');
   const clearCompletedBtn = document.getElementById('clearCompleted');
 
@@ -256,6 +425,11 @@ function setupSearchAndFilterListeners() {
   filterStatus?.addEventListener('change', updateTaskRender);
   filterPriority?.addEventListener('change', updateTaskRender);
   filterTag?.addEventListener('input', updateTaskRender);
+  filterFavoritesBtn?.addEventListener('click', () => {
+    filterFavoritesBtn.classList.toggle('bg-yellow-200');
+    filterFavoritesBtn.classList.toggle('bg-yellow-100');
+    updateTaskRender();
+  });
   
   sortAZBtn?.addEventListener('click', () => {
     const states = ['none', 'asc', 'desc'];
@@ -296,6 +470,7 @@ function setupSearchAndFilterListeners() {
   const filterAllBtn = document.getElementById('filterAllUsers');
   const filterActiveBtn = document.getElementById('filterActiveUsers');
   const filterInactiveBtn = document.getElementById('filterInactiveUsers');
+  const filterFavoriteUsersBtn = document.getElementById('filterFavoriteUsers');
   const userSearchInput = document.getElementById('searchUser');
 
   const setUserFilter = (filter: string) => {
@@ -303,12 +478,14 @@ function setupSearchAndFilterListeners() {
     setFilterButton(filterAllBtn, filter === 'all');
     setFilterButton(filterActiveBtn, filter === 'active');
     setFilterButton(filterInactiveBtn, filter === 'inactive');
+    setFilterButton(filterFavoriteUsersBtn, filter === 'favorites');
     window.appContext.renderUser.render();
   };
 
   filterAllBtn?.addEventListener('click', () => setUserFilter('all'));
   filterActiveBtn?.addEventListener('click', () => setUserFilter('active'));
   filterInactiveBtn?.addEventListener('click', () => setUserFilter('inactive'));
+  filterFavoriteUsersBtn?.addEventListener('click', () => setUserFilter('favorites'));
   userSearchInput?.addEventListener('input', () => window.appContext.renderUser.render());
 }
 
@@ -401,16 +578,45 @@ if (document.readyState === 'loading') {
 // Create test users and tasks
 const user1 = userService.addUser('test1@example.com', 'Test User 1', 'MEMBER');
 const user2 = userService.addUser('test2@example.com', 'Test User 2', 'MEMBER');
+const user3 = userService.addUser('test3@example.com', 'Test User 3', 'MEMBER');
+const user4 = userService.addUser('test4@example.com', 'Test User 4', 'MANAGER');
+const user5 = userService.addUser('test5@example.com', 'Test User 5', 'MEMBER');
+const user6 = userService.addUser('test6@example.com', 'Test User 6', 'VIEWER');
+const user7 = userService.addUser('test7@example.com', 'Test User 7', 'MEMBER');
+const user8 = userService.addUser('test8@example.com', 'Test User 8', 'MEMBER');
+const user9 = userService.addUser('test9@example.com', 'Test User 9', 'MANAGER');
+const user10 = userService.addUser('test10@example.com', 'Test User 10', 'VIEWER');
+const user11 = userService.addUser('test11@example.com', 'Test User 11', 'MEMBER');
+const user12 = userService.addUser('test12@example.com', 'Test User 12', 'MEMBER');
+
 const task1 = taskService.addTask('Test Task 1', 'Feature');
+const task2 = taskService.addTask('Test Task 2', 'Bug');
+const task3 = taskService.addTask('Test Task 3', 'Task');
+const task4 = taskService.addTask('Test Task 4', 'Feature');
+const task5 = taskService.addTask('Test Task 5', 'Bug');
+const task6 = taskService.addTask('Test Task 6', 'Task');
+const task7 = taskService.addTask('Test Task 7', 'Feature');
+const task8 = taskService.addTask('Test Task 8', 'Bug');
+const task9 = taskService.addTask('Test Task 9', 'Task');
+const task10 = taskService.addTask('Test Task 10', 'Feature');
+const task11 = taskService.addTask('Test Task 11', 'Bug');
+const task12 = taskService.addTask('Test Task 12', 'Task');
 
 // test EntityList with users
 const userList = new EntityList();
 userList.add(user1);
 userList.add(user2);
+userList.add(user3);
+userList.add(user4);
+userList.add(user5);
 
 // test EntityList with tasks
 const taskList = new EntityList();
 taskList.add(task1);
+taskList.add(task2);
+taskList.add(task3);
+taskList.add(task4);
+taskList.add(task5);
 
 console.log('Users in EntityList:', userList.getAll());
 console.log('Tasks in EntityList:', taskList.getAll());
@@ -431,19 +637,12 @@ const cachedTask = taskCache.get('task456');
 console.log('Cached User:', cachedUser);
 console.log('Cached Task:', cachedTask);
 
-
-// ===== TEST Paginator CLASS =====
-import { Paginator } from './src/utils/Paginator.js';
-
-const paginator = new Paginator();
-const page1 = paginator.paginate(userList.getAll(), 1, 2);
-const page2 = paginator.paginate(userList.getAll(), 2, 2);
-
-console.log(page1);
-console.log(page2);
-
 // ===== TEST TagManager CLASS =====
 const tagManager = new TagManager<any>();
 tagManager.addTag(task1, 'urgente');
 tagManager.addTag(task1, 'backend');
 console.log(tagManager.getTags(task1));
+
+// Re-render after adding test data
+window.appContext.renderTask.render();
+window.appContext.renderUser.render();

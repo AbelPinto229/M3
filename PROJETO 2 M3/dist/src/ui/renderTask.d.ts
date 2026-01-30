@@ -1,4 +1,4 @@
-import { TaskService } from '../services/TaskService.js';
+import { TaskService, ExtendedTask } from '../services/TaskService.js';
 import { UserService } from '../services/UserService.js';
 import { TagManager } from '../utils/TagManager.js';
 import { SearchService } from '../services/SearchService.js';
@@ -14,7 +14,7 @@ export declare class RenderTask {
     private activeTaskModalId;
     constructor(taskService: TaskService, userService: UserService, tagService: TagManager<any>, searchService: SearchService, commentService: CommentService, attachmentService: AttachmentService);
     render(): void;
-    private renderTaskRow;
+    renderTaskRow(t: ExtendedTask): string;
     openTaskModal(taskId: number): void;
     closeTaskModal(): void;
     private renderTaskModalContent;
@@ -29,4 +29,5 @@ export declare class RenderTask {
     manualAssign(taskId: number, email: string): void;
     setTaskPriority(taskId: number, p: string): void;
     editTaskTitle(taskId: number): void;
+    toggleTaskFavorite(taskId: number): void;
 }

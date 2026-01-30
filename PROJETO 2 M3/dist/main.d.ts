@@ -15,6 +15,18 @@ import { NotificationService } from './src/notifications/NotificationService.js'
 import { RenderUser } from './src/ui/renderUser.js';
 import { RenderTask } from './src/ui/renderTask.js';
 import { RenderModals } from './src/ui/renderModals.js';
+import { User } from './src/models/Users.js';
+import { Task } from './src/models/Task.js';
+import { Favorites } from './src/utils/Favorites.js';
+declare global {
+    interface Window {
+        appContext: AppContext;
+        favoriteTasks: Favorites<Task>;
+        favoriteUsers: Favorites<User>;
+        renderTasksWithPagination: (tasks: Task[]) => void;
+        renderUsersWithPagination: (users: User[]) => void;
+    }
+}
 interface AppContext {
     userService: UserService;
     taskService: TaskService;
@@ -39,11 +51,6 @@ interface AppContext {
     userFilter: string;
     checkPermission: (action: string) => boolean;
     saveAndRender: () => void;
-}
-declare global {
-    interface Window {
-        appContext: AppContext;
-    }
 }
 export declare function initializeApp(): void;
 export declare function saveAndRender(): void;
