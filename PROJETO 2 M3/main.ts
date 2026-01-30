@@ -7,7 +7,7 @@ import { TaskService } from './src/services/TaskService.js';
 import { HistoryLog } from './src/logs/HistoryLog.js';
 import { CommentService } from './src/services/CommentService.js';
 import { AttachmentService } from './src/services/AttachmentService.js';
-import { TagService } from './src/services/TagService.js';
+import { TagService } from './src/utils/TagManager.js';
 import { DeadlineService } from './src/services/DeadlineService.js';
 import { PriorityService } from './src/services/PriorityService.js';
 import { AssignmentService } from './src/services/AssignmentService.js';
@@ -430,3 +430,14 @@ const cachedTask = taskCache.get('task456');
 
 console.log('Cached User:', cachedUser);
 console.log('Cached Task:', cachedTask);
+
+
+// ===== TEST Paginator CLASS =====
+import { Paginator } from './src/utils/Paginator.js';
+
+const paginator = new Paginator();
+const page1 = paginator.paginate(userList.getAll(), 1, 2);
+const page2 = paginator.paginate(userList.getAll(), 2, 2);
+
+console.log(page1);
+console.log(page2);
