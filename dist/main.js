@@ -34,63 +34,69 @@ const statisticsService = new StatisticsService(taskService.getTasks(), userServ
 const searchService = new SearchService(taskService.getTasks());
 const backupService = new BackupService(userService.getUsers(), taskService.getTasks(), assignmentService);
 const notificationService = new NotificationService();
-// ===== EXPOSE SERVICES TO WINDOW =====
-window.userService = userService;
-window.taskService = taskService;
-window.logService = logService;
-window.deadlineService = deadlineService;
-window.priorityService = priorityService;
-window.assignmentService = assignmentService;
-window.commentService = commentService;
-window.attachmentService = attachmentService;
-window.tagService = tagService;
-window.automationService = automationService;
-window.statisticsService = statisticsService;
-window.searchService = searchService;
-window.backupService = backupService;
-window.notificationService = notificationService;
-// ===== INITIALIZE UI RENDERERS =====
-window.renderUser = new RenderUser(userService);
-window.renderTask = new RenderTask(taskService, userService, tagService, searchService, commentService, attachmentService);
-window.renderModals = new RenderModals(taskService, userService);
-// ===== INITIALIZE CURRENT USER =====
-// Set current logged-in user to admin (id: 0)
-window.currentUserId = 0;
-window.currentUserRole = 'ADMIN';
-// ===== SORT STATE =====
-window.taskSortState = 'none'; // none | asc | desc
-// ===== PERMISSION SYSTEM =====
-window.checkPermission = function (action) {
-    const role = window.currentUserRole;
-    const permissions = {
-        'create_user': ['ADMIN', 'MANAGER'],
-        'create_task': ['ADMIN', 'MANAGER'],
-        'edit_task': ['ADMIN', 'MANAGER', 'MEMBER'],
-        'delete_task': ['ADMIN', 'MANAGER'],
-        'delete_user': ['ADMIN', 'MANAGER'],
-        'edit_user': ['ADMIN', 'MANAGER'],
-        'assign_task': ['ADMIN', 'MANAGER'],
-        'edit_title': ['ADMIN', 'MANAGER'],
-        'add_comment': ['ADMIN', 'MANAGER', 'MEMBER'],
-        'toggle_user': ['ADMIN', 'MANAGER'],
-        'view_all': ['ADMIN', 'MANAGER', 'MEMBER', 'VIEWER']
-    };
-    return permissions[action]?.includes(role) || false;
+// ===== CREATE APP CONTEXT =====
+const appContext = {
+    userService,
+    taskService,
+    logService,
+    deadlineService,
+    priorityService,
+    assignmentService,
+    commentService,
+    attachmentService,
+    tagService,
+    automationService,
+    statisticsService,
+    searchService,
+    backupService,
+    notificationService,
+    renderUser: new RenderUser(userService),
+    renderTask: new RenderTask(taskService, userService, tagService, searchService, commentService, attachmentService),
+    renderModals: new RenderModals(taskService, userService),
+    currentUserId: 0,
+    currentUserRole: 'ADMIN',
+    taskSortState: 'none',
+    userFilter: 'all',
+    checkPermission: function (action) {
+        const role = this.currentUserRole;
+        const permissions = {
+            'create_user': ['ADMIN', 'MANAGER'],
+            'create_task': ['ADMIN', 'MANAGER'],
+            'edit_task': ['ADMIN', 'MANAGER', 'MEMBER'],
+            'delete_task': ['ADMIN', 'MANAGER'],
+            'delete_user': ['ADMIN', 'MANAGER'],
+            'edit_user': ['ADMIN', 'MANAGER'],
+            'assign_task': ['ADMIN', 'MANAGER'],
+            'edit_title': ['ADMIN', 'MANAGER'],
+            'add_comment': ['ADMIN', 'MANAGER', 'MEMBER'],
+            'toggle_user': ['ADMIN', 'MANAGER'],
+            'view_all': ['ADMIN', 'MANAGER', 'MEMBER', 'VIEWER']
+        };
+        return permissions[action]?.includes(role) || false;
+    },
+    saveAndRender: function () {
+        updateDashboard();
+        this.renderUser.render();
+        this.renderTask.render();
+        renderLogs();
+    }
 };
+// Expose to window
+window.appContext = appContext;
 // ===== APPLICATION INITIALIZATION =====
 export function initializeApp() {
     setupEventListeners();
     setupSearchAndFilterListeners();
     updateDashboard();
-    window.renderUser.render();
-    window.renderTask.render();
+    window.appContext.renderUser.render();
+    window.appContext.renderTask.render();
     renderLogs();
     console.log('Application initialized successfully');
 }
 // Helper to update dashboard stats
 function updateDashboard() {
-    const taskStats = window.statisticsService.countTasks();
-    const userStats = window.statisticsService.countUsers();
+    const taskStats = window.appContext.statisticsService.countTasks();
+    const userStats = window.appContext.statisticsService.countUsers();
     // Count tasks by status (using Portuguese status names from TaskStatus enum)
     const inProgressCount = taskStats.byStatus['Em Progresso'] || 0;
     const pendingCount = taskStats.byStatus['Criado'] || taskStats.byStatus['Atribuído'] || 0;
@@ -122,19 +128,14 @@ function setProgressBar(id, width) {
 }
 // Helper to save and render
 export function saveAndRender() {
-    updateDashboard();
-    window.renderUser.render();
-    window.renderTask.render();
-    renderLogs();
+    window.appContext.saveAndRender();
 }
-// Expose saveAndRender to window
-window.saveAndRender = saveAndRender;
 // Helper to render logs
 function renderLogs() {
     const logsContainer = document.getElementById('logs');
     if (!logsContainer)
         return;
-    const logs = window.logService.getLogs();
+    const logs = window.appContext.logService.getLogs();
     logsContainer.innerHTML = logs
         .slice()
         .reverse()
@@ -166,14 +167,14 @@ function setFilterButton(btn, active) {
 }
 // Helper to create a user
 function createNewUser(email, name, role, photo) {
-    const newUser = window.userService.addUser(email, name, role, photo);
+    const newUser = window.appContext.userService.addUser(email, name, role, photo);
     if (newUser) {
-        window.logService.addLog(`Utilizador ${name} (${email}) criado com role ${role}`);
-        window.notificationService.addNotification('Utilizador adicionado!', 'success');
-        window.notificationService.notifyAdmins(`Novo utilizador criado: ${email}`);
+        window.appContext.logService.addLog(`Utilizador ${name} (${email}) criado com role ${role}`);
+        window.appContext.notificationService.addNotification('Utilizador adicionado!', 'success');
+        window.appContext.notificationService.notifyAdmins(`Novo utilizador criado: ${email}`);
     }
     else {
-        window.notificationService.addNotification('Email já existe!', 'warning');
+        window.appContext.notificationService.addNotification('Email já existe!', 'warning');
     }
 }
 // Setup search and filter listeners
@@ -182,7 +183,7 @@ function setupSearchAndFilterListeners() {
     const roleSelector = document.getElementById('roleSelector');
     if (roleSelector) {
         roleSelector.addEventListener('change', (e) => {
-            window.currentUserRole = e.target.value;
+            window.appContext.currentUserRole = e.target.value;
             saveAndRender();
         });
     }
@@ -193,31 +194,31 @@ function setupSearchAndFilterListeners() {
     const filterTag = document.getElementById('filterTag');
     const sortAZBtn = document.getElementById('sortTasksAZ');
     const clearCompletedBtn = document.getElementById('clearCompleted');
-    const updateTaskRender = () => window.renderTask.render();
+    const updateTaskRender = () => window.appContext.renderTask.render();
     searchInput?.addEventListener('input', updateTaskRender);
     filterStatus?.addEventListener('change', updateTaskRender);
     filterPriority?.addEventListener('change', updateTaskRender);
     filterTag?.addEventListener('input', updateTaskRender);
     sortAZBtn?.addEventListener('click', () => {
         const states = ['none', 'asc', 'desc'];
-        const current = window.taskSortState || 'none';
+        const current = window.appContext.taskSortState || 'none';
         const nextIndex = (states.indexOf(current) + 1) % states.length;
-        window.taskSortState = states[nextIndex];
+        window.appContext.taskSortState = states[nextIndex];
         const texts = { 'asc': '↑ A-Z', 'desc': '↓ Z-A', 'none': 'Sort A-Z' };
         if (sortAZBtn)
-            sortAZBtn.textContent = texts[window.taskSortState];
-        window.renderTask.render();
+            sortAZBtn.textContent = texts[window.appContext.taskSortState];
+        window.appContext.renderTask.render();
     });
     clearCompletedBtn?.addEventListener('click', () => {
-        const completedTasks = window.taskService.getTasks().filter((t) => t.status === 'Concluído');
-        completedTasks.forEach((t) => window.taskService.deleteTask(t.id));
-        window.notificationService.addNotification(`${completedTasks.length} tarefas removidas!`, 'success');
+        const completedTasks = window.appContext.taskService.getTasks().filter((t) => t.status === 'Concluído');
+        completedTasks.forEach((t) => window.appContext.taskService.deleteTask(t.id));
+        window.appContext.notificationService.addNotification(`${completedTasks.length} tarefas removidas!`, 'success');
         saveAndRender();
     });
     // Export button
     const exportBtn = document.getElementById('exportBtn');
     exportBtn?.addEventListener('click', () => {
-        const exportedData = window.backupService.exportAll();
+        const exportedData = window.appContext.backupService.exportAll();
         const jsonString = JSON.stringify(exportedData, null, 2);
         const blob = new Blob([jsonString], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -228,7 +229,7 @@ function setupSearchAndFilterListeners() {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-        window.notificationService.addNotification('Dados exportados com sucesso!', 'success');
+        window.appContext.notificationService.addNotification('Dados exportados com sucesso!', 'success');
     });
     // User filter buttons
     const filterAllBtn = document.getElementById('filterAllUsers');
@@ -236,17 +237,16 @@ function setupSearchAndFilterListeners() {
     const filterInactiveBtn = document.getElementById('filterInactiveUsers');
     const userSearchInput = document.getElementById('searchUser');
     const setUserFilter = (filter) => {
-        window.userFilter = filter;
+        window.appContext.userFilter = filter;
         setFilterButton(filterAllBtn, filter === 'all');
         setFilterButton(filterActiveBtn, filter === 'active');
         setFilterButton(filterInactiveBtn, filter === 'inactive');
-        window.renderUser.render();
+        window.appContext.renderUser.render();
     };
     filterAllBtn?.addEventListener('click', () => setUserFilter('all'));
     filterActiveBtn?.addEventListener('click', () => setUserFilter('active'));
     filterInactiveBtn?.addEventListener('click', () => setUserFilter('inactive'));
-    userSearchInput?.addEventListener('input', () => window.renderUser.render());
-    window.userFilter = 'all';
+    userSearchInput?.addEventListener('input', () => window.appContext.renderUser.render());
 }
 // Setup event listeners
 function setupEventListeners() {
@@ -254,8 +254,8 @@ function setupEventListeners() {
     if (addUserForm) {
         addUserForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            if (!window.checkPermission('create_user')) {
-                window.notificationService.addNotification('Sem permissão para criar utilizadores!', 'warning');
+            if (!window.appContext.checkPermission('create_user')) {
+                window.appContext.notificationService.addNotification('Sem permissão para criar utilizadores!', 'warning');
                 return;
             }
             const nameInput = document.getElementById('userName');
@@ -285,8 +285,8 @@ function setupEventListeners() {
     if (addTaskForm) {
         addTaskForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            if (!window.checkPermission('create_task')) {
-                window.notificationService.addNotification('Sem permissão para criar tarefas!', 'warning');
+            if (!window.appContext.checkPermission('create_task')) {
+                window.appContext.notificationService.addNotification('Sem permissão para criar tarefas!', 'warning');
                 return;
             }
             const titleInput = document.getElementById('taskTitle');
@@ -294,22 +294,22 @@ function setupEventListeners() {
             const deadlineInput = document.getElementById('taskDeadline');
             if (!titleInput?.value || !typeSelect?.value)
                 return;
-            const newTask = window.taskService.addTask(titleInput.value, typeSelect.value, deadlineInput?.value);
+            const newTask = window.appContext.taskService.addTask(titleInput.value, typeSelect.value, deadlineInput?.value);
             if (deadlineInput?.value) {
-                window.deadlineService.setDeadline(newTask.id, new Date(deadlineInput.value));
+                window.appContext.deadlineService.setDeadline(newTask.id, new Date(deadlineInput.value));
             }
             // Log task creation
-            window.logService.addLog(`Tarefa criada: "${newTask.title}" (${typeSelect.value})`);
+            window.appContext.logService.addLog(`Tarefa criada: "${newTask.title}" (${typeSelect.value})`);
             // Auto-configure bug tasks
             if (typeSelect.value.toLowerCase() === 'bug') {
-                window.taskService.updateTaskPriority(newTask.id, 'CRITICAL');
-                const admin = window.userService.getUsers().find((u) => u.role === 'ADMIN' || u.role === 'MANAGER');
+                window.appContext.taskService.updateTaskPriority(newTask.id, 'CRITICAL');
+                const admin = window.appContext.userService.getUsers().find((u) => u.role === 'ADMIN' || u.role === 'MANAGER');
                 if (admin) {
                     newTask.assigned = [admin.email];
-                    window.logService.addLog(`Bug task "${newTask.title}" atribuído a ${admin.email}`);
+                    window.appContext.logService.addLog(`Bug task "${newTask.title}" atribuído a ${admin.email}`);
                 }
             }
-            window.notificationService.addNotification('Tarefa criada!');
+            window.appContext.notificationService.addNotification('Tarefa criada!');
             addTaskForm.reset();
             saveAndRender();
         });

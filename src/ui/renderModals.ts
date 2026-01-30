@@ -82,10 +82,10 @@ export class RenderModals {
 
     const oldTitle = task.title;
     this.taskService.updateTaskTitle(taskId, newTitle);
-    (window as any).logService.addLog(`Tarefa renomeada: "${oldTitle}" -> "${newTitle}"`);
+    window.appContext.logService.addLog(`Tarefa renomeada: "${oldTitle}" -> "${newTitle}"`);
     
     this.closeEditTitleModal();
-    (window as any).saveAndRender();
+    window.appContext.saveAndRender();
   }
 
   // ===== GENERIC MODAL =====
@@ -185,14 +185,14 @@ export class RenderModals {
     const photoInput = document.getElementById('editUserPhoto') as HTMLInputElement;
     
     if (!nameInput?.value || !emailInput?.value || !roleSelect?.value) {
-      (window as any).notificationService.addNotification('Por favor, preencha todos os campos!', 'warning');
+      window.appContext.notificationService.addNotification('Por favor, preencha todos os campos!', 'warning');
       return;
     }
     
     // Prevent managers from editing admin users
-    const userBeingEdited = (window as any).userService.getUserById(userId);
-    if ((window as any).currentUserRole === 'MANAGER' && userBeingEdited?.role === 'ADMIN') {
-      (window as any).notificationService.addNotification('Gerentes não podem modificar utilizadores administradores!', 'warning');
+    const userBeingEdited = window.appContext.userService.getUserById(userId);
+    if (window.appContext.currentUserRole === 'MANAGER' && userBeingEdited?.role === 'ADMIN') {
+      window.appContext.notificationService.addNotification('Gerentes não podem modificar utilizadores administradores!', 'warning');
       return;
     }
 
@@ -219,15 +219,15 @@ export class RenderModals {
 
   // Performs the actual user update and handles success/error responses
   private performUserUpdate(userId: number, updateData: any): void {
-    const result = (window as any).userService.updateUser(userId, updateData);
+    const result = window.appContext.userService.updateUser(userId, updateData);
 
     if (result) {
-      (window as any).notificationService.addNotification('Utilizador atualizado com sucesso!', 'success');
-      (window as any).logService.addLog(`Utilizador ${result.name} atualizado`);
+      window.appContext.notificationService.addNotification('Utilizador atualizado com sucesso!', 'success');
+      window.appContext.logService.addLog(`Utilizador ${result.name} atualizado`);
       this.closeEditUserModal();
-      (window as any).saveAndRender();
+      window.appContext.saveAndRender();
     } else {
-      (window as any).notificationService.addNotification('Erro ao atualizar utilizador. O e-mail pode já estar em uso!', 'warning');
+      window.appContext.notificationService.addNotification('Erro ao atualizar utilizador. O e-mail pode já estar em uso!', 'warning');
     }
   }
 }
