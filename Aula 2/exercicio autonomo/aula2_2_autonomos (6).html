@@ -1,0 +1,196 @@
+<html>
+
+<head>
+    <style>
+        body {
+            color: black;
+            font-family: Arial;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: #006600;
+        }
+
+        h2 {
+            color: #003366;
+        }
+
+        hr {
+            margin: 20px 0;
+        }
+
+        b {
+            background-color: #f0f0f0;
+            padding: 2px 4px;
+        }
+
+        i {
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>👤 Exercícios Autónomos — Gestão de Utilizadores (Continuação)</h1>
+
+    <p>
+        📌 <b>Objetivo:</b><br>
+        Estes exercícios são para trabalho autónomo.  
+        Consolidam o uso de <b>interfaces, classes, arrays, funções e manipulação do DOM</b>,  
+        mantendo a mesma lógica do projeto de utilizadores.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 11 — Remover utilizador</h2>
+    <p>
+        Permite remover um utilizador da lista.
+    </p>
+    <p>
+        <i>Dicas de implementação:</i><br>
+        - Adiciona um botão "Remover" em cada cartão.<br>
+        - O botão deve receber o <b>id</b> do utilizador.<br>
+        - Usa <b>filter()</b> para criar um novo array sem esse utilizador.<br>
+        - Atualiza a visualização.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 12 — Procurar utilizador por nome</h2>
+    <p>
+        Cria um campo de pesquisa para filtrar utilizadores pelo nome.
+    </p>
+    <p>
+        <i>Dicas de implementação:</i><br>
+        - Usa um <b>input</b> de texto.<br>
+        - À medida que o utilizador escreve, filtra o array.<br>
+        - Usa <b>includes()</b> para verificar o nome.<br>
+        - Mostra apenas os cartões correspondentes.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 13 — Contador de utilizadores ativos e inativos</h2>
+    <p>
+        Mostra dois contadores no topo da página.
+    </p>
+    <p>
+        <i>Dicas de implementação:</i><br>
+        - Um contador para <b>ativos</b>.<br>
+        - Outro para <b>inativos</b>.<br>
+        - Usa <b>filter()</b> em ambos os casos.<br>
+        - Atualiza sempre que o estado mudar.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 14 — Alternar estado (ativo / inativo)</h2>
+    <p>
+        Em vez de apenas desativar, permite alternar o estado.
+    </p>
+    <p>
+        <i>Dicas de implementação:</i><br>
+        - Cria um método na classe chamado <b>toggleEstado()</b>.<br>
+        - O botão deve mudar de texto conforme o estado.<br>
+        - Atualiza o cartão visualmente (cor ou texto).
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 15 — Ordenar utilizadores por nome</h2>
+    <p>
+        Cria um botão "Ordenar por nome".
+    </p>
+    <p>
+        <i>Dicas de implementação:</i><br>
+        - Usa o método <b>sort()</b> no array.<br>
+        - Compara os nomes alfabeticamente.<br>
+        - Não cries novos objetos, apenas reorganiza o array.<br>
+        - Re-renderiza a lista.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 16 — Validar formulário</h2>
+    <p>
+        Impede a criação de utilizadores inválidos.
+    </p>
+    <p>
+        <i>Dicas de implementação:</i><br>
+        - O nome não pode estar vazio.<br>
+        - O email deve conter "@".<br>
+        - Mostra mensagens de erro no HTML.<br>
+        - Só adiciona ao array se tudo estiver válido.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 17 — Mostrar detalhes do utilizador</h2>
+    <p>
+        Ao clicar num cartão, mostra mais detalhes.
+    </p>
+    <p>
+        <i>Dicas de implementação:</i><br>
+        - Usa um evento de clique no cartão.<br>
+        - Mostra os detalhes numa secção separada da página.<br>
+        - Não uses alert ou prompt.<br>
+        - Usa dados do objeto selecionado.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 18 — Estatísticas simples</h2>
+    <p>
+        Cria uma área de estatísticas do sistema.
+    </p>
+    <p>
+        <i>Dicas de implementação:</i><br>
+        - Total de utilizadores.<br>
+        - Percentagem de utilizadores ativos.<br>
+        - Usa cálculos simples com <b>length</b>.<br>
+        - Atualiza dinamicamente.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 19 — Simular dados iniciais</h2>
+    <p>
+        Cria uma função que carregue utilizadores iniciais.
+    </p>
+    <p>
+        <i>Dicas de implementação:</i><br>
+        - Cria um array de dados "fake".<br>
+        - Usa um ciclo para converter esses dados em instâncias da classe.<br>
+        - Chama essa função ao iniciar a aplicação.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 20 — Preparação para ligação ao gestor de tarefas</h2>
+    <p>
+        Associa um identificador visual de tarefas ao utilizador.
+    </p>
+    <p>
+        <i>Dicas de implementação:</i><br>
+        - Adiciona ao cartão um campo: <b>ID do Utilizador</b>.<br>
+        - Garante que este ID é único.<br>
+        - Este ID será usado futuramente para ligar tarefas a utilizadores.<br>
+        - Não é necessário criar tarefas ainda.
+    </p>
+
+    <hr>
+
+    <h2>🎯 Objetivos dos Exercícios Autónomos</h2>
+    <p>
+        ✔ Ganhar autonomia na escrita de TypeScript<br>
+        ✔ Praticar arrays e funções de forma consistente<br>
+        ✔ Separar lógica, dados e interface<br>
+        ✔ Preparar a base para projetos maiores<br>
+        ✔ Pensar em código reutilizável e organizado
+    </p>
+
+</body>
+
+</html>

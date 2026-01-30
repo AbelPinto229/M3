@@ -1,0 +1,197 @@
+<html>
+<head>
+<style>
+body { color: black; font-family: Arial; line-height: 1.6; }
+h1 { color: #006600; }
+h2 { color: #003366; }
+hr { margin: 20px 0; }
+pre { background-color: #f0f0f0; padding: 10px; }
+b { background-color: #f0f0f0; padding: 2px 4px; }
+i { color: #555; }
+</style>
+</head>
+
+<body>
+
+<h1>💡 Exercícios de TypeScript — Tipos Básicos</h1>
+
+<p>
+📌 <b>Regras gerais:</b><br>
+- Não usar <b>console.log</b><br>
+- Todos os resultados devem aparecer na página<br>
+- Usar TypeScript com tipos explícitos<br>
+</p>
+
+<hr>
+
+<h1>🧑‍🏫 Exercícios Guiados (Em Aula)</h1>
+
+<!-- EXERCÍCIO 1 -->
+<h2>📝 Exercício 1 — Mostrar texto na página</h2>
+<p>
+Cria uma variável do tipo <b>string</b> com um texto à tua escolha e mostra esse texto dentro de um elemento HTML.
+</p>
+<p>
+<i>Dica lógica:</i><br>
+- Cria uma variável do tipo <b>string</b><br>
+- Seleciona uma div na página (<b>#output</b>) usando <b>querySelector</b><br>
+- Para mostrar o texto, usa <b>innerHTML</b> da div
+</p>
+
+<hr>
+
+<!-- EXERCÍCIO 2 -->
+<h2>📝 Exercício 2 — Contador simples</h2>
+<p>
+Cria uma variável do tipo <b>number</b> que funcione como contador.  
+Incrementa o valor e mostra o resultado na página.
+</p>
+<p>
+<i>Dica lógica passo a passo:</i><br>
+1. Cria uma variável `count` do tipo <b>number</b> inicializada a 0.<br>
+2. Seleciona uma div para mostrar o total de tarefas.<br>
+3. Cria um botão e adiciona um <b>event listener</b> de click.<br>
+4. Dentro do listener, incrementa `count` e atualiza o conteúdo da div usando <b>innerHTML</b>.<br>
+5. Assim, cada clique vai aumentar o contador e atualizar a página.
+</p>
+
+<hr>
+
+<!-- EXERCÍCIO 3 -->
+<h2>📝 Exercício 3 — Estado booleano</h2>
+<p>
+Cria uma variável do tipo <b>boolean</b> que indique se existem tarefas.  
+Mostra uma mensagem diferente dependendo do valor da variável.
+</p>
+<p>
+<i>Dica lógica passo a passo:</i><br>
+1. Cria uma variável `temTarefas` do tipo <b>boolean</b> (começa como `false`).<br>
+2. Seleciona uma div para mostrar a mensagem.<br>
+3. Cria uma função que verifica se `temTarefas` é <b>true</b> ou <b>false</b>.<br>
+   - Se <b>true</b>, mostra `"Existem tarefas pendentes!"`.<br>
+   - Se <b>false</b>, mostra `"Não há tarefas no momento."`.<br>
+4. Adiciona um botão que alterna `temTarefas = !temTarefas` e chama a função de atualização.<br>
+5. Chama a função de atualização ao carregar a página para mostrar o estado inicial.
+</p>
+
+<hr>
+
+<!-- EXERCÍCIO 4 -->
+<h2>📝 Exercício 4 — Função tipada</h2>
+<p>
+Cria uma função que receba uma <b>string</b> como parâmetro e escreva essa mensagem na página.
+</p>
+<p>
+<i>Dica lógica passo a passo:</i><br>
+1. Cria uma função que recebe um parâmetro do tipo <b>string</b>.<br>
+2. Seleciona uma div onde vais mostrar o texto.<br>
+3. Dentro da função, atribui o parâmetro à div usando <b>innerHTML</b>.<br>
+4. Chama a função passando diferentes mensagens para testar.
+</p>
+
+<hr>
+
+<!-- EXERCÍCIO 5 -->
+<h2>📝 Exercício 5 — Validação de texto</h2>
+<p>
+Cria uma função que verifique se um texto tem pelo menos <b>3 caracteres</b>.  
+Mostra na página se o texto é válido ou inválido.
+</p>
+<p>
+<i>Dica lógica passo a passo:</i><br>
+1. Cria uma função que recebe um texto.<br>
+2. Verifica se o comprimento do texto é >= 3.<br>
+3. Seleciona uma div para mostrar a mensagem.<br>
+4. Se válido, mostra `"Texto válido"`; se não, mostra `"Texto inválido"` usando <b>innerHTML</b>.
+</p>
+
+<hr>
+
+<!-- EXERCÍCIO 6 -->
+<h2>📝 Exercício 6 — Ler valor de um input</h2>
+<p>
+Lê o valor de um campo de texto (<b>input</b>) e mostra o texto digitado na página.
+</p>
+<p>
+<i>Dica lógica passo a passo:</i><br>
+1. Seleciona o input usando <b>querySelector</b> e faz cast para <b>HTMLInputElement</b>.<br>
+2. Cria um botão para ler o valor.<br>
+3. No click do botão, lê o valor do input (`input.value`).<br>
+4. Mostra o valor na página usando <b>innerHTML</b>.
+</p>
+
+<hr>
+
+<!-- EXERCÍCIO 7 -->
+<h2>📝 Exercício 7 — Evento de botão</h2>
+<p>
+Adiciona um botão à página.  
+Quando o botão for clicado, mostra uma mensagem na página.
+</p>
+<p>
+<i>Dica lógica passo a passo:</i><br>
+1. Seleciona o botão usando <b>querySelector</b> e faz cast para <b>HTMLButtonElement</b>.<br>
+2. Seleciona uma div onde a mensagem vai aparecer.<br>
+3. Adiciona um <b>event listener</b> para click.<br>
+4. Dentro do listener, altera o conteúdo da div usando <b>innerHTML</b>.
+</p>
+
+<hr>
+
+<!-- EXERCÍCIO 8 -->
+<h2>📝 Exercício 8 — Criar elemento dinamicamente</h2>
+<p>
+Cria um novo elemento HTML (por exemplo, um <b>li</b>) usando TypeScript  
+e adiciona-o a uma lista existente na página.
+</p>
+<p>
+<i>Dica lógica passo a passo:</i><br>
+1. Seleciona a lista (<b>ul</b> ou <b>ol</b>) onde o item vai ser adicionado.<br>
+2. Cria um novo elemento com <b>document.createElement("li")</b>.<br>
+3. Define o conteúdo do elemento (`textContent` ou `innerHTML`).<br>
+4. Adiciona o elemento à lista usando <b>appendChild</b>.
+</p>
+
+<hr>
+
+<!-- EXERCÍCIO 9 -->
+<h2>📝 Exercício 9 — Verificação de null</h2>
+<p>
+Seleciona um elemento HTML e altera o seu texto apenas se ele existir  
+(utiliza verificação de <b>null</b>).
+</p>
+<p>
+<i>Dica lógica passo a passo:</i><br>
+1. Seleciona o elemento HTML.<br>
+2. Antes de alterar, verifica se não é <b>null</b>.<br>
+3. Se existir, atualiza o conteúdo com <b>innerHTML</b>.
+</p>
+
+<hr>
+
+<!-- EXERCÍCIO 10 -->
+<h2>📝 Exercício 10 — Tipo unknown</h2>
+<p>
+Cria uma variável do tipo <b>unknown</b>.  
+Antes de usar o valor, verifica o seu tipo e só depois mostra o resultado na página.
+</p>
+<p>
+<i>Dica lógica passo a passo:</i><br>
+1. Cria uma variável do tipo <b>unknown</b>.<br>
+2. Antes de usar, verifica o tipo com <b>typeof</b>.<br>
+3. Se for <b>string</b> ou <b>number</b>, mostra o valor usando <b>innerHTML</b> na página.
+</p>
+
+<hr>
+
+
+<h2>🎯 Objetivos da Aula</h2>
+<p>
+✔ Aplicar tipos básicos do TypeScript<br>
+✔ Interagir com HTML e CSS<br>
+✔ Preparar base para Arrays e Objetos<br>
+✔ Pensar em lógica + interface
+</p>
+
+</body>
+</html>

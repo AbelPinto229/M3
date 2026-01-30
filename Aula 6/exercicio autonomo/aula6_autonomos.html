@@ -1,0 +1,305 @@
+<hr>
+
+<h1>Exercícios Autónomos — Generics em TypeScript (Extensão do Projeto)</h1>
+
+<p>
+<b>Objetivo geral:</b><br>
+Aplicar generics em funcionalidades novas do sistema de gestão de tarefas e utilizadores,
+criando componentes reutilizáveis, tipados e integráveis no projeto real.
+</p>
+
+<hr>
+
+<h2>Exercício A1 — Sistema genérico de etiquetas (Tags)</h2>
+<p><b>Ficheiro:</b> <i>utils/TagManager.ts</i></p>
+
+<p><b>Contexto:</b><br>
+Adicionar tags a:
+<ul>
+<li>tarefas (ex: bug, urgente, frontend, backend)</li>
+<li>utilizadores (ex: admin, remoto, junior)</li>
+</ul>
+
+<p><b>Objetivo:</b><br>
+Criar um gestor genérico de etiquetas reutilizável.
+</p>
+
+<p><b>Dicas:</b></p>
+<ul>
+<li>Usar <code>&lt;T&gt;</code></li>
+<li>Usar <code>Map&lt;T, string[]&gt;</code></li>
+<li>Cada item pode ter várias tags</li>
+<li>Tags são strings</li>
+</ul>
+
+<p><b>Funções obrigatórias:</b></p>
+<ul>
+<li><code>addTag(item: T, tag: string): void</code></li>
+<li><code>removeTag(item: T, tag: string): void</code></li>
+<li><code>getTags(item: T): string[]</code></li>
+</ul>
+
+<pre>
+export class TagManager<T> {
+
+    // CRIAR:
+    // private tags: Map<T, string[]>
+
+    // IMPLEMENTAR:
+    // addTag(item: T, tag: string): void
+
+    // IMPLEMENTAR:
+    // removeTag(item: T, tag: string): void
+
+    // IMPLEMENTAR:
+    // getTags(item: T): string[]
+}
+</pre>
+
+<p><b>Teste:</b></p>
+<pre>
+// main.ts
+const tagManager = new TagManager<BugTask>();
+tagManager.addTag(task1, 'urgente');
+tagManager.addTag(task1, 'backend');
+console.log(tagManager.getTags(task1));
+</pre>
+
+<hr>
+
+<h2>Exercício A2 — Sistema genérico de subscrições (watchers)</h2>
+<p><b>Ficheiro:</b> <i>utils/WatcherSystem.ts</i></p>
+
+<p><b>Contexto:</b><br>
+Utilizadores que seguem:
+<ul>
+<li>tarefas</li>
+<li>outros utilizadores</li>
+</ul>
+
+<p><b>Objetivo:</b><br>
+Criar um sistema genérico de seguidores.
+</p>
+
+<p><b>Dicas:</b></p>
+<ul>
+<li>Usar <code>&lt;T, U&gt;</code></li>
+<li>T = entidade observada</li>
+<li>U = observador (User)</li>
+<li>Usar <code>Map&lt;T, U[]&gt;</code></li>
+</ul>
+
+<p><b>Funções obrigatórias:</b></p>
+<ul>
+<li><code>watch(target: T, user: U): void</code></li>
+<li><code>unwatch(target: T, user: U): void</code></li>
+<li><code>getWatchers(target: T): U[]</code></li>
+</ul>
+
+<pre>
+export class WatcherSystem<T, U> {
+
+    // CRIAR:
+    // private watchers: Map<T, U[]>
+
+    // IMPLEMENTAR:
+    // watch(target: T, user: U): void
+
+    // IMPLEMENTAR:
+    // unwatch(target: T, user: U): void
+
+    // IMPLEMENTAR:
+    // getWatchers(target: T): U[]
+}
+</pre>
+
+<p><b>Teste:</b></p>
+<pre>
+// main.ts
+const watcherSystem = new WatcherSystem<BugTask, UserClass>();
+watcherSystem.watch(task1, user1);
+watcherSystem.watch(task1, user2);
+console.log(watcherSystem.getWatchers(task1));
+</pre>
+
+<hr>
+
+<h2>Exercício A3 — Sistema genérico de prioridades</h2>
+<p><b>Ficheiro:</b> <i>utils/PriorityManager.ts</i></p>
+
+<p><b>Contexto:</b><br>
+Prioridade de:
+<ul>
+<li>tarefas</li>
+<li>utilizadores VIP</li>
+</ul>
+
+<p><b>Objetivo:</b><br>
+Associar prioridade numérica a qualquer entidade.
+</p>
+
+<p><b>Dicas:</b></p>
+<ul>
+<li>Usar <code>&lt;T&gt;</code></li>
+<li>Usar <code>Map&lt;T, number&gt;</code></li>
+<li>Número maior = maior prioridade</li>
+</ul>
+
+<p><b>Funções obrigatórias:</b></p>
+<ul>
+<li><code>setPriority(item: T, value: number): void</code></li>
+<li><code>getPriority(item: T): number | undefined</code></li>
+<li><code>getAll(): Map&lt;T, number&gt;</code></li>
+</ul>
+
+<pre>
+export class PriorityManager<T> {
+
+    // CRIAR:
+    // private priorities: Map<T, number>
+
+    // IMPLEMENTAR:
+    // setPriority(item: T, value: number): void
+
+    // IMPLEMENTAR:
+    // getPriority(item: T): number | undefined
+
+    // IMPLEMENTAR:
+    // getAll(): Map<T, number>
+}
+</pre>
+
+<p><b>Teste:</b></p>
+<pre>
+// main.ts
+const priorityManager = new PriorityManager<BugTask>();
+priorityManager.setPriority(task1, 5);
+priorityManager.setPriority(task2, 1);
+console.log(priorityManager.getPriority(task1));
+</pre>
+
+<hr>
+
+<h2>Exercício A4 — Sistema genérico de avaliações (ratings)</h2>
+<p><b>Ficheiro:</b> <i>utils/RatingSystem.ts</i></p>
+
+<p><b>Contexto:</b><br>
+Avaliar:
+<ul>
+<li>tarefas</li>
+<li>utilizadores</li>
+</ul>
+
+<p><b>Objetivo:</b><br>
+Sistema genérico de ratings (1 a 5).
+</p>
+
+<p><b>Dicas:</b></p>
+<ul>
+<li>Usar <code>&lt;T&gt;</code></li>
+<li>Usar <code>Map&lt;T, number[]&gt;</code></li>
+<li>Guardar múltiplas avaliações por item</li>
+<li>Calcular média</li>
+</ul>
+
+<p><b>Funções obrigatórias:</b></p>
+<ul>
+<li><code>rate(item: T, value: number): void</code></li>
+<li><code>getAverage(item: T): number</code></li>
+<li><code>getRatings(item: T): number[]</code></li>
+</ul>
+
+<pre>
+export class RatingSystem<T> {
+
+    // CRIAR:
+    // private ratings: Map<T, number[]>
+
+    // IMPLEMENTAR:
+    // rate(item: T, value: number): void
+
+    // IMPLEMENTAR:
+    // getAverage(item: T): number
+
+    // IMPLEMENTAR:
+    // getRatings(item: T): number[]
+}
+</pre>
+
+<p><b>Teste:</b></p>
+<pre>
+// main.ts
+const ratingSystem = new RatingSystem<BugTask>();
+ratingSystem.rate(task1, 5);
+ratingSystem.rate(task1, 3);
+console.log(ratingSystem.getAverage(task1));
+</pre>
+
+<hr>
+
+<h2>Exercício A5 — Sistema genérico de dependências</h2>
+<p><b>Ficheiro:</b> <i>utils/DependencyGraph.ts</i></p>
+
+<p><b>Contexto:</b><br>
+Dependências entre tarefas:
+<ul>
+<li>Task A depende de Task B</li>
+<li>Task C depende de Task A</li>
+</ul>
+
+<p><b>Objetivo:</b><br>
+Modelar dependências genéricas entre entidades.
+</p>
+
+<p><b>Dicas:</b></p>
+<ul>
+<li>Usar <code>&lt;T&gt;</code></li>
+<li>Usar <code>Map&lt;T, T[]&gt;</code></li>
+<li>Cada item pode depender de vários outros</li>
+</ul>
+
+<p><b>Funções obrigatórias:</b></p>
+<ul>
+<li><code>addDependency(item: T, dependsOn: T): void</code></li>
+<li><code>getDependencies(item: T): T[]</code></li>
+<li><code>hasDependencies(item: T): boolean</code></li>
+</ul>
+
+<pre>
+export class DependencyGraph<T> {
+
+    // CRIAR:
+    // private graph: Map<T, T[]>
+
+    // IMPLEMENTAR:
+    // addDependency(item: T, dependsOn: T): void
+
+    // IMPLEMENTAR:
+    // getDependencies(item: T): T[]
+
+    // IMPLEMENTAR:
+    // hasDependencies(item: T): boolean
+}
+</pre>
+
+<p><b>Teste:</b></p>
+<pre>
+// main.ts
+const depGraph = new DependencyGraph<BugTask>();
+depGraph.addDependency(task2, task1);
+depGraph.addDependency(task3, task2);
+console.log(depGraph.getDependencies(task2));
+</pre>
+
+<hr>
+
+<h2>Objetivo pedagógico destes exercícios</h2>
+
+<ul>
+<li>Usar generics em funcionalidades reais</li>
+<li>Modelar features de sistemas profissionais</li>
+<li>Reutilizar código</li>
+<li>Desenvolver pensamento arquitetural</li>
+<li>Preparar base para sistemas complexos</li>
+<li>Construir projeto escalável</li>
+</ul>

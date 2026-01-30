@@ -1,0 +1,193 @@
+<html>
+<head>
+<style>
+body { color: black; font-family: Arial; line-height: 1.6; }
+h1 { color: #006600; }
+h2 { color: #003366; }
+hr { margin: 20px 0; }
+pre { background-color: #f0f0f0; padding: 10px; }
+b { background-color: #f0f0f0; padding: 2px 4px; }
+i { color: #555; }
+</style>
+</head>
+
+<body>
+
+<h1>💡 Exercícios de TypeScript — Tipos Básicos</h1>
+
+<p>
+📌 <b>Regras gerais:</b><br>
+- Não usar <b>console.log</b><br>
+- Todos os resultados devem aparecer na página<br>
+- Usar TypeScript com tipos explícitos<br>
+</p>
+
+<hr>
+
+
+
+<h1>🏠 Exercícios para Casa</h1>
+
+<!-- EXERCÍCIO 1 -->
+<h2>📝 Exercício 1 — Contador visual de tarefas</h2>
+<p>
+Cria um contador de tarefas que aumenta sempre que uma função é chamada  
+e mostra o total atualizado na página.
+</p>
+<p>
+<i>Dica lógica passo a passo:</i><br>
+1. Cria uma variável `count` do tipo number fora da função.<br>
+2. Cria uma função que incrementa `count` e atualiza a div com <b>innerHTML</b>.<br>
+3. Chama a função sempre que necessário (ex: botão de adicionar).
+</p>
+
+<hr>
+
+<!-- EXERCÍCIO 2 -->
+<h2>📝 Exercício 2 — Mensagens de erro</h2>
+<p>
+Cria uma função que mostre mensagens de erro numa área específica da página.
+</p>
+<p>
+<i>Dica lógica passo a passo:</i><br>
+1. Seleciona uma div específica para erros.<br>
+2. Cria uma função que recebe a mensagem de erro.<br>
+3. Atribui o valor à div usando <b>innerHTML</b>.
+</p>
+
+<hr>
+
+<!-- EXERCÍCIO 3 -->
+<h2>📝 Exercício 3 — Limpar campo de texto</h2>
+<p>
+Cria uma função que receba um <b>input</b> como parâmetro e limpe o seu conteúdo.
+</p>
+<p>
+<i>Dica lógica passo a passo:</i><br>
+1. Cria uma função que recebe um input.<br>
+2. Define <b>input.value = ""</b> para limpar o campo.
+</p>
+
+<hr>
+
+<!-- EXERCÍCIO 4 -->
+<h2>📝 Exercício 4 — Estado da lista</h2>
+<p>
+Cria uma variável booleana que indica se existem tarefas  
+e mostra uma mensagem correspondente na página.
+</p>
+<p>
+<i>Dica lógica passo a passo:</i><br>
+1. Cria uma variável boolean indicando se existem tarefas.<br>
+2. Seleciona uma div para mostrar a mensagem.<br>
+3. Usa <b>if</b> para mostrar mensagem diferente dependendo do valor.
+</p>
+
+<hr>
+
+<!-- EXERCÍCIO 5 -->
+<h2>📝 Exercício 5 — Union Types</h2>
+<p>
+Cria uma função que aceite um identificador que pode ser <b>number</b> ou <b>string</b>  
+e mostra esse identificador na página.
+</p>
+
+<p>
+<i>Dica lógica passo a passo:</i><br>
+1. Cria uma função que recebe um parâmetro do tipo <b>number | string</b>.<br>
+2. Mostra o valor na página usando <b>innerHTML</b>.
+</p>
+
+<hr>
+
+<!-- EXERCÍCIO 6 -->
+<h2>📝 Exercício 6 — string ou null</h2>
+
+<p>
+Cria uma variável que pode ser <b>string</b> ou <b>null</b>.  
+Mostra o valor apenas se não for null.
+</p>
+<p>
+<i>Dica lógica passo a passo:</i><br>
+1. Cria uma variável do tipo <b>string | null</b>.<br>
+2. Antes de mostrar, verifica se não é null.<br>
+3. Se for string, mostra com <b>innerHTML</b>.
+</p>
+
+<hr>
+
+<!-- EXERCÍCIO 7 -->
+<h2>📝 Exercício 7 — Estilos dinâmicos</h2>
+<p>
+Altera dinamicamente o estilo de um elemento HTML usando TypeScript  
+(por exemplo, cor ou peso da fonte).
+</p>
+<p>
+<i>Dica lógica passo a passo:</i><br>
+1. Seleciona um elemento HTML.<br>
+2. Altera propriedades de estilo como <b>element.style.color</b> ou <b>element.style.fontWeight</b>.
+</p>
+
+<hr>
+
+<!-- EXERCÍCIO 8 -->
+<h2>📝 Exercício 8 — Adicionar tarefa completa</h2>
+<p>
+Cria uma função que:
+<ul>
+  <li>Lê o texto de um input</li>
+  <li>Valida o texto</li>
+  <li>Adiciona a tarefa a uma lista</li>
+  <li>Limpa o input</li>
+</ul>
+</p>
+<p>
+<i>Dica lógica passo a passo:</i><br>
+1. Lê o valor do input.<br>
+2. Valida o texto (ex: tamanho >= 3).<br>
+3. Cria um elemento <b>li</b> com o texto.<br>
+4. Adiciona o li à lista com <b>appendChild</b>.<br>
+5. Limpa o input com <b>input.value = ""</b>.
+</p>
+
+<hr>
+
+<!-- EXERCÍCIO 9 -->
+<h2>📝 Exercício 9 — Mensagem condicional</h2>
+<p>
+Mostra uma mensagem diferente na página dependendo do número total de tarefas.
+</p>
+<p>
+<i>Dica lógica passo a passo:</i><br>
+1. Conta o número de tarefas (por exemplo, o tamanho da lista).<br>
+2. Seleciona uma div para mostrar mensagem.<br>
+3. Usa <b>if</b> para mostrar mensagens diferentes dependendo do número de tarefas.
+</p>
+
+<hr>
+
+<!-- EXERCÍCIO 10 -->
+<h2>📝 Exercício 10 — Função reutilizável</h2>
+<p>
+Cria uma função reutilizável que receba um texto e devolva um elemento HTML  
+representando uma tarefa.
+</p>
+<p>
+<i>Dica lógica passo a passo:</i><br>
+1. Cria uma função que recebe texto.<br>
+2. Dentro da função, cria um elemento <b>li</b> com esse texto.<br>
+3. Retorna o elemento criado para poder ser usado em várias listas.
+</p>
+
+<hr>
+
+<h2>🎯 Objetivos da Aula</h2>
+<p>
+✔ Aplicar tipos básicos do TypeScript<br>
+✔ Interagir com HTML e CSS<br>
+✔ Preparar base para Arrays e Objetos<br>
+✔ Pensar em lógica + interface
+</p>
+
+</body>
+</html>

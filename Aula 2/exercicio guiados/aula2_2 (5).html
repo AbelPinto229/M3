@@ -1,0 +1,212 @@
+<html>
+
+<head>
+    <style>
+        body {
+            color: black;
+            font-family: Arial;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: #006600;
+        }
+
+        h2 {
+            color: #003366;
+        }
+
+        hr {
+            margin: 20px 0;
+        }
+
+        pre {
+            background-color: #f0f0f0;
+            padding: 10px;
+        }
+
+        b {
+            background-color: #f0f0f0;
+            padding: 2px 4px;
+        }
+
+        i {
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>👤 Exercícios de TypeScript — Gestão de Utilizadores</h1>
+
+    <p>
+        📌 <b>Contexto do projeto:</b><br>
+        Vamos criar um pequeno sistema de <b>gestão de utilizadores</b> que, no futuro, poderá ser ligado ao
+        gestor de tarefas.  
+        Nesta fase, o foco é apenas nos utilizadores, usando <b>interfaces, classes, arrays e funções</b>.
+    </p>
+
+    <p>
+        📌 <b>Regras gerais:</b><br>
+        - Todos os resultados devem aparecer no site<br>
+        - Usar TypeScript com tipos explícitos<br>
+        - Usar HTML e CSS para mostrar cartões de utilizadores
+    </p>
+
+    <hr>
+
+    <h1>🧑‍🏫 Exercícios Guiados</h1>
+
+    <h2>📝 Exercício 1 — Interface Utilizador</h2>
+    <p>
+        Cria uma interface chamada <b>Utilizador</b>.
+    </p>
+    <p>
+        <i>Dica lógica:</i><br>
+        - A interface deve definir:<br>
+        &nbsp;&nbsp;• <b>id</b> (number)<br>
+        &nbsp;&nbsp;• <b>nome</b> (string)<br>
+        &nbsp;&nbsp;• <b>email</b> (string)<br>
+        &nbsp;&nbsp;• <b>ativo</b> (boolean)
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 2 — Classe UtilizadorClass</h2>
+    <p>
+        Cria uma classe <b>UtilizadorClass</b> que implemente a interface <b>Utilizador</b>.
+    </p>
+    <p>
+        <i>Dica lógica passo a passo:</i><br>
+        1. Implementa todas as propriedades da interface.<br>
+        2. Cria um <b>constructor</b> que receba id, nome e email.<br>
+        3. A propriedade <b>ativo</b> deve iniciar como <b>true</b>.<br>
+        4. Cria um método <b>desativar()</b> que altera ativo para false.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 3 — Array de utilizadores</h2>
+    <p>
+        Cria um array chamado <b>listaUtilizadores</b>.
+    </p>
+    <p>
+        <i>Dica lógica passo a passo:</i><br>
+        1. O array deve ser do tipo <b>Utilizador[]</b>.<br>
+        2. Adiciona manualmente 2 utilizadores usando a classe.<br>
+        3. Confirma que o TypeScript aceita apenas objetos válidos.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 4 — Estrutura HTML (cartões)</h2>
+    <p>
+        Cria no HTML um contentor para mostrar os utilizadores.
+    </p>
+    <p>
+        <i>Dica visual:</i><br>
+        - Cada utilizador deve aparecer num <b>cartão</b>.<br>
+        - Cria uma div principal para conter a lista.
+        - Para cada item do array, cria uma nova div.
+        - Cada div representa um cartão com os dados do objeto.
+        - Adiciona essa div ao contentor principal.
+        - O cartão deve mostrar:<br>
+        &nbsp;&nbsp;• Nome<br>
+        &nbsp;&nbsp;• Email<br>
+        &nbsp;&nbsp;• Estado (Ativo / Inativo)
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 5 — Função de renderização</h2>
+    <p>
+        Cria uma função <b>renderUtilizadores()</b>.
+    </p>
+    <p>
+        <i>Dica lógica passo a passo:</i><br>
+        1. Limpa o contentor HTML.<br>
+        2. Usa <b>forEach</b> para percorrer o array.<br>
+        3. Para cada utilizador, cria um cartão HTML.<br>
+        4. Mostra o estado com texto ou cor diferente.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 6 — Adicionar utilizador via formulário</h2>
+    <p>
+        Cria inputs para nome e email e um botão "Adicionar".
+    </p>
+    <p>
+        <i>Dica lógica passo a passo:</i><br>
+        1. Lê os valores dos inputs.<br>
+        2. Cria um novo objeto com <b>new UtilizadorClass()</b>.<br>
+        3. Usa <b>push()</b> no array.<br>
+        4. Atualiza a lista no ecrã.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 7 — Desativar utilizador</h2>
+    <p>
+        Adiciona um botão "Desativar" em cada cartão.
+    </p>
+    <p>
+        <i>Dica lógica passo a passo:</i><br>
+        1. O botão deve chamar uma função com o <b>id</b> do utilizador.<br>
+        2. Localiza o utilizador no array.<br>
+        3. Chama o método <b>desativar()</b> da classe.<br>
+        4. Atualiza a renderização.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 8 — Filtrar utilizadores ativos</h2>
+    <p>
+        Cria um botão "Mostrar apenas ativos".
+    </p>
+    <p>
+        <i>Dica lógica passo a passo:</i><br>
+        1. Usa <b>filter</b> para criar um novo array.<br>
+        2. Mostra apenas utilizadores com <b>ativo === true</b>.<br>
+        3. Não alteres o array original.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 9 — Contador de utilizadores</h2>
+    <p>
+        Mostra no topo da página o número total de utilizadores.
+    </p>
+    <p>
+        <i>Dica lógica:</i><br>
+        - Usa <b>listaUtilizadores.length</b>.<br>
+        - Atualiza sempre que um utilizador for adicionado ou removido.
+    </p>
+
+    <hr>
+
+    <h2>📝 Exercício 10 — Preparação para integração futura</h2>
+    <p>
+        Adiciona ao cartão do utilizador uma área chamada "Tarefas".
+    </p>
+    <p>
+        <i>Dica conceptual:</i><br>
+        - Nesta fase, mostra apenas o texto: <b>"0 tarefas atribuídas"</b>.<br>
+        - Este campo será usado mais tarde para ligar ao gestor de tarefas.
+    </p>
+
+    <hr>
+
+    <h2>🎯 Objetivos da Aula</h2>
+    <p>
+        ✔ Criar interfaces e classes do zero<br>
+        ✔ Trabalhar com arrays tipados<br>
+        ✔ Usar funções para separar lógica e UI<br>
+        ✔ Preparar um projeto modular e escalável<br>
+        ✔ Reforçar boas práticas em TypeScript
+    </p>
+
+</body>
+
+</html>
