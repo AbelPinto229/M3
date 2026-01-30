@@ -21,6 +21,10 @@ import { NotificationService } from './src/notifications/NotificationService.js'
 import { RenderUser } from './src/ui/renderUser.js';
 import { RenderTask } from './src/ui/renderTask.js';
 import { RenderModals } from './src/ui/renderModals.js';
+import { EntityList } from './src/index.js';
+import { SimpleCache } from './src/utils/SimpleCache.js';
+import { User } from './src/models/Users.js';
+import { Task } from './src/models/Task.js';
 
 // ===== APP CONTEXT TYPE =====
 interface AppContext {
@@ -392,3 +396,37 @@ if (document.readyState === 'loading') {
 } else {
   initializeApp();
 }
+
+// ===== TEST EntityList CLASS =====
+// Create test users and tasks
+const user1 = userService.addUser('test1@example.com', 'Test User 1', 'MEMBER');
+const user2 = userService.addUser('test2@example.com', 'Test User 2', 'MEMBER');
+const task1 = taskService.addTask('Test Task 1', 'Feature');
+
+// test EntityList with users
+const userList = new EntityList();
+userList.add(user1);
+userList.add(user2);
+
+// test EntityList with tasks
+const taskList = new EntityList();
+taskList.add(task1);
+
+console.log('Users in EntityList:', userList.getAll());
+console.log('Tasks in EntityList:', taskList.getAll());
+
+// ===== TEST SimpleCache CLASS =====
+// cache for users by id
+const userCache = new SimpleCache<string, User>();
+const userData = user1;
+userCache.set('user123', userData);
+const cachedUser = userCache.get('user123');
+
+// cache for tasks by id
+const taskCache = new SimpleCache<string, Task>();
+const taskData = task1;
+taskCache.set('task456', taskData);
+const cachedTask = taskCache.get('task456');
+
+console.log('Cached User:', cachedUser);
+console.log('Cached Task:', cachedTask);
