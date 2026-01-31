@@ -534,47 +534,21 @@ const tagManager = new TagManager();
 tagManager.addTag(task1, 'urgente');
 tagManager.addTag(task1, 'backend');
 console.log(tagManager.getTags(task1));
-// ===== TEST WatcherSystem CLASS =====
-window.watcherSystem.watch(task1, user1);
-window.watcherSystem.watch(task1, user2);
-console.log('Watchers for task1:', window.watcherSystem.getWatchers(task1));
-window.watcherSystem.unwatch(task1, user1);
-console.log('Watchers for task1 after unwatch:', window.watcherSystem.getWatchers(task1));
-// ===== TEST RatingSystem CLASS =====
-console.log('=== RatingSystem Tests ===');
-// Test rating tasks
-window.ratingSystem.rate(task1, 5);
-window.ratingSystem.rate(task1, 3);
-window.ratingSystem.rate(task1, 4);
-console.log('Ratings for task1:', window.ratingSystem.getRatings(task1));
-console.log('Average rating for task1:', window.ratingSystem.getAverage(task1));
-console.log('Rating count for task1:', window.ratingSystem.getRatingCount(task1));
-// Test rating users
-window.ratingSystem.rate(user1, 5);
-window.ratingSystem.rate(user1, 5);
-window.ratingSystem.rate(user1, 4);
-console.log('Ratings for user1:', window.ratingSystem.getRatings(user1));
-console.log('Average rating for user1:', window.ratingSystem.getAverage(user1));
-// Test rating task2
-window.ratingSystem.rate(task2, 2);
-window.ratingSystem.rate(task2, 3);
-console.log('Ratings for task2:', window.ratingSystem.getRatings(task2));
-console.log('Average rating for task2:', window.ratingSystem.getAverage(task2));
-// ===== TEST DependencyGraph CLASS =====
-console.log('=== DependencyGraph Tests ===');
-// Create dependency relationships
-window.dependencyGraph.addDependency(task2, task1);
-window.dependencyGraph.addDependency(task3, task2);
-window.dependencyGraph.addDependency(task4, task1);
-window.dependencyGraph.addDependency(task5, task3);
-// Test getting dependencies
-console.log('Dependencies of task2:', window.dependencyGraph.getDependencies(task2));
-console.log('Dependencies of task3:', window.dependencyGraph.getDependencies(task3));
-console.log('Dependencies of task5:', window.dependencyGraph.getDependencies(task5));
-// Test checking if has dependencies
-console.log('task1 has dependencies:', window.dependencyGraph.hasDependencies(task1));
-console.log('task2 has dependencies:', window.dependencyGraph.hasDependencies(task2));
-console.log('task5 has dependencies:', window.dependencyGraph.hasDependencies(task5));
+//  test rarting system with tasks
+const testRatingSystem = new RatingSystem();
+testRatingSystem.rate(task1, 5);
+testRatingSystem.rate(task1, 3);
+console.log('testRatingSystem.getAverage(task1):', testRatingSystem.getAverage(task1));
+// test dependency graph with tasks
+const depGraph = new DependencyGraph();
+depGraph.addDependency(task2, task1);
+depGraph.addDependency(task3, task2);
+console.log('depGraph.getDependencies(task2):', depGraph.getDependencies(task2));
+// test watcher system with tasks
+const testWatcherSystem = new WatcherSystem();
+testWatcherSystem.watch(task1, user1);
+testWatcherSystem.watch(task1, user2);
+console.log('testWatcherSystem.getWatchers(task1):', testWatcherSystem.getWatchers(task1));
 //re-render after adding test data
 window.appContext.renderTask.render();
 window.appContext.renderUser.render();
