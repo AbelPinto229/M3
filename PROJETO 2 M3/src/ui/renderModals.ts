@@ -252,7 +252,7 @@ export class RenderModals {
         </div>
         
         <div class="flex justify-end gap-2 mt-6 border-t pt-4">
-          <button onclick="window.renderModals.closeEditUserModal()" class="px-4 py-2 bg-gray-200 rounded text-xs font-semibold">Cancelar</button>
+          <button onclick="window.renderModals.closeEditUserModal()" class="px-4 py-2 bg-gray-200 rounded text-xs font-semibold">Fechar</button>
           <button onclick="window.renderModals.saveEditUser(${userId})" class="px-4 py-2 bg-indigo-600 text-white rounded text-xs font-semibold">Guardar</button>
         </div>
       </div>
