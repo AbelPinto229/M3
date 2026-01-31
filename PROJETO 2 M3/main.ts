@@ -185,14 +185,14 @@ interface PaginationState {
 
 const taskPaginationState: PaginationState = {
   currentPage: 1,
-  pageSize: 5,
+  pageSize: 10,
   filteredItems: [],
   allItemsLoaded: []
 };
 
 const userPaginationState: PaginationState = {
   currentPage: 1,
-  pageSize: 5,
+  pageSize: 10,
   filteredItems: [],
   allItemsLoaded: []
 };
@@ -684,29 +684,29 @@ function setupSearchAndFilterListeners() {
 function setupEventListeners() {
   console.log('Setting up event listeners...');
   
-  // Toggle filter navbar
-  const toggleFiltersBtn = document.getElementById('toggleFilters');
-  const filtersContent = document.getElementById('filtersContent');
-  const filterToggleIcon = document.getElementById('filterToggleIcon');
-  
-  console.log('Filter elements:', { toggleFiltersBtn, filtersContent, filterToggleIcon });
-  
-  if (toggleFiltersBtn && filtersContent) {
-    toggleFiltersBtn.addEventListener('click', () => {
-      filtersContent.classList.toggle('hidden');
-      if (filterToggleIcon) {
-        const isHidden = filtersContent.classList.contains('hidden');
-        filterToggleIcon.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
-      }
-    });
-  }
-
   // Toggle status navbar
   const toggleStatusBtn = document.getElementById('toggleStatus');
   const statusContent = document.getElementById('statusContent');
   const statusToggleIcon = document.getElementById('statusToggleIcon');
+  const toggleFiltersBtn = document.getElementById('toggleFilters');
+  const filtersContent = document.getElementById('filtersContent');
+  const filterToggleIcon = document.getElementById('filterToggleIcon');
   
   console.log('Status elements:', { toggleStatusBtn, statusContent, statusToggleIcon });
+  
+  const updateNavbarPositions = () => {
+    const statusNavbar = document.getElementById('statusNavbar') as HTMLElement;
+    const filterNavbar = document.getElementById('filterNavbar') as HTMLElement;
+    const mainNavbar = document.querySelector('nav:first-of-type') as HTMLElement;
+    
+    if (statusNavbar && filterNavbar && mainNavbar) {
+      const mainHeight = mainNavbar.offsetHeight;
+      const statusHeight = statusNavbar.offsetHeight;
+      
+      statusNavbar.style.top = `${mainHeight}px`;
+      filterNavbar.style.top = `${mainHeight + statusHeight}px`;
+    }
+  };
   
   if (toggleStatusBtn && statusContent) {
     toggleStatusBtn.addEventListener('click', () => {
@@ -715,8 +715,60 @@ function setupEventListeners() {
         const isHidden = statusContent.classList.contains('hidden');
         statusToggleIcon.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
       }
+      
+      // Update navbar positions after content changes
+      setTimeout(updateNavbarPositions, 0);
     });
   }
+  
+  // Toggle filters navbar
+  if (toggleFiltersBtn && filtersContent) {
+    toggleFiltersBtn.addEventListener('click', () => {
+      filtersContent.classList.toggle('hidden');
+      if (filterToggleIcon) {
+        const isHidden = filtersContent.classList.contains('hidden');
+        filterToggleIcon.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+      }
+      
+      // Update main content margin-top based on filter navbar expansion
+      const mainElement = document.querySelector('main') as HTMLElement;
+      const filterNavbar = document.getElementById('filterNavbar') as HTMLElement;
+      if (mainElement && filterNavbar) {
+        setTimeout(() => {
+          const filterHeight = filterNavbar.offsetHeight;
+          const statusNavbar = document.getElementById('statusNavbar') as HTMLElement;
+          const mainNavbar = document.querySelector('nav:first-of-type') as HTMLElement;
+          if (statusNavbar && mainNavbar) {
+            const totalMargin = mainNavbar.offsetHeight + statusNavbar.offsetHeight + filterHeight - 32;
+            mainElement.style.marginTop = `${totalMargin}px`;
+          }
+        }, 50);
+      }
+    });
+  }
+  
+  // Update positions on resize
+  window.addEventListener('resize', updateNavbarPositions);
+  
+  // Function to adjust main container margin based on filter navbar state
+  const adjustMainMargin = () => {
+    const mainElement = document.querySelector('main') as HTMLElement;
+    const statusNavbar = document.getElementById('statusNavbar') as HTMLElement;
+    const filterNavbar = document.getElementById('filterNavbar') as HTMLElement;
+    const mainNavbar = document.querySelector('nav:first-of-type') as HTMLElement;
+    
+    if (mainElement && statusNavbar && filterNavbar && mainNavbar) {
+      const mainHeight = mainNavbar.offsetHeight;
+      const statusHeight = statusNavbar.offsetHeight;
+      const filterHeight = filterNavbar.classList.contains('hidden') ? 0 : filterNavbar.offsetHeight;
+      const totalMargin = mainHeight + statusHeight + filterHeight - 32;
+      mainElement.style.marginTop = `${totalMargin}px`;
+    }
+  };
+  
+  // Initial setup
+  setTimeout(updateNavbarPositions, 100);
+  setTimeout(adjustMainMargin, 150);
 
   // Create User button - opens modal
   const createUserBtn = document.getElementById('createUserBtn');
