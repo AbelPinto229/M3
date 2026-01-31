@@ -102,6 +102,12 @@
         <!-- Right: Export + Settings -->
         <div class="flex items-center gap-2 lg:gap-4">
             <button id="exportBtn" class="text-[9px] lg:text-xs font-bold bg-emerald-100 hover:bg-emerald-200 px-2 lg:px-3 py-1 lg:py-1.5 rounded-md border border-emerald-200 text-emerald-700 uppercase cursor-pointer transition-colors">Exportar</button>
+            <button id="toggleLogs" class="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer relative" title="Sistema de Logs">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                </svg>
+                <span id="logsBadge" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center">0</span>
+            </button>
             <button id="sysConfigBtn" class="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer" title="Configuração Global">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
@@ -250,8 +256,8 @@
 
     <div class="flex flex-col lg:flex-row gap-4 lg:gap-6">
         
-        <!-- Left Column: User Management Section (32% width on lg screens) -->
-        <div class="w-full md:w-[48%] lg:w-[32%] space-y-4 lg:space-y-6">
+        <!-- Left Column: User Management Section (50% width on lg screens) -->
+        <div class="w-full lg:w-1/2 space-y-4 lg:space-y-6">
             <!-- Users Panel: List, search, filter, and add new user form -->
             <section class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm h-full flex flex-col">
                 <div class="flex justify-between items-end mb-4">
@@ -275,8 +281,8 @@
             </section>
         </div>
 
-        <!-- Middle Column: Task/Workflow Management Section (45% width on lg screens) -->
-        <div class="w-full md:w-[48%] lg:w-[45%]">
+        <!-- Middle Column: Task/Workflow Management Section (50% width on lg screens) -->
+        <div class="w-full lg:w-1/2">
             <!-- Tasks Panel: Search, filter, sort, and add new task form -->
             <section class="bg-white border border-slate-200 rounded-xl lg:rounded-2xl p-4 lg:p-6 shadow-sm h-full">
                 <div class="flex justify-between items-end mb-4">
@@ -299,20 +305,19 @@
                 </div>
             </section>
         </div>
-
-        <!-- Right Column: Statistics and System Logs (23% width on lg screens) -->
-        <div class="w-full md:w-full lg:w-[23%] space-y-4 lg:space-y-6">
-            <!-- System Logs: Timeline of all system events and actions -->
-            <section class="bg-white border border-slate-200 rounded-xl lg:rounded-2xl p-4 lg:p-6 shadow-sm lg:sticky lg:top-44">
-                <button onclick="document.getElementById('logsContent').classList.toggle('hidden'); this.querySelector('svg').style.transform = document.getElementById('logsContent').classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)'" class="w-full flex items-center justify-between mb-4 lg:mb-6 cursor-pointer hover:text-slate-700 transition-colors">
-                    <h2 class="text-xs font-extrabold text-slate-500 uppercase tracking-[0.1em]">Sistema de Logs</h2>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transform: rotate(180deg); transition: transform 0.15s ease;">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-                <div id="logsContent" class="relative max-h-[300px] lg:max-h-[400px] overflow-y-auto timeline-line pl-4 lg:pl-6 space-y-4 lg:space-y-6 text-xs"></div>
-            </section>
+    </div>
+    
+    <!-- Logs Panel Modal (activated by bell icon) -->
+    <div id="logsPanel" class="hidden fixed top-20 right-4 lg:right-6 w-[90%] max-w-md bg-white border border-slate-200 rounded-xl shadow-2xl z-50 max-h-[calc(100vh-6rem)] overflow-hidden">
+        <div class="sticky top-0 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+            <h2 class="text-sm font-bold text-slate-700">Sistema de Logs</h2>
+            <button id="closeLogsPanel" class="text-slate-400 hover:text-slate-600 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
         </div>
+        <div id="logsContent" class="relative max-h-[calc(100vh-12rem)] overflow-y-auto px-4 lg:px-6 py-4 space-y-4 lg:space-y-6 text-xs"></div>
     </div>
 </main>
 

@@ -383,6 +383,26 @@ function initializeGlobalSystems() {
   renderSystemStats();
 }
 
+// Logs notification counter (global state)
+let unreadLogsCount = 0;
+let lastSeenLogCount = 0;
+
+// Function to update logs badge
+function updateLogsBadge() {
+  const logsBadge = document.getElementById('logsBadge');
+  if (logsBadge && window.systemStats?.systemLog) {
+    const currentLogCount = window.systemStats.systemLog.length;
+    unreadLogsCount = currentLogCount - lastSeenLogCount;
+    
+    if (unreadLogsCount > 0) {
+      logsBadge.textContent = unreadLogsCount > 99 ? '99+' : unreadLogsCount.toString();
+      logsBadge.classList.remove('hidden');
+    } else {
+      logsBadge.classList.add('hidden');
+    }
+  }
+}
+
 // Renderizar painel com estatísticas do sistema
 function renderSystemStats() {
   // Atualizar stats com os logs atuais
@@ -411,6 +431,9 @@ function renderSystemStats() {
         </div>`;
       })
       .join('');
+    
+    // Update logs badge
+    updateLogsBadge();
   }
 
   const statsPanel = document.getElementById('statsContent');
@@ -769,6 +792,52 @@ function setupEventListeners() {
   // Initial setup
   setTimeout(updateNavbarPositions, 100);
   setTimeout(adjustMainMargin, 150);
+
+  // Logs Panel Toggle (bell icon in navbar)
+  const toggleLogsBtn = document.getElementById('toggleLogs');
+  const logsPanel = document.getElementById('logsPanel');
+  const closeLogsBtn = document.getElementById('closeLogsPanel');
+  const logsBadge = document.getElementById('logsBadge');
+  
+  if (toggleLogsBtn && logsPanel) {
+    toggleLogsBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      logsPanel.classList.toggle('hidden');
+      
+      // Mark all logs as seen when panel is opened
+      if (!logsPanel.classList.contains('hidden')) {
+        if (window.systemStats?.systemLog) {
+          lastSeenLogCount = window.systemStats.systemLog.length;
+          unreadLogsCount = 0;
+        }
+        if (logsBadge) {
+          logsBadge.classList.add('hidden');
+          logsBadge.textContent = '0';
+        }
+      }
+    });
+  }
+  
+  if (closeLogsBtn && logsPanel) {
+    closeLogsBtn.addEventListener('click', () => {
+      logsPanel.classList.add('hidden');
+    });
+  }
+  
+  // Close logs panel when clicking outside
+  document.addEventListener('click', (e) => {
+    if (logsPanel && !logsPanel.classList.contains('hidden')) {
+      const target = e.target as HTMLElement;
+      if (!logsPanel.contains(target) && !toggleLogsBtn?.contains(target)) {
+        logsPanel.classList.add('hidden');
+      }
+    }
+  });
+
+  // Initialize badge on first load - mark all existing logs as seen
+  if (window.systemStats?.systemLog) {
+    lastSeenLogCount = window.systemStats.systemLog.length;
+  }
 
   // Create User button - opens modal
   const createUserBtn = document.getElementById('createUserBtn');
