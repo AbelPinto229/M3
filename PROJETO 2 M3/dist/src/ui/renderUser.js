@@ -43,6 +43,9 @@ export class RenderUser {
         const isWatching = currentUser && watchers.includes(currentUser);
         const watchClass = isWatching ? 'text-blue-600 font-bold' : 'text-slate-400';
         const watchCount = watchers.length;
+        // Get VIP priority level from PriorityManager
+        const vipLevel = window.priorityManager.getPriority(u) ?? 0;
+        const vipBadgeClass = vipLevel > 0 ? 'bg-yellow-200 text-yellow-800 font-bold' : '';
         const photoHTML = u.photo ? `<img src="${u.photo}" alt="${u.name}" class="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-slate-200">` : `<div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">${u.name.charAt(0).toUpperCase()}</div>`;
         const allTasks = window.appContext.taskService.getTasks?.() || [];
         const assignedTaskCount = allTasks.filter((t) => t.assigned && t.assigned.includes(u.email)).length;
@@ -61,7 +64,7 @@ export class RenderUser {
           </div>
           ${photoHTML}
           <div class="flex flex-col gap-1">
-            <span>${u.name} <span class="text-[8px] px-1.5 py-0.5 rounded border font-black inline-block ml-1 ${roleColors[u.role] || 'bg-slate-50'}">${u.role}</span></span>
+            <span>${u.name} <span class="text-[8px] px-1.5 py-0.5 rounded border font-black inline-block ml-1 ${roleColors[u.role] || 'bg-slate-50'}">${u.role}</span>${vipLevel > 0 ? ` <span class="text-[8px] px-1.5 py-0.5 rounded border font-black inline-block ml-1 ${vipBadgeClass}">VIP ⭐${vipLevel}</span>` : ''}</span>
             <span class="text-[11px] text-slate-500 font-normal">Tarefas atribuídas: ${assignedTaskCount}</span>
           </div>
         </td>
@@ -132,6 +135,18 @@ export class RenderUser {
         const tasksListHTML = assignedTasks.length > 0
             ? assignedTasks.map((t) => `<li class="text-sm text-slate-700">• ${t.title} <span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">${t.status}</span></li>`).join('')
             : '<li class="text-sm text-slate-500 italic">Nenhuma tarefa atribuída</li>';
+        // Get ratings for the user
+        const average = window.ratingSystem.getAverage(user);
+        const ratings = window.ratingSystem.getRatings(user);
+        const ratingStarsHTML = [1, 2, 3, 4, 5]
+            .map(i => {
+            const isFilled = i <= Math.round(average);
+            return `<button onclick="window.appContext.renderUser.rateUser(${id}, ${i})" class="text-2xl hover:scale-125 transition-transform ${isFilled ? 'text-amber-400' : 'text-amber-200'}" title="Avaliar com ${i} estrelas">${isFilled ? '★' : '☆'}</button>`;
+        })
+            .join('');
+        const ratingsInfoHTML = ratings.length === 0
+            ? '<p class="text-slate-500 text-sm">Nenhuma avaliação ainda</p>'
+            : `<p class="text-sm"><b>Média:</b> ${average.toFixed(1)} (${ratings.length} avaliações)</p>`;
         const detailsContent = `
       <div class="space-y-4">
         ${photoHTML}
@@ -156,6 +171,13 @@ export class RenderUser {
         <div>
           <p class="text-sm font-bold text-slate-600">ESTADO</p>
           <p class="text-lg font-semibold ${user.active ? 'text-emerald-600' : 'text-slate-400'}">${user.active ? 'ATIVO' : 'INATIVO'}</p>
+        </div>
+        <div>
+          <p class="text-sm font-bold text-slate-600 mb-2">⭐ AVALIAÇÕES</p>
+          <div class="flex gap-1 mb-2">
+            ${ratingStarsHTML}
+          </div>
+          ${ratingsInfoHTML}
         </div>
         <div>
           <p class="text-sm font-bold text-slate-600">TAREFAS ATRIBUÍDAS (${assignedTasks.length})</p>
@@ -225,6 +247,49 @@ export class RenderUser {
             window.appContext.logService.addLog(`Utilizador "${user.name}" adicionado aos favoritos`);
         }
         window.appContext.saveAndRender();
+    }
+    // ===== VIP PRIORITY MANAGEMENT =====
+    // Set VIP priority level for a user (1-4)
+    setUserVIPLevel(userId, vipLevel) {
+        const user = this.userService.getUserById(userId);
+        if (!user)
+            return;
+        const level = parseInt(vipLevel.toString());
+        if (level >= 0 && level <= 4) {
+            window.priorityManager.setPriority(user, level);
+            if (level === 0) {
+                window.appContext.notificationService.addNotification(`Nível VIP removido de "${user.name}"`, 'info');
+            }
+            else {
+                window.appContext.notificationService.addNotification(`${user.name} agora é VIP ⭐${level}!`, 'success');
+            }
+            window.appContext.logService.addLog(`Nível VIP de "${user.name}" alterado para ${level}`);
+            window.appContext.saveAndRender();
+        }
+    }
+    // Get VIP level for a user
+    getUserVIPLevel(userId) {
+        const user = this.userService.getUserById(userId);
+        if (!user)
+            return undefined;
+        return window.priorityManager.getPriority(user);
+    }
+    // ===== RATING MANAGEMENT =====
+    // Rate a user with a value 1-5
+    rateUser(userId, rating) {
+        const user = this.userService.getUserById(userId);
+        if (!user)
+            return;
+        if (rating < 1 || rating > 5) {
+            window.appContext.notificationService.addNotification('Avaliação deve estar entre 1 e 5', 'warning');
+            return;
+        }
+        window.ratingSystem.rate(user, rating);
+        window.appContext.notificationService.addNotification(`Utilizador avaliado com ${rating} ⭐!`, 'success');
+        window.appContext.logService.addLog(`Utilizador "${user.name}" avaliado com ${rating} estrelas`);
+        // Refresh the modal with updated ratings
+        this.showUserDetails(userId);
+        window.appContext.saveData();
     }
 }
 //# sourceMappingURL=renderUser.js.map

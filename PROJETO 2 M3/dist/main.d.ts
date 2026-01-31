@@ -19,6 +19,9 @@ import { User } from './src/models/Users.js';
 import { Task } from './src/models/Task.js';
 import { Favorites } from './src/utils/Favorites.js';
 import { WatcherSystem } from './src/utils/WatcherSystem.js';
+import { PriorityManager } from './src/utils/PriorityManager.js';
+import { RatingSystem } from './src/utils/RatingSystem.js';
+import { DependencyGraph } from './src/utils/DependencyGraph.js';
 declare global {
     interface Window {
         appContext: AppContext;
@@ -26,6 +29,9 @@ declare global {
         favoriteTasks: Favorites<Task>;
         favoriteUsers: Favorites<User>;
         watcherSystem: WatcherSystem<Task | User, User>;
+        priorityManager: PriorityManager<Task | User>;
+        ratingSystem: RatingSystem<Task | User>;
+        dependencyGraph: DependencyGraph<Task>;
         renderTasksWithPagination: (tasks: Task[]) => void;
         renderUsersWithPagination: (users: User[]) => void;
     }

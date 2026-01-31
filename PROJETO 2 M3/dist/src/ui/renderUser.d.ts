@@ -10,4 +10,7 @@ export declare class RenderUser {
     editUser(id: number): void;
     toggleUserWatch(userId: number): void;
     toggleUserFavorite(id: number): void;
+    setUserVIPLevel(userId: number, vipLevel: number): void;
+    getUserVIPLevel(userId: number): number | undefined;
+    rateUser(userId: number, rating: number): void;
 }

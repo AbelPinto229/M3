@@ -29,5 +29,15 @@ export class PriorityService {
     });
     return result;
   }
+
+  // remove priority of a task
+  removePriority(taskId: number): boolean {
+    return this.priorities.delete(taskId);
+  }
+
+  // clear all priorities
+  clear(): void {
+    this.priorities.clear();
+  }
 }
 

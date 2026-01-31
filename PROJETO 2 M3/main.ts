@@ -28,6 +28,9 @@ import { Task } from './src/models/Task.js';
 import { Paginator } from './src/utils/Paginator.js';
 import { Favorites } from './src/utils/Favorites.js';
 import { WatcherSystem } from './src/utils/WatcherSystem.js';
+import { PriorityManager } from './src/utils/PriorityManager.js';
+import { RatingSystem } from './src/utils/RatingSystem.js';
+import { DependencyGraph } from './src/utils/DependencyGraph.js';
 
 // ===== EXTEND WINDOW TYPE =====
 declare global {
@@ -37,6 +40,9 @@ declare global {
     favoriteTasks: Favorites<Task>;
     favoriteUsers: Favorites<User>;
     watcherSystem: WatcherSystem<Task | User, User>;
+    priorityManager: PriorityManager<Task | User>;
+    ratingSystem: RatingSystem<Task | User>;
+    dependencyGraph: DependencyGraph<Task>;
     renderTasksWithPagination: (tasks: Task[]) => void;
     renderUsersWithPagination: (users: User[]) => void;
   }
@@ -85,6 +91,8 @@ const statisticsService = new StatisticsService(taskService.getTasks(), userServ
 const searchService = new SearchService(taskService.getTasks());
 const backupService = new BackupService(userService.getUsers(), taskService.getTasks(), assignmentService);
 const notificationService = new NotificationService();
+const ratingSystem = new RatingSystem<Task | User>();
+const dependencyGraph = new DependencyGraph<Task>();
 
 // ===== CREATE APP CONTEXT =====
 const appContext: AppContext = {
@@ -136,12 +144,14 @@ const appContext: AppContext = {
   },
   saveData: function() {
     updateDashboard();
+    renderLogs();
   }
 };
 
 // Expose to window
 window.appContext = appContext;
 window.renderModals = appContext.renderModals;
+window.ratingSystem = ratingSystem;
 
 // ===== PAGINATION STATE =====
 const paginator = new Paginator();
@@ -153,10 +163,16 @@ const favoriteUsers = new Favorites<User>();
 // ===== WATCHER SYSTEM =====
 const watcherSystem = new WatcherSystem<Task | User, User>();
 
-// Expose favorites and watcher system to window for global access
+// ===== PRIORITY MANAGER =====
+const priorityManager = new PriorityManager<Task | User>();
+
+// Expose favorites, watcher system, and priority manager to window for global access
 window.favoriteTasks = favoriteTasks;
 window.favoriteUsers = favoriteUsers;
 window.watcherSystem = watcherSystem;
+window.priorityManager = priorityManager;
+window.ratingSystem = ratingSystem;
+window.dependencyGraph = dependencyGraph;
 
 interface PaginationState {
   currentPage: number;
@@ -661,6 +677,49 @@ window.watcherSystem.watch(task1, user2);
 console.log('Watchers for task1:', window.watcherSystem.getWatchers(task1));
 window.watcherSystem.unwatch(task1, user1);
 console.log('Watchers for task1 after unwatch:', window.watcherSystem.getWatchers(task1));
+
+// ===== TEST RatingSystem CLASS =====
+console.log('=== RatingSystem Tests ===');
+
+// Test rating tasks
+window.ratingSystem.rate(task1, 5);
+window.ratingSystem.rate(task1, 3);
+window.ratingSystem.rate(task1, 4);
+console.log('Ratings for task1:', window.ratingSystem.getRatings(task1));
+console.log('Average rating for task1:', window.ratingSystem.getAverage(task1));
+console.log('Rating count for task1:', window.ratingSystem.getRatingCount(task1));
+
+// Test rating users
+window.ratingSystem.rate(user1, 5);
+window.ratingSystem.rate(user1, 5);
+window.ratingSystem.rate(user1, 4);
+console.log('Ratings for user1:', window.ratingSystem.getRatings(user1));
+console.log('Average rating for user1:', window.ratingSystem.getAverage(user1));
+
+// Test rating task2
+window.ratingSystem.rate(task2, 2);
+window.ratingSystem.rate(task2, 3);
+console.log('Ratings for task2:', window.ratingSystem.getRatings(task2));
+console.log('Average rating for task2:', window.ratingSystem.getAverage(task2));
+
+// ===== TEST DependencyGraph CLASS =====
+console.log('=== DependencyGraph Tests ===');
+
+// Create dependency relationships
+window.dependencyGraph.addDependency(task2, task1);
+window.dependencyGraph.addDependency(task3, task2);
+window.dependencyGraph.addDependency(task4, task1);
+window.dependencyGraph.addDependency(task5, task3);
+
+// Test getting dependencies
+console.log('Dependencies of task2:', window.dependencyGraph.getDependencies(task2));
+console.log('Dependencies of task3:', window.dependencyGraph.getDependencies(task3));
+console.log('Dependencies of task5:', window.dependencyGraph.getDependencies(task5));
+
+// Test checking if has dependencies
+console.log('task1 has dependencies:', window.dependencyGraph.hasDependencies(task1));
+console.log('task2 has dependencies:', window.dependencyGraph.hasDependencies(task2));
+console.log('task5 has dependencies:', window.dependencyGraph.hasDependencies(task5));
 
 //re-render after adding test data
 window.appContext.renderTask.render();

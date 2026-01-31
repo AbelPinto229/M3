@@ -9,4 +9,6 @@ export declare class PriorityService {
     setPriority(taskId: number, priority: Priority): void;
     getPriority(taskId: number): Priority | undefined;
     getHighPriorityTasks(): number[];
+    removePriority(taskId: number): boolean;
+    clear(): void;
 }

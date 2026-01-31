@@ -166,6 +166,16 @@ export class RenderModals {
               <option value="VIEWER" ${user.role === 'VIEWER' ? 'selected' : ''}>VIEWER</option>
             </select>
           </div>
+          <div>
+            <label class="text-xs font-bold text-slate-600 block mb-1">NÍVEL VIP (1-4)</label>
+            <select id="editUserVIPLevel" class="w-full border border-slate-200 rounded px-3 py-2 text-sm">
+              <option value="0" ${window.priorityManager.getPriority(user) === 0 ? 'selected' : ''}>Sem VIP</option>
+              <option value="1" ${window.priorityManager.getPriority(user) === 1 ? 'selected' : ''}>🔵 Nível 1 (Bronze)</option>
+              <option value="2" ${window.priorityManager.getPriority(user) === 2 ? 'selected' : ''}>🟡 Nível 2 (Prata)</option>
+              <option value="3" ${window.priorityManager.getPriority(user) === 3 ? 'selected' : ''}>🟠 Nível 3 (Ouro)</option>
+              <option value="4" ${window.priorityManager.getPriority(user) === 4 ? 'selected' : ''}>🔴 Nível 4 (Platina)</option>
+            </select>
+          </div>
         </div>
         <div class="flex justify-end gap-2">
           <button onclick="window.renderModals.closeEditUserModal()" class="px-4 py-2 bg-gray-200 rounded text-sm">Cancelar</button>
@@ -183,11 +193,12 @@ export class RenderModals {
     if (modal) modal.remove();
   }
 
-  // Validates and saves updated user data (handles photo upload)
+  // Validates and saves updated user data (handles photo upload and VIP level)
   saveEditUser(userId: number): void {
     const nameInput = document.getElementById('editUserName') as HTMLInputElement;
     const emailInput = document.getElementById('editUserEmail') as HTMLInputElement;
     const roleSelect = document.getElementById('editUserRole') as HTMLSelectElement;
+    const vipLevelSelect = document.getElementById('editUserVIPLevel') as HTMLSelectElement;
     const photoInput = document.getElementById('editUserPhoto') as HTMLInputElement;
     
     if (!nameInput?.value || !emailInput?.value || !roleSelect?.value) {
@@ -207,6 +218,15 @@ export class RenderModals {
       email: emailInput.value,
       role: roleSelect.value
     };
+
+    // Handle VIP level
+    if (vipLevelSelect && userBeingEdited) {
+      const vipLevel = parseInt(vipLevelSelect.value);
+      window.priorityManager.setPriority(userBeingEdited, vipLevel);
+      if (vipLevel > 0) {
+        window.appContext.logService.addLog(`Nível VIP de "${userBeingEdited.name}" alterado para ${vipLevel}`);
+      }
+    }
 
     // Handle photo if provided
     if (photoInput?.files && photoInput.files.length > 0) {

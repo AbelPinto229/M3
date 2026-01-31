@@ -25,5 +25,13 @@ export class PriorityService {
         });
         return result;
     }
+    // remove priority of a task
+    removePriority(taskId) {
+        return this.priorities.delete(taskId);
+    }
+    // clear all priorities
+    clear() {
+        this.priorities.clear();
+    }
 }
 //# sourceMappingURL=PriorityService.js.map
