@@ -4,7 +4,7 @@
 // Import all services
 import { UserService } from './src/services/UserService.js';
 import { TaskService } from './src/services/TaskService.js';
-import { HistoryLog } from './src/logs/HistoryLog.js';
+import { SystemLogger } from './src/logs/SystemLogger.js';
 import { CommentService } from './src/services/CommentService.js';
 import { AttachmentService } from './src/services/AttachmentService.js';
 import { TagManager } from './src/utils/TagManager.js';
@@ -21,8 +21,6 @@ import { NotificationService } from './src/notifications/NotificationService.js'
 import { RenderUser } from './src/ui/renderUser.js';
 import { RenderTask } from './src/ui/renderTask.js';
 import { RenderModals } from './src/ui/renderModals.js';
-import { EntityList } from './src/index.js';
-import { SimpleCache } from './src/utils/SimpleCache.js';
 import { User } from './src/models/Users.js';
 import { Task } from './src/models/Task.js';
 import { Paginator } from './src/utils/Paginator.js';
@@ -31,6 +29,11 @@ import { WatcherSystem } from './src/utils/WatcherSystem.js';
 import { PriorityManager } from './src/utils/PriorityManager.js';
 import { RatingSystem } from './src/utils/RatingSystem.js';
 import { DependencyGraph } from './src/utils/DependencyGraph.js';
+import { IdGenerator } from './src/utils/IdGenerator.js';
+import { SystemConfig } from './src/services/SystemConfig.js';
+import { BusinessRules } from './src/services/BusinessRules.js';
+import { GlobalValidators } from './src/utils/GlobalValidators.js';
+import { BaseEntity } from './src/models/BaseEntity.js';
 
 // ===== EXTEND WINDOW TYPE =====
 declare global {
@@ -45,14 +48,13 @@ declare global {
     dependencyGraph: DependencyGraph<Task>;
     renderTasksWithPagination: (tasks: Task[]) => void;
     renderUsersWithPagination: (users: User[]) => void;
+    systemStats: { totalEntities: number; systemLog: string[] };
   }
 }
-
 // ===== APP CONTEXT TYPE =====
 interface AppContext {
   userService: UserService;
   taskService: TaskService;
-  logService: HistoryLog;
   deadlineService: DeadlineService;
   priorityService: PriorityService;
   assignmentService: AssignmentService;
@@ -79,7 +81,6 @@ interface AppContext {
 // ===== INITIALIZE SERVICES =====
 const userService = new UserService();
 const taskService = new TaskService();
-const logService = new HistoryLog();
 const deadlineService = new DeadlineService();
 const priorityService = new PriorityService();
 const assignmentService = new AssignmentService();
@@ -98,7 +99,6 @@ const dependencyGraph = new DependencyGraph<Task>();
 const appContext: AppContext = {
   userService,
   taskService,
-  logService,
   deadlineService,
   priorityService,
   assignmentService,
@@ -141,10 +141,12 @@ const appContext: AppContext = {
     this.renderUser.render();
     this.renderTask.render();
     renderLogs();
+    renderSystemStats();
   },
   saveData: function() {
     updateDashboard();
     renderLogs();
+    renderSystemStats();
   }
 };
 
@@ -324,6 +326,153 @@ function setupUserScrollListener() {
 window.renderTasksWithPagination = renderTasksWithPagination;
 window.renderUsersWithPagination = renderUsersWithPagination;
 
+// ===== INITIALIZE GLOBAL SYSTEMS (Exercícios 1-7) =====
+function initializeGlobalSystems() {
+  // Exercício 2: Configurar sistema
+  SystemConfig.set('environment', 'production');
+  SystemConfig.set('debugMode', false);
+  const sysInfo = SystemConfig.getInfo();
+  SystemLogger.log(`Sistema inicializado: ${sysInfo.appName} v${sysInfo.version} (${sysInfo.environment})`);
+
+  // Exercício 3: Gerar alguns IDs
+  const id1 = IdGenerator.generate();
+  const id2 = IdGenerator.generate();
+  const id3 = IdGenerator.generate();
+  SystemLogger.log(`IDs gerados: ${id1}, ${id2}, ${id3}`);
+
+  // Exercício 6: Validar dados
+  const testEmail = 'user@example.com';
+  const testTitle = 'Nova Tarefa de Teste';
+  const invalidEmail = 'invalid-email';
+  const isEmailValid = GlobalValidators.isValidEmail(testEmail);
+  const isInvalidEmailValid = GlobalValidators.isValidEmail(invalidEmail);
+  const isTitleValid = BusinessRules.isValidTitle(testTitle);
+  const isNonEmptyValid = GlobalValidators.isNonEmpty(testTitle);
+  SystemLogger.log(`Email "${testEmail}" válido: ${isEmailValid}`);
+  SystemLogger.log(`Email "${invalidEmail}" válido: ${isInvalidEmailValid}`);
+  SystemLogger.log(`Título "${testTitle}" válido: ${isTitleValid}`);
+  SystemLogger.log(`Texto não vazio: ${isNonEmptyValid}`);
+
+  // Exercício 4: Aplicar regras de negócio
+  const canDeactivate = BusinessRules.canUserBeDeactivated(0);
+  const canComplete = BusinessRules.canTaskBeCompleted(false);
+  const canAssign = BusinessRules.canAssignTask(true);
+  const isValidPriority = BusinessRules.isValidPriority('HIGH');
+  const isValidRole = BusinessRules.isValidRole('ADMIN');
+  SystemLogger.log(`Utilizador pode ser desativado (0 tarefas): ${canDeactivate}`);
+  SystemLogger.log(`Tarefa pode ser concluída (não bloqueada): ${canComplete}`);
+  SystemLogger.log(`Tarefa pode ser atribuída (utilizador ativo): ${canAssign}`);
+  SystemLogger.log(`Prioridade "HIGH" válida: ${isValidPriority}`);
+  SystemLogger.log(`Role "ADMIN" válida: ${isValidRole}`);
+
+  // Exercício 1: Obter total de entidades
+  const totalEntities = BaseEntity.getTotalEntities();
+  SystemLogger.log(`Total de entidades no sistema: ${totalEntities}`);
+
+  // Exercício 5: Exibir logs do sistema
+  const sysLogs = SystemLogger.getLastN(SystemLogger.count());
+  SystemLogger.log(`Total de logs do sistema: ${sysLogs.length}`);
+
+  // Guardar estatísticas no window para UI
+  window.systemStats = {
+    totalEntities,
+    systemLog: sysLogs
+  };
+
+  // Renderizar painel de sistema
+  renderSystemStats();
+}
+
+// Renderizar painel com estatísticas do sistema
+function renderSystemStats() {
+  // Atualizar stats com os logs atuais
+  const sysLogs = SystemLogger.getLastN(SystemLogger.count());
+  window.systemStats = {
+    totalEntities: BaseEntity.getTotalEntities(),
+    systemLog: sysLogs
+  };
+
+  const logsContent = document.getElementById('logsContent');
+  if (logsContent && window.systemStats?.systemLog) {
+    logsContent.innerHTML = [...window.systemStats.systemLog]
+      .reverse()
+      .map((log: string) => {
+        const timeMatch = log.match(/\[([\d:]+)\]/);
+        const time = timeMatch ? timeMatch[1] : '';
+        const message = log.replace(/\[[\d:]+\]\s/, '');
+        return `<div class="flex gap-3">
+          <div class="flex flex-col items-center">
+            <div class="w-2 h-2 rounded-full bg-slate-300 mt-1"></div>
+          </div>
+          <div class="flex-1">
+            <div class="text-[9px] font-semibold text-slate-700">${message}</div>
+            <div class="text-[8px] text-slate-400 mt-0.5">${time}</div>
+          </div>
+        </div>`;
+      })
+      .join('');
+  }
+
+  const statsPanel = document.getElementById('statsContent');
+  if (!statsPanel) return;
+
+  const sysInfo = SystemConfig.getInfo();
+  const stats = window.systemStats;
+
+  // ID Generator Stats
+  const idGeneratorHtml = `
+    <div class="flex justify-between">
+      <span>Contador Atual:</span>
+      <span class="font-bold text-purple-600">${IdGenerator.getCounter()}</span>
+    </div>
+  `;
+
+  // Business Rules Stats
+  const businessRulesHtml = `
+    <div class="flex justify-between">
+      <span>Regras Ativas:</span>
+      <span class="font-bold text-blue-600">6</span>
+    </div>
+    <div class="text-[9px] space-y-1 mt-2 pl-2 border-l-2 border-blue-200">
+      <div>✓ Validação de Título (5-100 chars)</div>
+      <div>✓ Validação de Prioridade</div>
+      <div>✓ Validação de Role</div>
+      <div>✓ Tarefa Concluída (não bloqueada)</div>
+      <div>✓ Tarefa Atribuída (user ativo)</div>
+      <div>✓ Desativação de User (0 tarefas)</div>
+    </div>
+  `;
+
+  // Global Validators Stats
+  const globalValidatorsHtml = `
+    <div class="flex justify-between">
+      <span>Validadores Disponíveis:</span>
+      <span class="font-bold text-green-600">7</span>
+    </div>
+    <div class="text-[9px] space-y-1 mt-2 pl-2 border-l-2 border-green-200">
+      <div>✓ Email Validation</div>
+      <div>✓ Non-Empty Text</div>
+      <div>✓ Positive Numbers</div>
+      <div>✓ Min/Max Length</div>
+      <div>✓ URL Validation</div>
+      <div>✓ Date Validation</div>
+      <div>✓ Text Trimming</div>
+    </div>
+  `;
+
+  // Render ID Generator
+  const idGenEl = document.getElementById('idGeneratorStats');
+  if (idGenEl) idGenEl.innerHTML = idGeneratorHtml;
+
+  // Render Business Rules
+  const busRulesEl = document.getElementById('businessRulesStats');
+  if (busRulesEl) busRulesEl.innerHTML = businessRulesHtml;
+
+  // Render Global Validators
+  const validatorsEl = document.getElementById('globalValidatorsStats');
+  if (validatorsEl) validatorsEl.innerHTML = globalValidatorsHtml;
+}
+
 // ===== APPLICATION INITIALIZATION =====
 export function initializeApp() {
   setupEventListeners();
@@ -332,6 +481,9 @@ export function initializeApp() {
   window.appContext.renderUser.render();
   window.appContext.renderTask.render();
   renderLogs();
+  
+  // ===== INTEGRAÇÃO DOS 7 EXERCÍCIOS =====
+  initializeGlobalSystems();
   
   console.log('Application initialized successfully');
 }
@@ -383,7 +535,7 @@ function renderLogs() {
   const logsContainer = document.getElementById('logs');
   if (!logsContainer) return;
   
-  const logs = window.appContext.logService.getLogs();
+  const logs = SystemLogger.getLogs();
   
   logsContainer.innerHTML = logs
     .slice()
@@ -419,7 +571,7 @@ function createNewUser(email: string, name: string, role: string, photo?: string
   const newUser = window.appContext.userService.addUser(email, name, role, photo);
   
   if (newUser) {
-    window.appContext.logService.addLog(`Utilizador ${name} (${email}) criado com role ${role}`);
+    SystemLogger.log(`Utilizador ${name} (${email}) criado com role ${role}`);
     window.appContext.notificationService.addNotification('Utilizador adicionado!', 'success');
     window.appContext.notificationService.notifyAdmins(`Novo utilizador criado: ${email}`);
   } else {
@@ -576,7 +728,7 @@ function setupEventListeners() {
       }
       
       // Log task creation
-      window.appContext.logService.addLog(`Tarefa criada: "${newTask.title}" (${typeSelect.value})`);
+      SystemLogger.log(`Tarefa criada: "${newTask.title}" (${typeSelect.value})`);
       
       // Auto-configure bug tasks
       if (typeSelect.value.toLowerCase() === 'bug') {
@@ -584,7 +736,7 @@ function setupEventListeners() {
         const admin = window.appContext.userService.getUsers().find((u: any) => u.role === 'ADMIN' || u.role === 'MANAGER');
         if (admin) {
           newTask.assigned = [admin.email];
-          window.appContext.logService.addLog(`Bug task "${newTask.title}" atribuído a ${admin.email}`);
+          SystemLogger.log(`Bug task "${newTask.title}" atribuído a ${admin.email}`);
         }
       }
       
@@ -601,3 +753,4 @@ if (document.readyState === 'loading') {
 } else {
   initializeApp();
 }
+

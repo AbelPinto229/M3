@@ -8,6 +8,7 @@ import { TaskStatus } from '../tasks/TaskStatus.js';
 import { CommentService } from '../services/CommentService.js';
 import { AttachmentService } from '../services/AttachmentService.js';
 import { processTask } from '../utils/TaskUtils.js';
+import { SystemLogger } from '../logs/SystemLogger.js';
 
 const TASK_PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
 const PRIORITY_DISPLAY_MAP: Record<string, string> = { 'LOW': 'Baixa', 'MEDIUM': 'Média', 'HIGH': 'Alta', 'CRITICAL': 'Crítica' };
@@ -158,36 +159,37 @@ export class RenderTask {
 
     const isViewer = window.appContext.currentUserRole === 'VIEWER';
     const modalHtml = `
-      <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 border border-slate-100 max-h-[85vh] overflow-y-auto">
-        <h3 class="font-bold mb-1.5 text-sm">${task.title}</h3>
-        <p class="text-[9px] text-slate-400 mb-3">Tipo: ${displayType} | Prioridade: ${displayPriority}</p>
+      <div class="bg-white rounded-2xl shadow-2xl w-[85vw] p-6 border border-slate-100 max-h-[90vh] overflow-y-auto flex flex-col">
+        <h3 class="font-bold mb-2 text-base">${task.title}</h3>
+        <p class="text-xs text-slate-400 mb-4">Tipo: ${displayType} | Prioridade: ${displayPriority}</p>
         
-        ${!isViewer ? `
-        <div class="mb-3 space-y-1.5">
-          <div>
-            <label class="text-[9px] font-bold text-slate-600 block mb-0.5">NOME:</label>
-            <input id="taskTitleInput" type="text" value="${task.title}" class="w-full text-[9px] px-2 py-1 rounded border bg-white" onkeypress="if(event.key==='Enter'){ window.appContext.renderTask.saveTaskTitle(${taskId}); }">
-          </div>
-          <div>
-            <label class="text-[9px] font-bold text-slate-600 block mb-0.5">ATRIBUIR:</label>
-            <select id="taskAssignSelect" onchange="window.appContext.renderTask.manualAssign(${taskId}, this.value)" class="w-full text-[9px] px-2 py-1 rounded border bg-white">
-              <option value="">Sem atribuição</option>
-              ${this.userService
-                .getActiveUsers()
-                .map(u => `<option value="${u.email}" ${task.assigned?.includes(u.email) ? 'selected' : ''}>${u.name}</option>`)
-                .join('')}
-            </select>
-          </div>
-          <div class="grid grid-cols-2 gap-1">
+        <div class="grid grid-cols-2 gap-6 flex-1">
+          <!-- Left Column -->
+          <div class="space-y-4">
+            ${!isViewer ? `
             <div>
-              <label class="text-[9px] font-bold text-slate-600 block mb-0.5">PRIORIDADE:</label>
-              <select id="taskPrioritySelect" onchange="window.appContext.renderTask.setTaskPriority(${taskId}, this.value)" class="w-full text-[9px] px-2 py-1 rounded border bg-white">
+              <label class="text-xs font-bold text-slate-600 block mb-1">NOME:</label>
+              <input id="taskTitleInput" type="text" value="${task.title}" class="w-full text-xs px-2 py-2 rounded border bg-white" onkeypress="if(event.key==='Enter'){ window.appContext.renderTask.saveTaskTitle(${taskId}); }">
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-600 block mb-1">ATRIBUIR:</label>
+              <select id="taskAssignSelect" onchange="window.appContext.renderTask.manualAssign(${taskId}, this.value)" class="w-full text-xs px-2 py-2 rounded border bg-white">
+                <option value="">Sem atribuição</option>
+                ${this.userService
+                  .getActiveUsers()
+                  .map(u => `<option value="${u.email}" ${task.assigned?.includes(u.email) ? 'selected' : ''}>${u.name}</option>`)
+                  .join('')}
+              </select>
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-600 block mb-1">PRIORIDADE:</label>
+              <select id="taskPrioritySelect" onchange="window.appContext.renderTask.setTaskPriority(${taskId}, this.value)" class="w-full text-xs px-2 py-2 rounded border bg-white">
                 ${TASK_PRIORITIES.map(p => `<option value="${p}" ${task.priority === p ? 'selected' : ''}>${PRIORITY_DISPLAY_MAP[p] || p}</option>`).join('')}
               </select>
             </div>
             <div>
-              <label class="text-[9px] font-bold text-slate-600 block mb-0.5">DESTAQUE:</label>
-              <select id="taskPriorityLevelSelect" onchange="window.appContext.renderTask.setTaskPriorityLevel(${taskId}, this.value)" class="w-full text-[9px] px-2 py-1 rounded border bg-white">
+              <label class="text-xs font-bold text-slate-600 block mb-1">DESTAQUE:</label>
+              <select id="taskPriorityLevelSelect" onchange="window.appContext.renderTask.setTaskPriorityLevel(${taskId}, this.value)" class="w-full text-xs px-2 py-2 rounded border bg-white">
                 <option value="0">Nenhum</option>
                 <option value="1" ${window.priorityManager.getPriority(task) === 1 ? 'selected' : ''}>Nível 1</option>
                 <option value="2" ${window.priorityManager.getPriority(task) === 2 ? 'selected' : ''}>Nível 2</option>
@@ -195,56 +197,60 @@ export class RenderTask {
                 <option value="4" ${window.priorityManager.getPriority(task) === 4 ? 'selected' : ''}>Nível 4</option>
               </select>
             </div>
-          </div>
-        </div>
-        ` : ''}
-        
-        ${!isViewer ? `
-        <div class="mb-2.5">
-          <h4 class="font-bold text-[9px] mb-1">Etiquetas:</h4>
-          <div id="taskTagsList" class="flex flex-wrap gap-1 mb-1"></div>
-          <input type="text" id="tagInput" class="w-full px-2 py-1 border rounded text-[9px]" placeholder="Nova etiqueta..." onkeypress="if(event.key==='Enter'){ window.appContext.renderTask.addTag(); }">
-        </div>
-        ` : '<div class="mb-2"><h4 class="font-bold text-[8px] mb-1">Etiquetas:</h4><div id="taskTagsList" class="flex flex-wrap gap-0.5 mb-1"></div></div>'}
-        
-        <div class="mb-2.5 border-t border-b border-slate-100 py-1.5">
-          <div id="taskComments" class="max-h-20 overflow-y-auto text-[9px] mb-1"></div>
-          ${!isViewer ? `<input type="text" id="newCommentInput" class="w-full px-2 py-1 border rounded text-[9px]" placeholder="Comentário..." onkeypress="if(event.key==='Enter'){ window.appContext.renderTask.addComment(); }">` : '<p class="text-[9px] text-slate-400 italic">Ver. - Sem permissão</p>'}
-        </div>
-        
-        ${!isViewer ? `
-        <div class="mb-2.5">
-          <h4 class="font-bold text-[9px] mb-1">Dependências:</h4>
-          <div id="taskDependencies" class="max-h-12 overflow-y-auto text-[9px] mb-1 bg-blue-50 p-1.5 rounded"></div>
-          <select id="dependencySelect" class="w-full text-[9px] px-2 py-1 rounded border bg-white" onchange="window.appContext.renderTask.addDependency(${taskId}, this.value); this.value='';">
-            <option value="">+ Adicionar dependência</option>
-            ${this.taskService.getTasks().filter((t: any) => t.id !== taskId).map((t: any) => `<option value="${t.id}">${t.title}</option>`).join('')}
-          </select>
-        </div>
-        ` : '<div class="mb-2.5"><h4 class="font-bold text-[9px] mb-1">Dependências:</h4><div id="taskDependencies" class="max-h-12 overflow-y-auto text-[9px] bg-blue-50 p-1.5 rounded"></div></div>'}
-        
-        ${!isViewer ? `
-        <div class="mb-2.5">
-          <h4 class="font-bold text-[9px] mb-1">Anexos:</h4>
-          <div id="taskAttachments" class="max-h-16 overflow-y-auto text-[9px]"></div>
-          <input type="file" id="newAttachmentInput" class="mt-1 text-[8px]" onchange="window.appContext.renderTask.addAttachment(event)">
-        </div>
-        ` : '<div class="mb-2"><h4 class="font-bold text-[8px] mb-1">Anexos:</h4><div id="taskAttachments" class="max-h-12 overflow-y-auto text-[8px]"></div></div>'}
-        
-        <div class="border-t pt-1.5 mb-2">
-          <h4 class="font-bold text-[9px] mb-1">⭐ Avaliações:</h4>
-          <div class="flex items-center gap-1.5 mb-1">
-            <div class="flex gap-1" id="ratingStars">
-              ${[1, 2, 3, 4, 5].map(i => `<button onclick="window.appContext.renderTask.rateTask(${taskId}, ${i})" class="text-lg hover:scale-110 transition-transform" data-rating="${i}">☆</button>`).join('')}
+            ` : ''}
+            
+            ${!isViewer ? `
+            <div>
+              <h4 class="font-bold text-xs mb-2">Etiquetas:</h4>
+              <div id="taskTagsList" class="flex flex-wrap gap-1 mb-2"></div>
+              <input type="text" id="tagInput" class="w-full px-2 py-1 border rounded text-xs" placeholder="Nova etiqueta..." onkeypress="if(event.key==='Enter'){ window.appContext.renderTask.addTag(); }">
             </div>
-            <span id="ratingAverage" class="text-[9px] font-bold text-amber-600 ml-1"></span>
+            ` : '<div><h4 class="font-bold text-xs mb-2">Etiquetas:</h4><div id="taskTagsList" class="flex flex-wrap gap-1 mb-2"></div></div>'}
           </div>
-          <div id="taskRatingsInfo" class="text-[8px] text-slate-600 max-h-12 overflow-y-auto bg-slate-50 p-1.5 rounded"></div>
+
+          <!-- Right Column -->
+          <div class="space-y-4 flex flex-col">
+            <div>
+              <h4 class="font-bold text-xs mb-2">Comentários:</h4>
+              <div id="taskComments" class="max-h-20 overflow-y-auto text-xs bg-slate-50 p-2 rounded mb-2 flex-1"></div>
+              ${!isViewer ? `<input type="text" id="newCommentInput" class="w-full px-2 py-1 border rounded text-xs" placeholder="Comentário..." onkeypress="if(event.key==='Enter'){ window.appContext.renderTask.addComment(); }">` : '<p class="text-xs text-slate-400 italic">Ver. - Sem permissão</p>'}
+            </div>
+            
+            ${!isViewer ? `
+            <div>
+              <h4 class="font-bold text-xs mb-2">Dependências:</h4>
+              <div id="taskDependencies" class="max-h-12 overflow-y-auto text-xs bg-blue-50 p-2 rounded mb-2"></div>
+              <select id="dependencySelect" class="w-full text-xs px-2 py-1 rounded border bg-white" onchange="window.appContext.renderTask.addDependency(${taskId}, this.value); this.value='';">
+                <option value="">+ Adicionar dependência</option>
+                ${this.taskService.getTasks().filter((t: any) => t.id !== taskId).map((t: any) => `<option value="${t.id}">${t.title}</option>`).join('')}
+              </select>
+            </div>
+            ` : '<div><h4 class="font-bold text-xs mb-2">Dependências:</h4><div id="taskDependencies" class="max-h-12 overflow-y-auto text-xs bg-blue-50 p-2 rounded"></div></div>'}
+            
+            ${!isViewer ? `
+            <div>
+              <h4 class="font-bold text-xs mb-2">Anexos:</h4>
+              <div id="taskAttachments" class="max-h-12 overflow-y-auto text-xs bg-slate-50 p-2 rounded mb-2"></div>
+              <input type="file" id="newAttachmentInput" class="text-xs" onchange="window.appContext.renderTask.addAttachment(event)">
+            </div>
+            ` : '<div><h4 class="font-bold text-xs mb-2">Anexos:</h4><div id="taskAttachments" class="max-h-12 overflow-y-auto text-xs bg-slate-50 p-2 rounded"></div></div>'}
+            
+            <div>
+              <h4 class="font-bold text-xs mb-2">⭐ Avaliações:</h4>
+              <div class="flex items-center gap-2 mb-2">
+                <div class="flex gap-1" id="ratingStars">
+                  ${[1, 2, 3, 4, 5].map(i => `<button onclick="window.appContext.renderTask.rateTask(${taskId}, ${i})" class="text-lg hover:scale-110 transition-transform" data-rating="${i}">☆</button>`).join('')}
+                </div>
+                <span id="ratingAverage" class="text-xs font-bold text-amber-600"></span>
+              </div>
+              <div id="taskRatingsInfo" class="text-xs text-slate-600 max-h-12 overflow-y-auto bg-slate-50 p-2 rounded"></div>
+            </div>
+          </div>
         </div>
         
-        <div class="flex justify-end gap-2 mt-3">
-          <button onclick="window.appContext.renderTask.closeTaskModal()" class="px-3 py-1.5 bg-gray-200 rounded text-[9px]">Fechar</button>
-          ${!isViewer ? `<button onclick="window.appContext.renderTask.saveAllTaskChanges(${taskId})" class="px-3 py-1.5 bg-indigo-600 text-white rounded text-[9px]">Guardar</button>` : ''}
+        <div class="flex justify-end gap-2 mt-4 border-t pt-4">
+          <button onclick="window.appContext.renderTask.closeTaskModal()" class="px-4 py-2 bg-gray-200 rounded text-xs font-semibold">Fechar</button>
+          ${!isViewer ? `<button onclick="window.appContext.renderTask.saveAllTaskChanges(${taskId})" class="px-4 py-2 bg-indigo-600 text-white rounded text-xs font-semibold">Guardar</button>` : ''}
         </div>
       </div>`;
 
@@ -360,6 +366,7 @@ export class RenderTask {
     }
     
     this.commentService.addComment(this.activeTaskModalId, userId, input.value);
+    SystemLogger.log(`Comentário adicionado à tarefa ${this.activeTaskModalId}`);
     window.appContext.notificationService.addNotification('Comentário adicionado!', 'success');
     input.value = '';
     this.renderTaskModalContent();
@@ -368,6 +375,7 @@ export class RenderTask {
   // Deletes a comment and refreshes modal content
   deleteComment(id: number): void {
     this.commentService.deleteComment(id);
+    SystemLogger.log(`Comentário ${id} eliminado`);
     this.renderTaskModalContent();
   }
 
@@ -387,6 +395,7 @@ export class RenderTask {
         size: file.size,
         url: e.target?.result as string,
       });
+      SystemLogger.log(`Ficheiro "${file.name}" anexado à tarefa ${this.activeTaskModalId}`);
       window.appContext.notificationService.addNotification(`Ficheiro "${file.name}" anexado!`, 'success');
       this.renderTaskModalContent();
     };
@@ -396,6 +405,7 @@ export class RenderTask {
   // Removes an attachment from the task
   deleteAttachment(id: number): void {
     this.attachmentService.removeAttachment(id);
+    SystemLogger.log(`Ficheiro ${id} removido da tarefa`);
     window.appContext.notificationService.addNotification('Ficheiro removido!', 'success');
     this.renderTaskModalContent();
   }
@@ -416,7 +426,7 @@ export class RenderTask {
     const currentIndex = TASK_STATUS_CYCLE.indexOf(task.status as TaskStatus);
     const newStatus = TASK_STATUS_CYCLE[(currentIndex + 1) % TASK_STATUS_CYCLE.length];
     this.taskService.updateTaskStatus(id, newStatus);
-    window.appContext.logService.addLog(`Status "${task.title}": ${task.status} -> ${newStatus}`);
+    SystemLogger.log(`Status "${task.title}": ${task.status} -> ${newStatus}`);
     window.appContext.notificationService.addNotification(`Status alterado: ${task.status} → ${newStatus}`, 'success');
     
     // Process task with type-specific logic (BugTask, Feature, etc)
@@ -442,6 +452,7 @@ export class RenderTask {
     if (!task) return;
     window.appContext.renderModals.openConfirmModal(`Eliminar tarefa?`, () => {
       this.taskService.deleteTask(id);
+      SystemLogger.log(`Tarefa "${task.title}" eliminada`);
       window.appContext.notificationService.addNotification(`Tarefa "${task.title}" eliminada!`, 'success');
       window.appContext.saveAndRender();
     });
@@ -453,7 +464,7 @@ export class RenderTask {
     if (!task) return;
     task.assigned = email ? [email] : [];
     if (email) {
-      window.appContext.logService.addLog(`Tarefa "${task.title}" atribuída a ${email}`);
+      SystemLogger.log(`Tarefa "${task.title}" atribuída a ${email}`);
       window.appContext.notificationService.addNotification(`Tarefa "${task.title}" atribuída a ${email}!`, 'success');
     }
     window.appContext.saveAndRender();
@@ -472,7 +483,7 @@ export class RenderTask {
 
     const oldTitle = task.title;
     this.taskService.updateTaskTitle(taskId, newTitle);
-    window.appContext.logService.addLog(`Tarefa renomeada: "${oldTitle}" -> "${newTitle}"`);
+    SystemLogger.log(`Tarefa renomeada: "${oldTitle}" -> "${newTitle}"`);
     window.appContext.notificationService.addNotification(`Tarefa renomeada: "${newTitle}"`, 'success');
     
     window.appContext.saveAndRender();
@@ -500,7 +511,7 @@ export class RenderTask {
       if (newTitle) {
         const oldTitle = task.title;
         this.taskService.updateTaskTitle(taskId, newTitle);
-        window.appContext.logService.addLog(`Tarefa renomeada: "${oldTitle}" -> "${newTitle}"`);
+        SystemLogger.log(`Tarefa renomeada: "${oldTitle}" -> "${newTitle}"`);
         changed = true;
       }
     }
@@ -509,7 +520,7 @@ export class RenderTask {
     if (prioritySelect && prioritySelect.value !== task.priority) {
       this.taskService.updateTaskPriority(taskId, prioritySelect.value);
       window.appContext.priorityService.setPriority(taskId, prioritySelect.value as any);
-      window.appContext.logService.addLog(`Tarefa "${task.title}" prioridade -> ${prioritySelect.value}`);
+      SystemLogger.log(`Tarefa "${task.title}" prioridade -> ${prioritySelect.value}`);
       changed = true;
     }
 
@@ -518,12 +529,12 @@ export class RenderTask {
       const newEmail = assignSelect.value;
       if (!task.assigned?.includes(newEmail)) {
         task.assigned = [newEmail];
-        window.appContext.logService.addLog(`Tarefa "${task.title}" atribuída a ${newEmail}`);
+        SystemLogger.log(`Tarefa "${task.title}" atribuída a ${newEmail}`);
         changed = true;
       }
     } else if (assignSelect && !assignSelect.value && task.assigned?.length) {
       task.assigned = [];
-      window.appContext.logService.addLog(`Tarefa "${task.title}" desatribuída`);
+      SystemLogger.log(`Tarefa "${task.title}" desatribuída`);
       changed = true;
     }
 
@@ -545,11 +556,11 @@ export class RenderTask {
     if (window.favoriteTasks.exists(task)) {
       window.favoriteTasks.remove(task);
       window.appContext.notificationService.addNotification(`"${task.title}" removida de favoritos!`, 'info');
-      window.appContext.logService.addLog(`Tarefa "${task.title}" removida de favoritos`);
+      SystemLogger.log(`Tarefa "${task.title}" removida de favoritos`);
     } else {
       window.favoriteTasks.add(task);
       window.appContext.notificationService.addNotification(`"${task.title}" adicionada aos favoritos!`, 'success');
-      window.appContext.logService.addLog(`Tarefa "${task.title}" adicionada aos favoritos`);
+      SystemLogger.log(`Tarefa "${task.title}" adicionada aos favoritos`);
     }
     
     window.appContext.saveAndRender();
@@ -568,11 +579,11 @@ export class RenderTask {
     if (watchers.includes(currentUser)) {
       window.watcherSystem.unwatch(task, currentUser);
       window.appContext.notificationService.addNotification(`Deixou de seguir "${task.title}"!`, 'info');
-      window.appContext.logService.addLog(`Deixou de seguir a tarefa "${task.title}"`);
+      SystemLogger.log(`Deixou de seguir a tarefa "${task.title}"`);
     } else {
       window.watcherSystem.watch(task, currentUser);
       window.appContext.notificationService.addNotification(`Agora está a seguir "${task.title}"!`, 'success');
-      window.appContext.logService.addLog(`Agora está a seguir a tarefa "${task.title}"`);
+      SystemLogger.log(`Agora está a seguir a tarefa "${task.title}"`);
     }
     
     // Only save data, don't re-render
@@ -612,7 +623,7 @@ export class RenderTask {
       } else {
         window.appContext.notificationService.addNotification(`Prioridade ${level} definida para "${task.title}"`, 'success');
       }
-      window.appContext.logService.addLog(`Prioridade da tarefa "${task.title}" alterada para ${level}`);
+      SystemLogger.log(`Prioridade da tarefa "${task.title}" alterada para ${level}`);
       window.appContext.saveData();
     }
   }
@@ -630,7 +641,7 @@ export class RenderTask {
       } else {
         window.appContext.notificationService.addNotification(`Nível de destaque ${numLevel} definido para "${task.title}"`, 'success');
       }
-      window.appContext.logService.addLog(`Nível de visualização da tarefa "${task.title}" alterado para ${numLevel}`);
+      SystemLogger.log(`Nível de visualização da tarefa "${task.title}" alterado para ${numLevel}`);
       window.appContext.saveData();
     }
   }
@@ -659,7 +670,7 @@ export class RenderTask {
 
     window.dependencyGraph.addDependency(task, dependsOnTask);
     window.appContext.notificationService.addNotification(`"${task.title}" agora depende de "${dependsOnTask.title}"`, 'success');
-    window.appContext.logService.addLog(`Tarefa "${task.title}" agora depende de "${dependsOnTask.title}"`);
+    SystemLogger.log(`Tarefa "${task.title}" agora depende de "${dependsOnTask.title}"`);
     this.renderTaskModalContent();
     window.appContext.saveData();
   }
@@ -673,7 +684,7 @@ export class RenderTask {
 
     window.dependencyGraph.removeDependency(task, dependsOnTask);
     window.appContext.notificationService.addNotification(`Dependência removida de "${task.title}"`, 'info');
-    window.appContext.logService.addLog(`Dependência removida: "${task.title}" já não depende de "${dependsOnTask.title}"`);
+    SystemLogger.log(`Dependência removida: "${task.title}" já não depende de "${dependsOnTask.title}"`);
     this.renderTaskModalContent();
     window.appContext.saveData();
   }
@@ -691,7 +702,7 @@ export class RenderTask {
 
     window.ratingSystem.rate(task, rating);
     window.appContext.notificationService.addNotification(`Tarefa avaliada com ${rating} ⭐!`, 'success');
-    window.appContext.logService.addLog(`Tarefa "${task.title}" avaliada com ${rating} estrelas`);
+    SystemLogger.log(`Tarefa "${task.title}" avaliada com ${rating} estrelas`);
     this.renderTaskRatings(taskId);
     window.appContext.saveData();
   }
@@ -738,3 +749,4 @@ export class RenderTask {
     }
   }
 }
+

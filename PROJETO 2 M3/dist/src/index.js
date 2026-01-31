@@ -6,5 +6,5 @@ export * from './notifications/index.js';
 export * from './security/index.js';
 export * from './tasks/index.js';
 export * from './utils/index.js';
-export { HistoryLog } from './logs/index.js';
+export { SystemLogger } from './logs/index.js';
 //# sourceMappingURL=index.js.map

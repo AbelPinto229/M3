@@ -1,6 +1,7 @@
 // ===== USER RENDERER - All user-related rendering =====
 
 import { UserService } from '../services/UserService.js';
+import { SystemLogger } from '../logs/SystemLogger.js';
 
 export class RenderUser {
   constructor(private userService: UserService) {}
@@ -60,7 +61,7 @@ export class RenderUser {
     const assignedTaskCount = allTasks.filter((t: any) => t.assigned && t.assigned.includes(u.email)).length;
     
     return `
-      <tr class="group hover:bg-slate-50 transition-colors cursor-pointer" data-user-id="${u.id}" onclick="window.appContext.renderUser.showUserDetails(${u.id})">
+      <tr class="group hover:bg-slate-50 transition-colors" data-user-id="${u.id}">
         <td class="py-3 font-medium text-slate-700 flex items-center gap-3">
           <div class="flex flex-col gap-1 items-center pt-1">
             <span class="${favoriteStarClass}" onclick="event.stopPropagation(); window.appContext.renderUser.toggleUserFavorite(${u.id})">★</span>
@@ -115,7 +116,7 @@ export class RenderUser {
     const newStatus = updatedUser?.active ? 'ATIVO' : 'INATIVO';
     
     window.appContext.notificationService.addNotification(`${user.name} agora está ${newStatus}!`, 'success');
-    window.appContext.logService.addLog(`Utilizador ${user.name} estado: ${newStatus}`);
+    SystemLogger.log(`Utilizador ${user.name} estado: ${newStatus}`);
     window.appContext.saveAndRender();
   }
 
@@ -134,7 +135,7 @@ export class RenderUser {
     window.appContext.renderModals.openConfirmModal(`Eliminar ${user.email}?`, () => {
       this.userService.deleteUser(id);
       window.appContext.notificationService.addNotification(`${user.name} eliminado!`, 'success');
-      window.appContext.logService.addLog(`Utilizador ${user.name} eliminado`);
+      SystemLogger.log(`Utilizador ${user.name} eliminado`);
       window.appContext.saveAndRender();
     });
   }
@@ -230,11 +231,11 @@ export class RenderUser {
     if (watchers.includes(currentUser)) {
       window.watcherSystem.unwatch(user, currentUser);
       window.appContext.notificationService.addNotification(`Deixou de seguir ${user.name}!`, 'info');
-      window.appContext.logService.addLog(`Deixou de seguir o utilizador "${user.name}"`);
+      SystemLogger.log(`Deixou de seguir o utilizador "${user.name}"`);
     } else {
       window.watcherSystem.watch(user, currentUser);
       window.appContext.notificationService.addNotification(`Agora está a seguir ${user.name}!`, 'success');
-      window.appContext.logService.addLog(`Agora está a seguir o utilizador "${user.name}"`);
+      SystemLogger.log(`Agora está a seguir o utilizador "${user.name}"`);
     }
     
     // Only save data, don't re-render
@@ -267,11 +268,11 @@ export class RenderUser {
     if (window.favoriteUsers.exists(user)) {
       window.favoriteUsers.remove(user);
       window.appContext.notificationService.addNotification(`${user.name} removido de favoritos!`, 'info');
-      window.appContext.logService.addLog(`Utilizador "${user.name}" removido de favoritos`);
+      SystemLogger.log(`Utilizador "${user.name}" removido de favoritos`);
     } else {
       window.favoriteUsers.add(user);
       window.appContext.notificationService.addNotification(`${user.name} adicionado aos favoritos!`, 'success');
-      window.appContext.logService.addLog(`Utilizador "${user.name}" adicionado aos favoritos`);
+      SystemLogger.log(`Utilizador "${user.name}" adicionado aos favoritos`);
     }
     
     window.appContext.saveAndRender();
@@ -291,7 +292,7 @@ export class RenderUser {
       } else {
         window.appContext.notificationService.addNotification(`${user.name} agora é VIP ⭐${level}!`, 'success');
       }
-      window.appContext.logService.addLog(`Nível VIP de "${user.name}" alterado para ${level}`);
+      SystemLogger.log(`Nível VIP de "${user.name}" alterado para ${level}`);
       window.appContext.saveAndRender();
     }
   }
@@ -316,7 +317,7 @@ export class RenderUser {
 
     window.ratingSystem.rate(user, rating);
     window.appContext.notificationService.addNotification(`Utilizador avaliado com ${rating} ⭐!`, 'success');
-    window.appContext.logService.addLog(`Utilizador "${user.name}" avaliado com ${rating} estrelas`);
+    SystemLogger.log(`Utilizador "${user.name}" avaliado com ${rating} estrelas`);
     
     // Refresh the modal with updated ratings
     this.showUserDetails(userId);

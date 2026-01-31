@@ -1,6 +1,5 @@
 import { UserService } from './src/services/UserService.js';
 import { TaskService } from './src/services/TaskService.js';
-import { HistoryLog } from './src/logs/HistoryLog.js';
 import { CommentService } from './src/services/CommentService.js';
 import { AttachmentService } from './src/services/AttachmentService.js';
 import { TagManager } from './src/utils/TagManager.js';
@@ -34,12 +33,15 @@ declare global {
         dependencyGraph: DependencyGraph<Task>;
         renderTasksWithPagination: (tasks: Task[]) => void;
         renderUsersWithPagination: (users: User[]) => void;
+        systemStats: {
+            totalEntities: number;
+            systemLog: string[];
+        };
     }
 }
 interface AppContext {
     userService: UserService;
     taskService: TaskService;
-    logService: HistoryLog;
     deadlineService: DeadlineService;
     priorityService: PriorityService;
     assignmentService: AssignmentService;

@@ -6,3 +6,7 @@ export * from './Paginator.js';
 export * from './PriorityManager.js';
 export * from './RatingSystem.js';
 export * from './DependencyGraph.js';
+export * from './IdGenerator.js';
+export * from './GlobalValidators.js';
+export * from './WatcherSystem.js';
+export * from './TagManager.js';

@@ -2,6 +2,7 @@
 
 import { TaskService, ExtendedTask } from '../services/TaskService.js';
 import { UserService } from '../services/UserService.js';
+import { SystemLogger } from '../logs/SystemLogger.js';
 
 export class RenderModals {
   private pendingDeleteAction: (() => void) | null = null;
@@ -82,7 +83,7 @@ export class RenderModals {
 
     const oldTitle = task.title;
     this.taskService.updateTaskTitle(taskId, newTitle);
-    window.appContext.logService.addLog(`Tarefa renomeada: "${oldTitle}" -> "${newTitle}"`);
+    SystemLogger.log(`Tarefa renomeada: "${oldTitle}" -> "${newTitle}"`);
     
     this.closeEditTitleModal();
     window.appContext.saveAndRender();
@@ -137,49 +138,122 @@ export class RenderModals {
     const existing = document.getElementById(modalId);
     if (existing) existing.remove();
 
+    // Get ratings for the user
+    const average = window.ratingSystem.getAverage(user);
+    const ratings = window.ratingSystem.getRatings(user);
+    const ratingStarsHTML = [1, 2, 3, 4, 5]
+      .map(i => {
+        const isFilled = i <= Math.round(average);
+        return `<span class="text-xl ${isFilled ? 'text-amber-400' : 'text-amber-200'}">${isFilled ? '★' : '☆'}</span>`;
+      })
+      .join('');
+    const ratingsInfoHTML = ratings.length === 0 
+      ? '<p class="text-slate-500 text-xs">Nenhuma avaliação ainda</p>'
+      : `<p class="text-xs"><b>Média:</b> ${average.toFixed(1)} (${ratings.length} avaliações)</p>`;
+    
+    // Get watchers for the user
+    const watchers = window.watcherSystem.getWatchers(user);
+    const watchersListHTML = watchers.length > 0 
+      ? watchers.map((w: any) => `<li class="text-xs text-slate-700">• ${w.name}</li>`).join('')
+      : '<li class="text-xs text-slate-500 italic">Nenhum seguidor</li>';
+    
+    // Get assigned tasks
+    const assignedTasks = window.appContext.taskService.getTasks().filter((t: any) => t.assigned && Array.isArray(t.assigned) && t.assigned.some((email: any) => String(email) === String(user.email)));
+    const tasksListHTML = assignedTasks.length > 0 
+      ? assignedTasks.map((t: any) => `<li class="text-xs text-slate-700">• ${t.title} <span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">${t.status}</span></li>`).join('')
+      : '<li class="text-xs text-slate-500 italic">Nenhuma tarefa atribuída</li>';
+
     const modal = document.createElement('div');
     modal.id = modalId;
     modal.className = 'fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]';
 
     modal.innerHTML = `
-      <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
-        <h3 class="font-bold text-lg mb-4">Editar ${user.name}</h3>
-        <div class="space-y-3 mb-4">
-          <div>
-            <label class="text-xs font-bold text-slate-600 block mb-1">FOTO (opcional)</label>
-            <input id="editUserPhoto" type="file" accept="image/*" class="w-full border border-slate-200 rounded px-3 py-2 text-sm cursor-pointer">
+      <div class="bg-white rounded-2xl shadow-2xl w-[85vw] p-6 border border-slate-100 max-h-[90vh] overflow-y-auto flex flex-col">
+        <h3 class="font-bold text-base mb-4">Editar ${user.name}</h3>
+        
+        <div class="grid grid-cols-2 gap-6 flex-1">
+          <!-- Left Column: Information Display -->
+          <div class="space-y-4 bg-slate-50 p-4 rounded-lg overflow-y-auto">
+            <div>
+              <p class="text-xs font-bold text-slate-600 mb-1">ID</p>
+              <p class="text-xs font-semibold text-slate-900">${user.id}</p>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-600 mb-1">E-MAIL ATUAL</p>
+              <p class="text-xs font-semibold text-slate-900">${user.email}</p>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-600 mb-1">FUNÇÃO ATUAL</p>
+              <p class="text-xs font-semibold text-slate-900">${user.role}</p>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-600 mb-1">ESTADO</p>
+              <p class="text-xs font-semibold ${user.active ? 'text-emerald-600' : 'text-slate-400'}">${user.active ? 'ATIVO' : 'INATIVO'}</p>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-600 mb-1">NÍVEL VIP ATUAL</p>
+              <p class="text-xs font-semibold text-slate-900">${window.priorityManager.getPriority(user) || 'Sem VIP'}</p>
+            </div>
+            <div class="pt-2 border-t border-slate-200">
+              <p class="text-xs font-bold text-slate-600 mb-2">⭐ AVALIAÇÕES</p>
+              <div class="flex gap-0.5 mb-2">
+                ${ratingStarsHTML}
+              </div>
+              ${ratingsInfoHTML}
+            </div>
+            <div class="pt-2 border-t border-slate-200">
+              <p class="text-xs font-bold text-slate-600 mb-2">👁️ SEGUIDORES (${watchers.length})</p>
+              <ul class="max-h-24 overflow-y-auto bg-white p-2 rounded border border-slate-200">
+                ${watchersListHTML}
+              </ul>
+            </div>
+            <div class="pt-2 border-t border-slate-200">
+              <p class="text-xs font-bold text-slate-600 mb-2">TAREFAS ATRIBUÍDAS (${assignedTasks.length})</p>
+              <ul class="max-h-24 overflow-y-auto bg-white p-2 rounded border border-slate-200">
+                ${tasksListHTML}
+              </ul>
+            </div>
           </div>
-          <div>
-            <label class="text-xs font-bold text-slate-600 block mb-1">NOME</label>
-            <input id="editUserName" type="text" value="${user.name}" class="w-full border border-slate-200 rounded px-3 py-2 text-sm">
-          </div>
-          <div>
-            <label class="text-xs font-bold text-slate-600 block mb-1">E-MAIL</label>
-            <input id="editUserEmail" type="email" value="${user.email}" class="w-full border border-slate-200 rounded px-3 py-2 text-sm">
-          </div>
-          <div>
-            <label class="text-xs font-bold text-slate-600 block mb-1">FUNÇÃO</label>
-            <select id="editUserRole" class="w-full border border-slate-200 rounded px-3 py-2 text-sm">
-              <option value="ADMIN" ${user.role === 'ADMIN' ? 'selected' : ''}>ADMIN</option>
-              <option value="MANAGER" ${user.role === 'MANAGER' ? 'selected' : ''}>MANAGER</option>
-              <option value="MEMBER" ${user.role === 'MEMBER' ? 'selected' : ''}>MEMBER</option>
-              <option value="VIEWER" ${user.role === 'VIEWER' ? 'selected' : ''}>VIEWER</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-xs font-bold text-slate-600 block mb-1">NÍVEL VIP (1-4)</label>
-            <select id="editUserVIPLevel" class="w-full border border-slate-200 rounded px-3 py-2 text-sm">
-              <option value="0" ${window.priorityManager.getPriority(user) === 0 ? 'selected' : ''}>Sem VIP</option>
-              <option value="1" ${window.priorityManager.getPriority(user) === 1 ? 'selected' : ''}>🔵 Nível 1 (Bronze)</option>
-              <option value="2" ${window.priorityManager.getPriority(user) === 2 ? 'selected' : ''}>🟡 Nível 2 (Prata)</option>
-              <option value="3" ${window.priorityManager.getPriority(user) === 3 ? 'selected' : ''}>🟠 Nível 3 (Ouro)</option>
-              <option value="4" ${window.priorityManager.getPriority(user) === 4 ? 'selected' : ''}>🔴 Nível 4 (Platina)</option>
-            </select>
+
+          <!-- Right Column: Editable Fields -->
+          <div class="space-y-4">
+            <div>
+              <label class="text-xs font-bold text-slate-600 block mb-1">FOTO (opcional)</label>
+              <input id="editUserPhoto" type="file" accept="image/*" class="w-full border border-slate-200 rounded px-3 py-2 text-xs cursor-pointer">
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-600 block mb-1">NOME</label>
+              <input id="editUserName" type="text" value="${user.name}" class="w-full border border-slate-200 rounded px-3 py-2 text-xs">
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-600 block mb-1">NOVO E-MAIL</label>
+              <input id="editUserEmail" type="email" value="${user.email}" class="w-full border border-slate-200 rounded px-3 py-2 text-xs">
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-600 block mb-1">FUNÇÃO</label>
+              <select id="editUserRole" class="w-full border border-slate-200 rounded px-3 py-2 text-xs">
+                <option value="ADMIN" ${user.role === 'ADMIN' ? 'selected' : ''}>ADMIN</option>
+                <option value="MANAGER" ${user.role === 'MANAGER' ? 'selected' : ''}>MANAGER</option>
+                <option value="MEMBER" ${user.role === 'MEMBER' ? 'selected' : ''}>MEMBER</option>
+                <option value="VIEWER" ${user.role === 'VIEWER' ? 'selected' : ''}>VIEWER</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-600 block mb-1">NÍVEL VIP</label>
+              <select id="editUserVIPLevel" class="w-full border border-slate-200 rounded px-3 py-2 text-xs">
+                <option value="0" ${window.priorityManager.getPriority(user) === 0 ? 'selected' : ''}>Sem VIP</option>
+                <option value="1" ${window.priorityManager.getPriority(user) === 1 ? 'selected' : ''}>🔵 Nível 1 (Bronze)</option>
+                <option value="2" ${window.priorityManager.getPriority(user) === 2 ? 'selected' : ''}>🟡 Nível 2 (Prata)</option>
+                <option value="3" ${window.priorityManager.getPriority(user) === 3 ? 'selected' : ''}>🟠 Nível 3 (Ouro)</option>
+                <option value="4" ${window.priorityManager.getPriority(user) === 4 ? 'selected' : ''}>🔴 Nível 4 (Platina)</option>
+              </select>
+            </div>
           </div>
         </div>
-        <div class="flex justify-end gap-2">
-          <button onclick="window.renderModals.closeEditUserModal()" class="px-4 py-2 bg-gray-200 rounded text-sm">Cancelar</button>
-          <button onclick="window.renderModals.saveEditUser(${userId})" class="px-4 py-2 bg-indigo-600 text-white rounded text-sm">Guardar</button>
+        
+        <div class="flex justify-end gap-2 mt-6 border-t pt-4">
+          <button onclick="window.renderModals.closeEditUserModal()" class="px-4 py-2 bg-gray-200 rounded text-xs font-semibold">Cancelar</button>
+          <button onclick="window.renderModals.saveEditUser(${userId})" class="px-4 py-2 bg-indigo-600 text-white rounded text-xs font-semibold">Guardar</button>
         </div>
       </div>
     `;
@@ -224,7 +298,7 @@ export class RenderModals {
       const vipLevel = parseInt(vipLevelSelect.value);
       window.priorityManager.setPriority(userBeingEdited, vipLevel);
       if (vipLevel > 0) {
-        window.appContext.logService.addLog(`Nível VIP de "${userBeingEdited.name}" alterado para ${vipLevel}`);
+        SystemLogger.log(`Nível VIP de "${userBeingEdited.name}" alterado para ${vipLevel}`);
       }
     }
 
@@ -249,7 +323,7 @@ export class RenderModals {
 
     if (result) {
       window.appContext.notificationService.addNotification('Utilizador atualizado com sucesso!', 'success');
-      window.appContext.logService.addLog(`Utilizador ${result.name} atualizado`);
+      SystemLogger.log(`Utilizador ${result.name} atualizado`);
       this.closeEditUserModal();
       window.appContext.saveAndRender();
     } else {
@@ -257,3 +331,4 @@ export class RenderModals {
     }
   }
 }
+

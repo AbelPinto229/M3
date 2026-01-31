@@ -1,1 +1,1 @@
-export { HistoryLog } from './HistoryLog.js';
+export { SystemLogger } from './SystemLogger.js';

@@ -11,4 +11,6 @@ export { SearchService } from './SearchService.js';
 export { StatisticsService } from './StatisticService.js';
 export { BackupService } from './BackupService.js';
 export { AutomationRulesService } from './AutomationRulesService.js';
+export { SystemConfig } from './SystemConfig.js';
+export { BusinessRules } from './BusinessRules.js';
 //# sourceMappingURL=index.js.map
