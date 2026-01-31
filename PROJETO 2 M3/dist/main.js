@@ -378,6 +378,8 @@ export function initializeApp() {
 function updateDashboard() {
     const taskStats = window.appContext.statisticsService.countTasks();
     const userStats = window.appContext.statisticsService.countUsers();
+    console.log('Dashboard Update - Task Stats:', taskStats);
+    console.log('Dashboard Update - User Stats:', userStats);
     // Count tasks by status (using Portuguese status names from TaskStatus enum)
     const inProgressCount = taskStats.byStatus['Em Progresso'] || 0;
     const pendingCount = taskStats.byStatus['Criado'] || taskStats.byStatus['Atribuído'] || 0;
@@ -394,6 +396,12 @@ function updateDashboard() {
     setElementText('inactiveUsers', userStats.inactive);
     setElementText('userActiveRate2', `${userStats.activeRate}%`);
     setProgressBar('userProgressBar', userStats.activeRate);
+    // Update navbar mini stats cards
+    setElementText('navbarTotalTasksCard', taskStats.total);
+    setElementText('navbarPendingTasksCard', taskStats.pending);
+    // Update status navbar full-size stats cards
+    setElementText('statusTotalTasksCard', taskStats.total);
+    setElementText('statusPendingTasksCard', taskStats.pending);
 }
 // Helper to set element text
 function setElementText(id, text) {
@@ -540,6 +548,64 @@ function setupSearchAndFilterListeners() {
 }
 // Setup event listeners
 function setupEventListeners() {
+    console.log('Setting up event listeners...');
+    // Toggle filter navbar
+    const toggleFiltersBtn = document.getElementById('toggleFilters');
+    const filtersContent = document.getElementById('filtersContent');
+    const filterToggleIcon = document.getElementById('filterToggleIcon');
+    console.log('Filter elements:', { toggleFiltersBtn, filtersContent, filterToggleIcon });
+    if (toggleFiltersBtn && filtersContent) {
+        toggleFiltersBtn.addEventListener('click', () => {
+            filtersContent.classList.toggle('hidden');
+            if (filterToggleIcon) {
+                const isHidden = filtersContent.classList.contains('hidden');
+                filterToggleIcon.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+            }
+        });
+    }
+    // Toggle status navbar
+    const toggleStatusBtn = document.getElementById('toggleStatus');
+    const statusContent = document.getElementById('statusContent');
+    const statusToggleIcon = document.getElementById('statusToggleIcon');
+    console.log('Status elements:', { toggleStatusBtn, statusContent, statusToggleIcon });
+    if (toggleStatusBtn && statusContent) {
+        toggleStatusBtn.addEventListener('click', () => {
+            statusContent.classList.toggle('hidden');
+            if (statusToggleIcon) {
+                const isHidden = statusContent.classList.contains('hidden');
+                statusToggleIcon.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+            }
+        });
+    }
+    // Create User button - opens modal
+    const createUserBtn = document.getElementById('createUserBtn');
+    if (createUserBtn) {
+        createUserBtn.addEventListener('click', () => {
+            if (!window.appContext.checkPermission('create_user')) {
+                window.appContext.notificationService.addNotification('Sem permissão para criar utilizadores!', 'warning');
+                return;
+            }
+            window.appContext.renderModals.openCreateUserModal();
+        });
+    }
+    // Create Task button - opens modal
+    const createTaskBtn = document.getElementById('createTaskBtn');
+    if (createTaskBtn) {
+        createTaskBtn.addEventListener('click', () => {
+            if (!window.appContext.checkPermission('create_task')) {
+                window.appContext.notificationService.addNotification('Sem permissão para criar tarefas!', 'warning');
+                return;
+            }
+            window.appContext.renderModals.openCreateTaskModal();
+        });
+    }
+    // System Config button - opens modal
+    const sysConfigBtn = document.getElementById('sysConfigBtn');
+    if (sysConfigBtn) {
+        sysConfigBtn.addEventListener('click', () => {
+            window.appContext.renderModals.openSystemConfigModal();
+        });
+    }
     const addUserForm = document.getElementById('userForm');
     if (addUserForm) {
         addUserForm.addEventListener('submit', (e) => {
@@ -599,6 +665,7 @@ function setupEventListeners() {
                     SystemLogger.log(`Bug task "${newTask.title}" atribuído a ${admin.email}`);
                 }
             }
+            window.appContext.notificationService.addNotification('Tarefa criada!');
             window.appContext.notificationService.addNotification('Tarefa criada!');
             addTaskForm.reset();
             saveAndRender();

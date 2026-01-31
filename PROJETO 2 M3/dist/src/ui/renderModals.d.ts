@@ -17,4 +17,13 @@ export declare class RenderModals {
     closeEditUserModal(): void;
     saveEditUser(userId: number): void;
     private performUserUpdate;
+    openCreateUserModal(): void;
+    closeCreateUserModal(): void;
+    saveCreateUser(): void;
+    openCreateTaskModal(): void;
+    closeCreateTaskModal(): void;
+    handleTaskFileUpload(event: Event): void;
+    saveCreateTask(): void;
+    openSystemConfigModal(): void;
+    closeSystemConfigModal(): void;
 }

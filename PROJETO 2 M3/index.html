@@ -71,16 +71,18 @@
 
 <!-- Navigation Bar: Logo, status indicator, role selector -->
 <nav class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-    <div class="max-w-[1600px] mx-auto px-4 lg:px-6 py-3 lg:py-4 flex justify-between items-center">
-        <span class="font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <div class="w-7 lg:w-8 h-7 lg:h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-black text-xs lg:text-sm shadow-md shadow-indigo-200">S</div>
-            <span class="hidden sm:inline text-sm">Console Admin</span>
-        </span>
-        <div class="flex items-center gap-2 lg:gap-4">
-            <button id="exportBtn" class="text-[9px] lg:text-xs font-bold bg-emerald-100 hover:bg-emerald-200 px-2 lg:px-3 py-1 lg:py-1.5 rounded-md border border-emerald-200 text-emerald-700 uppercase cursor-pointer transition-colors">Exportar</button>
-            <div class="hidden md:block text-right">
-                <p class="text-[9px] lg:text-[10px] font-bold text-slate-400 uppercase leading-none">Status</p>
-                <p class="text-[10px] lg:text-xs font-semibold text-emerald-600">Online</p>
+    <div class="max-w-[1600px] mx-auto px-4 lg:px-6 py-3 lg:py-4 flex justify-between items-center relative">
+        <!-- Left: Logo + Console Admin + Role Selector + Status -->
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+                <div class="w-7 lg:w-8 h-7 lg:h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-black text-xs lg:text-sm shadow-md shadow-indigo-200">S</div>
+                <div class="flex flex-col">
+                    <span class="font-bold text-slate-900 tracking-tight text-sm">Console Admin</span>
+                    <div class="text-right">
+                        <p class="text-[9px] lg:text-[10px] font-bold text-slate-400 uppercase leading-none">Status</p>
+                        <p class="text-[10px] lg:text-xs font-semibold text-emerald-600">Online</p>
+                    </div>
+                </div>
             </div>
             <div class="w-px h-6 lg:h-8 bg-slate-200 hidden sm:block"></div>
             <select id="roleSelector" class="text-[9px] lg:text-xs font-bold bg-slate-100 px-2 lg:px-3 py-1 lg:py-1.5 rounded-md border border-slate-200 text-slate-700 uppercase cursor-pointer">
@@ -89,6 +91,143 @@
                 <option value="MEMBER">MEMBER</option>
                 <option value="VIEWER">VIEWER</option>
             </select>
+        </div>
+
+        <!-- Middle: Create Buttons (Absolutely Centered) -->
+        <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 lg:gap-4">
+            <button id="createUserBtn" class="text-[9px] lg:text-xs font-bold bg-blue-100 hover:bg-blue-200 px-2 lg:px-3 py-1 lg:py-1.5 rounded-md border border-blue-200 text-blue-700 uppercase cursor-pointer transition-colors hidden md:inline">+ User</button>
+            <button id="createTaskBtn" class="text-[9px] lg:text-xs font-bold bg-purple-100 hover:bg-purple-200 px-2 lg:px-3 py-1 lg:py-1.5 rounded-md border border-purple-200 text-purple-700 uppercase cursor-pointer transition-colors hidden md:inline">+ Task</button>
+        </div>
+
+        <!-- Right: Export + Settings -->
+        <div class="flex items-center gap-2 lg:gap-4">
+            <button id="exportBtn" class="text-[9px] lg:text-xs font-bold bg-emerald-100 hover:bg-emerald-200 px-2 lg:px-3 py-1 lg:py-1.5 rounded-md border border-emerald-200 text-emerald-700 uppercase cursor-pointer transition-colors">Exportar</button>
+            <button id="sysConfigBtn" class="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer text-lg" title="Configuração Global">⚙️</button>
+        </div>
+    </div>
+</nav>
+
+<!-- Secondary Navbar: Status User and Tasks Info -->
+<nav id="statusNavbar" class="bg-white border-b border-slate-200 sticky top-16 z-30 shadow-sm">
+    <div class="max-w-[1600px] mx-auto px-4 lg:px-6 py-3 flex items-center justify-between">
+        <button id="toggleStatus" class="flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-slate-900 uppercase cursor-pointer">
+            <span>📊 Status User e Tarefas</span>
+            <svg id="statusToggleIcon" class="w-4 h-4 transition-transform pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transform: rotate(0deg)">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+        </button>
+    </div>
+    
+    <!-- Status Content -->
+    <div id="statusContent" class="hidden bg-slate-50 border-t border-slate-200 px-4 lg:px-6 py-4">
+        <div class="max-w-[1600px] mx-auto flex items-start justify-between gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1">
+                <!-- User Status -->
+                <div>
+                    <h3 class="text-[9px] font-bold text-slate-600 uppercase mb-3">Acessos</h3>
+                    <div class="space-y-2">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase"><span id="totalUsers">0</span> Total</p>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase"><span id="inactiveUsers">0</span> Inativos</p>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase"><span id="activeUsers">0</span> Ativos</p>
+                    </div>
+                    <div class="flex justify-between items-center mb-2 mt-3">
+                        <p class="text-[9px] text-slate-400 font-bold uppercase">Taxa de Ativos</p>
+                        <div id="userActiveRate2" class="text-xs font-black text-emerald-600 italic">0%</div>
+                    </div>
+                    <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div id="userProgressBar" class="h-full bg-emerald-500 transition-all duration-700" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <!-- Task Status -->
+                <div>
+                    <h3 class="text-[9px] font-bold text-slate-600 uppercase mb-3">Workflow</h3>
+                    <div class="space-y-2">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase"><span id="pendingTasksCount">0</span> Pendentes</p>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase"><span id="inProgressTasks">0</span> Em Progresso</p>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase"><span id="completedTasksCount">0</span> Concluídas</p>
+                    </div>
+                    <div class="flex justify-between items-center mb-2 mt-3">
+                        <p class="text-[9px] text-slate-400 font-bold uppercase">Taxa de Conclusão</p>
+                        <div id="completionRate" class="text-xs font-black text-indigo-600 italic">0%</div>
+                    </div>
+                    <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div id="taskProgressBar" class="h-full bg-indigo-600 transition-all duration-700" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Stats - Right Aligned -->
+            <div class="flex flex-col items-center gap-4 pt-2">
+                <div class="text-center">
+                    <p class="text-[8px] text-slate-400 font-bold uppercase">Total de Tarefas</p>
+                    <span id="statusTotalTasksCard" class="text-lg font-bold text-indigo-600">0</span>
+                </div>
+                <div class="w-12 h-px bg-slate-200"></div>
+                <div class="text-center">
+                    <p class="text-[8px] text-slate-400 font-bold uppercase">Tarefas Abertas</p>
+                    <span id="statusPendingTasksCard" class="text-lg font-bold text-orange-600">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Tertiary Navbar: Expandible Filters and Search -->
+<nav id="filterNavbar" class="bg-white border-b border-slate-200 sticky top-[7.5rem] z-30 shadow-sm">
+    <div class="max-w-[1600px] mx-auto px-4 lg:px-6 py-3 flex items-center justify-between">
+        <button id="toggleFilters" class="flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-slate-900 uppercase cursor-pointer">
+            <span>🔍 Pesquisa Avançada</span>
+            <svg id="filterToggleIcon" class="w-4 h-4 transition-transform pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transform: rotate(180deg)">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+        </button>
+    </div>
+    
+    <!-- Expandible Filters Content -->
+    <div id="filtersContent" class="bg-slate-50 border-t border-slate-200 px-4 lg:px-6 py-4">
+        <div class="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <!-- Users Filters -->
+            <div>
+                <h3 class="text-[9px] font-bold text-slate-600 uppercase mb-3">Acessos</h3>
+                <input type="text" id="searchUser" placeholder="Procurar utilizador..." 
+                    class="w-full mb-2 p-2 text-[10px] bg-white border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500">
+                <div class="flex gap-1 lg:gap-2 overflow-x-auto pb-2">
+                    <button id="filterAllUsers" class="text-[9px] font-bold px-2 py-1 rounded-md bg-indigo-600 text-white whitespace-nowrap">Todos</button>
+                    <button id="filterActiveUsers" class="text-[9px] font-bold px-2 py-1 rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap">Ativos</button>
+                    <button id="filterInactiveUsers" class="text-[9px] font-bold px-2 py-1 rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap">Inativos</button>
+                    <button id="filterFavoriteUsers" class="text-[9px] font-bold px-2 py-1 rounded-md bg-yellow-100 text-yellow-700 hover:bg-yellow-200 whitespace-nowrap">⭐ Favoritos</button>
+                </div>
+            </div>
+            
+            <!-- Tasks Filters -->
+            <div>
+                <h3 class="text-[9px] font-bold text-slate-600 uppercase mb-3">Workflow</h3>
+                <input type="text" id="searchTask" placeholder="Procurar tarefa..." 
+                    class="w-full mb-2 p-2 text-[10px] bg-white border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500">
+                <div class="flex flex-col lg:flex-row gap-2">
+                    <select id="filterStatus" class="bg-white p-2 text-[9px] font-bold rounded-lg border border-slate-200 flex-1 text-slate-500 uppercase">
+                        <option value="">Status</option>
+                        <option value="Criado">Criado</option>
+                        <option value="Atribuído">Atribuído</option>
+                        <option value="Em Progresso">Em Progresso</option>
+                        <option value="Bloqueado">Bloqueado</option>
+                        <option value="Concluído">Concluído</option>
+                    </select>
+                    <select id="filterPriority" class="bg-white p-2 text-[9px] font-bold rounded-lg border border-slate-200 flex-1 text-slate-500 uppercase">
+                        <option value="">Prioridade</option>
+                        <option value="LOW">Baixa</option>
+                        <option value="MEDIUM">Média</option>
+                        <option value="HIGH">Alta</option>
+                        <option value="CRITICAL">Crítica</option>
+                    </select>
+                    <input type="text" id="filterTag" placeholder="Tag" 
+                        class="flex-1 lg:w-24 p-2 text-[9px] bg-white border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500">
+                    <button id="filterFavoriteTasks" class="text-[9px] font-bold px-2 py-1 rounded-lg bg-yellow-100 text-yellow-700 hover:bg-yellow-200 whitespace-nowrap">⭐ Favoritos</button>
+                    <button id="sortTasksAZ" class="text-[9px] font-bold px-2 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap">A-Z</button>
+                    <button id="clearCompleted" class="text-[9px] font-bold px-2 py-1 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 whitespace-nowrap">Limpar Concluídas</button>
+                </div>
+            </div>
         </div>
     </div>
 </nav>
@@ -106,51 +245,10 @@
             <section class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
                 <div class="flex justify-between items-end mb-4">
                     <div>
-                        <h2 class="text-xs font-extrabold text-slate-500 uppercase tracking-widest">Acessos</h2>
-                        <p class="text-[10px] text-slate-400 font-bold mt-2 uppercase"><span id="totalUsers">0</span> Total</p>
-                        <p class="text-[10px] text-slate-400 font-bold mt-1 uppercase"><span id="inactiveUsers">0</span> Inativos</p>
-                        <p class="text-[10px] text-slate-400 font-bold mt-1 uppercase"><span id="activeUsers">0</span> Ativos</p>
+                        <h2 class="text-xs font-extrabold text-slate-500 uppercase tracking-widest">Utilizadores</h2>
                     </div>
-                </div>
-                <div class="flex justify-between items-center mb-2">
-                    <p class="text-[9px] text-slate-400 font-bold uppercase">Taxa de Ativos</p>
-                    <div id="userActiveRate2" class="text-xs font-black text-emerald-600 italic">0%</div>
-                </div>
-                <div class="w-full h-1.5 bg-slate-100 rounded-full mb-6 overflow-hidden">
-                    <div id="userProgressBar" class="h-full bg-emerald-500 transition-all duration-700" style="width: 0%"></div>
-                </div>
-
-                <input type="text" id="searchUser" placeholder="Procurar..." 
-                    class="w-full mb-2 p-2 text-[10px] bg-slate-50 border border-slate-100 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500">
-                
-                <div class="flex gap-1 lg:gap-2 mb-4 overflow-x-auto pb-2">
-                    <button id="filterAllUsers" class="text-[9px] font-bold px-2 py-1 rounded-md bg-indigo-600 text-white">Todos</button>
-                    <button id="filterActiveUsers" class="text-[9px] font-bold px-2 py-1 rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200">Ativos</button>
-                    <button id="filterInactiveUsers" class="text-[9px] font-bold px-2 py-1 rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200">Inativos</button>
-                    <button id="filterFavoriteUsers" class="text-[9px] font-bold px-2 py-1 rounded-md bg-yellow-100 text-yellow-700 hover:bg-yellow-200">⭐ Favoritos</button>
                 </div>
                 
-                <form id="userForm" class="flex flex-col gap-2 p-2 bg-slate-50 rounded-xl border border-slate-100 mb-6">
-                    <input type="text" id="userName" placeholder="Nome completo" required 
-                        class="bg-transparent border-none p-2 text-xs font-medium outline-none">
-                    <input type="email" id="userEmail" placeholder="Email institucional" required 
-                        class="bg-transparent border-none p-2 text-xs font-medium outline-none">
-                    <div class="border-t border-slate-200 pt-2">
-                        <label for="userPhoto" class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">Foto do Perfil (opcional)</label>
-                        <input type="file" id="userPhoto" accept="image/*" 
-                            class="bg-white border border-slate-200 rounded p-2 text-xs font-medium outline-none cursor-pointer w-full">
-                    </div>
-                    <div class="flex gap-2">
-                        <select id="userRole" class="bg-white p-2 text-[10px] font-bold rounded-lg shadow-sm border border-slate-100 flex-1 text-slate-700 uppercase">
-                            <option value="ADMIN">ADMIN</option>
-                            <option value="MANAGER">MANAGER</option>
-                            <option value="MEMBER">MEMBER</option>
-                            <option value="VIEWER">VIEWER</option>
-                        </select>
-                        <button type="submit" class="bg-slate-900 hover:bg-black text-white p-2 px-4 text-xs font-bold rounded-lg transition-all active:scale-95">+</button>
-                    </div>
-                </form>
-
                 <div class="overflow-x-auto max-h-[500px] overflow-y-auto" id="userListContainer">
                     <table class="w-full text-[10px] lg:text-xs">
                         <tbody id="userList" class="divide-y divide-slate-50"></tbody>
@@ -173,67 +271,9 @@
                 <div class="flex justify-between items-end mb-4">
                     <div>
                         <h2 class="text-xs font-extrabold text-slate-500 uppercase tracking-widest">Workflow</h2>
-                        <p class="text-[10px] text-slate-400 font-bold mt-2 uppercase"><span id="pendingTasksCount">0</span> Pendentes</p>
-                        <p class="text-[10px] text-slate-400 font-bold mt-1 uppercase"><span id="inProgressTasks">0</span> Em Progresso</p>
-                        <p class="text-[10px] text-slate-400 font-bold mt-1 uppercase"><span id="completedTasksCount">0</span> Concluídas</p>
-                    </div>
-                </div>
-                <div class="flex justify-between items-center mb-2">
-                    <p class="text-[9px] text-slate-400 font-bold uppercase">Taxa de Conclusão</p>
-                    <div id="completionRate" class="text-xs font-black text-indigo-600 italic">0%</div>
-                </div>
-                <div class="w-full h-1.5 bg-slate-100 rounded-full mb-6 overflow-hidden">
-                    <div id="taskProgressBar" class="h-full bg-indigo-600 transition-all duration-700" style="width: 0%"></div>
-                </div>
-
-                <div class="flex flex-col gap-2 mb-4">
-                <input type="text" id="searchTask" placeholder="Procurar tarefa..." 
-                    class="w-full p-2 text-[10px] bg-slate-50 border border-slate-100 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500">
-                    
-                    <div class="flex flex-col lg:flex-row gap-2">
-                        <select id="filterStatus" class="bg-slate-50 p-2 text-[9px] font-bold rounded-lg border border-slate-100 flex-1 text-slate-500 uppercase">
-                            <option value="">Estado</option>
-                            <option value="Criado">Criado</option>
-                            <option value="Atribuído">Atribuído</option>
-                            <option value="Em Progresso">Em Progresso</option>
-                            <option value="Bloqueado">Bloqueado</option>
-                            <option value="Concluído">Concluído</option>
-                            <option value="Arquivado">Arquivado</option>
-                        </select>
-                        <select id="filterPriority" class="bg-slate-50 p-2 text-[9px] font-bold rounded-lg border border-slate-100 flex-1 text-slate-500 uppercase">
-                            <option value="">Prioridade</option>
-                            <option value="LOW">Baixa</option>
-                            <option value="MEDIUM">Média</option>
-                            <option value="HIGH">Alta</option>
-                            <option value="CRITICAL">Crítica</option>
-                        </select>
-                        <input type="text" id="filterTag" placeholder="Tag" 
-                            class="flex-1 lg:w-24 p-2 text-[9px] bg-slate-50 border border-slate-100 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500">
-                        <button id="filterFavoriteTasks" class="text-[9px] font-bold px-2 py-1 rounded-lg bg-yellow-100 text-yellow-700 hover:bg-yellow-200 whitespace-nowrap">⭐ Favoritos</button>
-                    </div>
-                    <div class="flex gap-2 mt-2">
-                        <button id="sortTasksAZ" class="text-[8px] lg:text-[9px] font-bold px-2 py-1 rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200 flex-1">A-Z</button>
-                        <button id="clearCompleted" class="text-[8px] lg:text-[9px] font-bold px-2 py-1 rounded-md bg-red-100 text-red-700 hover:bg-red-200 flex-1">Limpar tarefas concluídas</button>
                     </div>
                 </div>
                 
-                <form id="taskForm" class="flex flex-col gap-2 p-3 bg-slate-50 rounded-lg lg:rounded-xl border border-slate-100 mb-6">
-                    <input type="text" id="taskTitle" placeholder="Título novo..." required 
-                        class="bg-transparent border-none p-2 text-[11px] font-medium outline-none">
-                    <div class="flex flex-col lg:flex-row gap-2 border-t border-slate-200 pt-2">
-                        <select id="taskType" class="bg-white p-2 text-[9px] font-bold rounded-lg shadow-sm border border-slate-100 flex-1 text-slate-700">
-                            <option value="bug">Erro</option>
-                            <option value="feature">Funcionalidade</option>
-                            <option value="task">Tarefa</option>
-                        </select>
-                        <div class="flex-1 lg:flex-initial">
-                            <label class="text-[8px] text-slate-400 font-bold uppercase mb-1 block">Deadline (opcional)</label>
-                            <input type="date" id="taskDeadline" class="w-full bg-white p-2 text-[9px] font-bold rounded-lg shadow-sm border border-slate-100">
-                        </div>
-                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 px-4 text-[10px] font-bold rounded-lg transition-all active:scale-95">+</button>
-                    </div>
-                </form>
-
                 <div class="overflow-x-auto max-h-[600px] overflow-y-auto" id="taskListContainer">
                     <table class="w-full text-[10px] lg:text-xs">
                         <tbody id="taskList" class="divide-y divide-slate-50"></tbody>
@@ -251,49 +291,6 @@
 
         <!-- Right Column: Statistics and System Logs (23% width on lg screens) -->
         <div class="w-full md:w-full lg:w-[23%] space-y-4 lg:space-y-6">
-            <!-- Quick Stats Cards: Total tasks and open tasks metrics -->
-            <div class="grid grid-cols-2 lg:grid-cols-2 gap-3 lg:gap-4">
-                <div class="bg-white p-4 lg:p-5 rounded-xl lg:rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
-                    <div class="absolute right-0 top-0 w-1 bg-indigo-600 h-full"></div>
-                    <p class="text-[8px] lg:text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-1 text-center">Total de tarefas</p>
-                    <span id="totalTasks" class="text-xl lg:text-2xl font-bold block text-center">0</span>
-                </div>
-                <div class="bg-white p-4 lg:p-5 rounded-xl lg:rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
-                    <div class="absolute right-0 top-0 w-1 bg-orange-500 h-full"></div>
-                    <p class="text-[8px] lg:text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-1 text-center">Tarefas abertas</p>
-                    <span id="pendingTasks" class="text-xl lg:text-2xl font-bold block text-center">0</span>
-                </div>
-            </div>
-
-            <!-- Global System Stats: Exercícios 1-7 statistics -->
-            <section class="bg-white border border-slate-200 rounded-xl lg:rounded-2xl p-4 lg:p-6 shadow-sm">
-                <button onclick="document.getElementById('statsContent').classList.toggle('hidden'); this.querySelector('svg').style.transform = document.getElementById('statsContent').classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)'" class="w-full flex items-center justify-between mb-4 lg:mb-6 cursor-pointer hover:text-slate-700 transition-colors">
-                    <h2 class="text-xs font-extrabold text-slate-500 uppercase tracking-[0.1em]">Configuração Global</h2>
-                    <svg class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transform: rotate(0deg)">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-                    </svg>
-                </button>
-                <div id="statsContent" class="hidden text-[10px] space-y-4 lg:space-y-6">
-                    <!-- ID Generator Stats -->
-                    <div class="border-b border-slate-200 pb-4">
-                        <h3 class="text-xs font-bold text-slate-700 mb-2">ID Generator</h3>
-                        <div id="idGeneratorStats" class="space-y-1 text-slate-600"></div>
-                    </div>
-
-                    <!-- Business Rules Stats -->
-                    <div class="border-b border-slate-200 pb-4">
-                        <h3 class="text-xs font-bold text-slate-700 mb-2">Business Rules</h3>
-                        <div id="businessRulesStats" class="space-y-1 text-slate-600"></div>
-                    </div>
-
-                    <!-- Global Validators Stats -->
-                    <div>
-                        <h3 class="text-xs font-bold text-slate-700 mb-2">Global Validators</h3>
-                        <div id="globalValidatorsStats" class="space-y-1 text-slate-600"></div>
-                    </div>
-                </div>
-            </section>
-
             <!-- System Logs: Timeline of all system events and actions -->
             <section class="bg-white border border-slate-200 rounded-xl lg:rounded-2xl p-4 lg:p-6 shadow-sm lg:sticky lg:top-24">
                 <button onclick="document.getElementById('logsContent').classList.toggle('hidden'); this.querySelector('svg').style.transform = document.getElementById('logsContent').classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)'" class="w-full flex items-center justify-between mb-4 lg:mb-6 cursor-pointer hover:text-slate-700 transition-colors">

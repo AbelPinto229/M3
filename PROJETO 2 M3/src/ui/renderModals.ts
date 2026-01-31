@@ -3,6 +3,9 @@
 import { TaskService, ExtendedTask } from '../services/TaskService.js';
 import { UserService } from '../services/UserService.js';
 import { SystemLogger } from '../logs/SystemLogger.js';
+import { SystemConfig } from '../services/SystemConfig.js';
+import { BaseEntity } from '../models/BaseEntity.js';
+import { IdGenerator } from '../utils/IdGenerator.js';
 
 export class RenderModals {
   private pendingDeleteAction: (() => void) | null = null;
@@ -330,5 +333,336 @@ export class RenderModals {
       window.appContext.notificationService.addNotification('Erro ao atualizar utilizador. O e-mail pode já estar em uso!', 'warning');
     }
   }
-}
 
+  // Opens modal to create a new user
+  openCreateUserModal(): void {
+    const modalId = 'createUserModal';
+    
+    // Close any existing create user modal
+    const existing = document.getElementById(modalId);
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = modalId;
+    modal.className = 'fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]';
+
+    modal.innerHTML = `
+      <div class="bg-white rounded-2xl shadow-2xl w-[85vw] max-w-2xl p-6 border border-slate-100 max-h-[90vh] overflow-y-auto flex flex-col">
+        <h3 class="font-bold text-base mb-4">Criar Novo Utilizador</h3>
+        
+        <div class="space-y-4 flex-1">
+          <div>
+            <label class="text-xs font-bold text-slate-600 block mb-1">NOME</label>
+            <input id="createUserName" type="text" placeholder="Nome completo" class="w-full border border-slate-200 rounded px-3 py-2 text-xs">
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-600 block mb-1">E-MAIL</label>
+            <input id="createUserEmail" type="email" placeholder="Email institucional" class="w-full border border-slate-200 rounded px-3 py-2 text-xs">
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-600 block mb-1">FOTO (opcional)</label>
+            <input id="createUserPhoto" type="file" accept="image/*" class="w-full border border-slate-200 rounded px-3 py-2 text-xs cursor-pointer">
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-600 block mb-1">FUNÇÃO</label>
+            <select id="createUserRole" class="w-full border border-slate-200 rounded px-3 py-2 text-xs">
+              <option value="ADMIN">ADMIN</option>
+              <option value="MANAGER">MANAGER</option>
+              <option value="MEMBER">MEMBER</option>
+              <option value="VIEWER">VIEWER</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="flex justify-end gap-2 mt-6 border-t pt-4">
+          <button onclick="window.renderModals.closeCreateUserModal()" class="px-4 py-2 bg-gray-200 rounded text-xs font-semibold">Fechar</button>
+          <button onclick="window.renderModals.saveCreateUser()" class="px-4 py-2 bg-indigo-600 text-white rounded text-xs font-semibold">Guardar</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+  }
+
+  closeCreateUserModal(): void {
+    const modal = document.getElementById('createUserModal');
+    if (modal) modal.remove();
+  }
+
+  saveCreateUser(): void {
+    const nameInput = document.getElementById('createUserName') as HTMLInputElement;
+    const emailInput = document.getElementById('createUserEmail') as HTMLInputElement;
+    const roleSelect = document.getElementById('createUserRole') as HTMLSelectElement;
+    const photoInput = document.getElementById('createUserPhoto') as HTMLInputElement;
+    
+    if (!nameInput?.value || !emailInput?.value || !roleSelect?.value) {
+      window.appContext.notificationService.addNotification('Por favor, preencha todos os campos!', 'warning');
+      return;
+    }
+    
+    // Handle photo if selected
+    if (photoInput?.files?.length) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const newUser = window.appContext.userService.addUser(
+          emailInput.value, 
+          nameInput.value, 
+          roleSelect.value, 
+          event.target?.result as string
+        );
+        if (newUser) {
+          SystemLogger.log(`Utilizador "${nameInput.value}" criado com função ${roleSelect.value}`);
+          this.closeCreateUserModal();
+          window.appContext.saveAndRender();
+        }
+      };
+      reader.readAsDataURL(photoInput.files[0]);
+    } else {
+      const newUser = window.appContext.userService.addUser(
+        emailInput.value, 
+        nameInput.value, 
+        roleSelect.value
+      );
+      if (newUser) {
+        SystemLogger.log(`Utilizador "${nameInput.value}" criado com função ${roleSelect.value}`);
+        this.closeCreateUserModal();
+        window.appContext.saveAndRender();
+      }
+    }
+  }
+
+  // Opens modal to create a new task
+  openCreateTaskModal(): void {
+    const modalId = 'createTaskModal';
+    
+    // Close any existing create task modal
+    const existing = document.getElementById(modalId);
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = modalId;
+    modal.className = 'fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]';
+
+    modal.innerHTML = `
+      <div class="bg-white rounded-2xl shadow-2xl w-[85vw] max-w-2xl p-6 border border-slate-100 max-h-[90vh] overflow-y-auto flex flex-col">
+        <h3 class="font-bold text-base mb-4">Criar Nova Tarefa</h3>
+        
+        <div class="space-y-4 flex-1">
+          <div>
+            <label class="text-xs font-bold text-slate-600 block mb-1">TÍTULO</label>
+            <input id="createTaskTitle" type="text" placeholder="Título da tarefa" class="w-full border border-slate-200 rounded px-3 py-2 text-xs">
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-600 block mb-1">TIPO</label>
+            <select id="createTaskType" class="w-full border border-slate-200 rounded px-3 py-2 text-xs">
+              <option value="bug">Erro</option>
+              <option value="feature">Funcionalidade</option>
+              <option value="task">Tarefa</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-600 block mb-1">DEADLINE (opcional)</label>
+            <input id="createTaskDeadline" type="date" class="w-full border border-slate-200 rounded px-3 py-2 text-xs">
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-600 block mb-1">ADICIONAR FICHEIRO (opcional)</label>
+            <input type="file" id="createTaskFileInput" class="w-full text-xs" onchange="window.renderModals.handleTaskFileUpload(event)">
+            <p class="text-[10px] text-slate-400 mt-1">Pode adicionar anexos à tarefa</p>
+          </div>
+        </div>
+        
+        <div class="flex justify-end gap-2 mt-6 border-t pt-4">
+          <button onclick="window.renderModals.closeCreateTaskModal()" class="px-4 py-2 bg-gray-200 rounded text-xs font-semibold">Fechar</button>
+          <button onclick="window.renderModals.saveCreateTask()" class="px-4 py-2 bg-indigo-600 text-white rounded text-xs font-semibold">Guardar</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+  }
+
+  closeCreateTaskModal(): void {
+    const modal = document.getElementById('createTaskModal');
+    if (modal) modal.remove();
+  }
+
+  handleTaskFileUpload(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      // Store the file data in a data attribute for later use in saveCreateTask()
+      const fileDataAttr = (document.getElementById('createTaskFileInput') as any);
+      if (fileDataAttr) {
+        fileDataAttr.dataset.fileUrl = e.target?.result as string;
+        fileDataAttr.dataset.fileName = file.name;
+        fileDataAttr.dataset.fileSize = file.size.toString();
+      }
+      SystemLogger.log(`Ficheiro selecionado: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  saveCreateTask(): void {
+    const titleInput = document.getElementById('createTaskTitle') as HTMLInputElement;
+    const typeSelect = document.getElementById('createTaskType') as HTMLSelectElement;
+    const deadlineInput = document.getElementById('createTaskDeadline') as HTMLInputElement;
+    const fileInput = document.getElementById('createTaskFileInput') as HTMLInputElement;
+    
+    if (!titleInput?.value || !typeSelect?.value) {
+      window.appContext.notificationService.addNotification('Por favor, preencha todos os campos!', 'warning');
+      return;
+    }
+    
+    const newTask = window.appContext.taskService.addTask(titleInput.value, typeSelect.value, deadlineInput?.value);
+    
+    if (deadlineInput?.value) {
+      window.appContext.deadlineService.setDeadline(newTask.id, new Date(deadlineInput.value));
+    }
+    
+    // Handle file attachment if provided
+    const fileDataAttr = (fileInput as any);
+    if (fileDataAttr?.dataset?.fileUrl) {
+      window.appContext.attachmentService.addAttachment(newTask.id, {
+        taskId: newTask.id,
+        filename: fileDataAttr.dataset.fileName,
+        size: parseInt(fileDataAttr.dataset.fileSize),
+        url: fileDataAttr.dataset.fileUrl,
+      });
+      SystemLogger.log(`Ficheiro "${fileDataAttr.dataset.fileName}" anexado à tarefa "${newTask.title}"`);
+      window.appContext.notificationService.addNotification(`Ficheiro "${fileDataAttr.dataset.fileName}" anexado!`, 'success');
+    }
+    
+    // Log task creation
+    SystemLogger.log(`Tarefa criada: "${newTask.title}" (${typeSelect.value})`);
+    
+    // Auto-configure bug tasks
+    if (typeSelect.value.toLowerCase() === 'bug') {
+      window.appContext.taskService.updateTaskPriority(newTask.id, 'CRITICAL');
+      const admin = window.appContext.userService.getUsers().find((u: any) => u.role === 'ADMIN' || u.role === 'MANAGER');
+      if (admin) {
+        newTask.assigned = [admin.email];
+        SystemLogger.log(`Bug task "${newTask.title}" atribuído a ${admin.email}`);
+      }
+    }
+    
+    window.appContext.notificationService.addNotification('Tarefa criada!', 'success');
+    this.closeCreateTaskModal();
+    window.appContext.saveAndRender();
+  }
+
+  // Opens modal to display system configuration and statistics
+  openSystemConfigModal(): void {
+    const modalId = 'systemConfigModal';
+    
+    // Close any existing modal
+    const existing = document.getElementById(modalId);
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = modalId;
+    modal.className = 'fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]';
+
+    // Get current stats
+    const sysInfo = SystemConfig.getInfo();
+    const totalEntities = BaseEntity.getTotalEntities();
+    const idCounter = IdGenerator.getCounter();
+
+    modal.innerHTML = `
+      <div class="bg-white rounded-2xl shadow-2xl w-[85vw] max-w-2xl p-6 border border-slate-100 max-h-[90vh] overflow-y-auto flex flex-col">
+        <h3 class="font-bold text-base mb-4">⚙️ Configuração Global</h3>
+        
+        <div class="space-y-6 flex-1 text-xs">
+          <!-- System Info -->
+          <div class="border-b border-slate-200 pb-4">
+            <h4 class="font-bold text-slate-700 mb-3">Informações do Sistema</h4>
+            <div class="space-y-2 text-slate-600">
+              <div class="flex justify-between">
+                <span>Aplicação:</span>
+                <span class="font-semibold text-slate-900">${sysInfo.appName}</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Versão:</span>
+                <span class="font-semibold text-slate-900">${sysInfo.version}</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Ambiente:</span>
+                <span class="font-semibold text-slate-900">${sysInfo.environment}</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Debug Mode:</span>
+                <span class="font-semibold ${sysInfo.debugMode ? 'text-red-600' : 'text-green-600'}">${sysInfo.debugMode ? 'ON' : 'OFF'}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ID Generator -->
+          <div class="border-b border-slate-200 pb-4">
+            <h4 class="font-bold text-slate-700 mb-3">ID Generator</h4>
+            <div class="space-y-2 text-slate-600">
+              <div class="flex justify-between">
+                <span>Contador Atual:</span>
+                <span class="font-bold text-purple-600">${idCounter}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Business Rules -->
+          <div class="border-b border-slate-200 pb-4">
+            <h4 class="font-bold text-slate-700 mb-3">Business Rules (6)</h4>
+            <div class="text-[9px] space-y-1 text-slate-600">
+              <div>✓ Validação de Título (5-100 chars)</div>
+              <div>✓ Validação de Prioridade</div>
+              <div>✓ Validação de Role</div>
+              <div>✓ Tarefa Concluída (não bloqueada)</div>
+              <div>✓ Tarefa Atribuída (user ativo)</div>
+              <div>✓ Desativação de User (0 tarefas)</div>
+            </div>
+          </div>
+
+          <!-- Global Validators -->
+          <div class="border-b border-slate-200 pb-4">
+            <h4 class="font-bold text-slate-700 mb-3">Global Validators (7)</h4>
+            <div class="text-[9px] space-y-1 text-slate-600">
+              <div>✓ Email Validation</div>
+              <div>✓ Non-Empty Text</div>
+              <div>✓ Positive Numbers</div>
+              <div>✓ Min/Max Length</div>
+              <div>✓ URL Validation</div>
+              <div>✓ Date Validation</div>
+              <div>✓ Text Trimming</div>
+            </div>
+          </div>
+
+          <!-- Statistics -->
+          <div>
+            <h4 class="font-bold text-slate-700 mb-3">Estatísticas</h4>
+            <div class="space-y-2 text-slate-600">
+              <div class="flex justify-between">
+                <span>Total de Entidades:</span>
+                <span class="font-bold text-indigo-600">${totalEntities}</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Total de Logs:</span>
+                <span class="font-bold text-indigo-600">${SystemLogger.count()}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex justify-end gap-2 mt-6 border-t pt-4">
+          <button onclick="window.renderModals.closeSystemConfigModal()" class="px-4 py-2 bg-gray-200 rounded text-xs font-semibold">Fechar</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+  }
+
+  closeSystemConfigModal(): void {
+    const modal = document.getElementById('systemConfigModal');
+    if (modal) modal.remove();
+  }
+}
