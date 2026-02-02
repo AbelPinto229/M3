@@ -128,7 +128,7 @@ export class RenderTask {
         </td>
         <td class="py-4 text-right pr-2">
           <div class="flex flex-col gap-1 items-center">
-            <button ${((window.appContext.checkPermission?.('edit_title'))) ? '' : 'disabled'} onclick="event.stopPropagation(); ${((window.appContext.checkPermission?.('edit_title'))) ? `window.appContext.renderTask.openTaskModal(${t.id})` : 'return false'}" class="text-slate-300 hover:text-indigo-600 transition-colors ${!((window.appContext.checkPermission?.('edit_title'))) ? 'opacity-50 cursor-not-allowed' : ''}" title="Editar">
+            <button ${((window.appContext.checkPermission?.('open_edit_modal'))) ? '' : 'disabled'} onclick="event.stopPropagation(); ${((window.appContext.checkPermission?.('open_edit_modal'))) ? `window.appContext.renderTask.openTaskModal(${t.id})` : 'return false'}" class="text-slate-300 hover:text-indigo-600 transition-colors ${!((window.appContext.checkPermission?.('open_edit_modal'))) ? 'opacity-50 cursor-not-allowed' : ''}" title="Editar">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
               </svg>
@@ -162,6 +162,13 @@ export class RenderTask {
       <div class="bg-white rounded-2xl shadow-2xl w-[85vw] p-6 border border-slate-100 max-h-[90vh] overflow-y-auto flex flex-col">
         <h3 class="font-bold mb-2 text-base">${task.title}</h3>
         <p class="text-xs text-slate-400 mb-4">Tipo: ${displayType} | Prioridade: ${displayPriority}</p>
+        
+        ${isViewer ? `
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+          <p class="text-xs text-blue-700 font-semibold">👁️ Modo Visualização</p>
+          <p class="text-xs text-blue-600">Como visualizador, você só pode ver as informações. Nenhuma alteração permitida</p>
+        </div>
+        ` : ''}
         
         <div class="grid grid-cols-2 gap-6 flex-1">
           <!-- Left Column -->
@@ -197,7 +204,29 @@ export class RenderTask {
                 <option value="4" ${window.priorityManager.getPriority(task) === 4 ? 'selected' : ''}>Nível 4</option>
               </select>
             </div>
-            ` : ''}
+            ` : `
+            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
+              <div>
+                <p class="text-xs font-bold text-slate-600 mb-1">ATRIBUÍDO A:</p>
+                <p class="text-xs font-semibold text-slate-900">${
+                  (task.assigned && Array.isArray(task.assigned) && task.assigned.length > 0) 
+                    ? task.assigned.map((id: string) => {
+                      const user = this.userService.getUserById(parseInt(id, 10));
+                      return user ? user.name : `ID ${id}`;
+                    }).join(', ')
+                    : 'Sem atribuição'
+                }</p>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-slate-600 mb-1">PRIORIDADE:</p>
+                <p class="text-xs font-semibold text-slate-900">${displayPriority}</p>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-slate-600 mb-1">DESTAQUE:</p>
+                <p class="text-xs font-semibold text-slate-900">${window.priorityManager.getPriority(task) > 0 ? `Nível ${window.priorityManager.getPriority(task)}` : 'Nenhum'}</p>
+              </div>
+            </div>
+            `}
             
             ${!isViewer ? `
             <div>

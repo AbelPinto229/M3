@@ -78,7 +78,8 @@ const appContext = {
             'delete_user': ['ADMIN', 'MANAGER'],
             'edit_user': ['ADMIN', 'MANAGER'],
             'assign_task': ['ADMIN', 'MANAGER'],
-            'edit_title': ['ADMIN', 'MANAGER'],
+            'edit_title': ['ADMIN', 'MANAGER', 'MEMBER'],
+            'open_edit_modal': ['ADMIN', 'MANAGER', 'MEMBER', 'VIEWER'],
             'add_comment': ['ADMIN', 'MANAGER', 'MEMBER'],
             'toggle_user': ['ADMIN', 'MANAGER'],
             'view_all': ['ADMIN', 'MANAGER', 'MEMBER', 'VIEWER']
@@ -222,9 +223,6 @@ function updateUserPaginationControls() {
             }
         };
     }
-}
-function setupUserScrollListener() {
-    // No longer needed with page-based pagination
 }
 // Expose to window
 window.renderTasksWithPagination = renderTasksWithPagination;

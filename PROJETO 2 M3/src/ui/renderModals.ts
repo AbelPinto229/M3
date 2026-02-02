@@ -220,21 +220,33 @@ export class RenderModals {
 
           <!-- Right Column: Editable Fields -->
           <div class="space-y-4">
+            ${window.appContext.currentUserRole === 'MEMBER' ? `
+              <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                <p class="text-xs text-amber-700 font-semibold">ℹ️ Apenas tarefas podem ser editadas</p>
+                <p class="text-xs text-amber-600">Como membro, você não pode editar os dados do utilizador</p>
+              </div>
+            ` : ''}
+            ${window.appContext.currentUserRole === 'VIEWER' ? `
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                <p class="text-xs text-blue-700 font-semibold">👁️ Modo Visualização</p>
+                <p class="text-xs text-blue-600">Como visualizador, você só pode ver as informações. Nenhuma alteração permitida</p>
+              </div>
+            ` : ''}
             <div>
               <label class="text-xs font-bold text-slate-600 block mb-1">FOTO (opcional)</label>
-              <input id="editUserPhoto" type="file" accept="image/*" class="w-full border border-slate-200 rounded px-3 py-2 text-xs cursor-pointer">
+              <input id="editUserPhoto" type="file" accept="image/*" ${(window.appContext.currentUserRole === 'MEMBER' || window.appContext.currentUserRole === 'VIEWER') ? 'disabled' : ''} class="w-full border border-slate-200 rounded px-3 py-2 text-xs cursor-pointer ${(window.appContext.currentUserRole === 'MEMBER' || window.appContext.currentUserRole === 'VIEWER') ? 'opacity-50 bg-slate-100' : ''}">
             </div>
             <div>
               <label class="text-xs font-bold text-slate-600 block mb-1">NOME</label>
-              <input id="editUserName" type="text" value="${user.name}" class="w-full border border-slate-200 rounded px-3 py-2 text-xs">
+              <input id="editUserName" type="text" value="${user.name}" ${(window.appContext.currentUserRole === 'MEMBER' || window.appContext.currentUserRole === 'VIEWER') ? 'disabled' : ''} class="w-full border border-slate-200 rounded px-3 py-2 text-xs ${(window.appContext.currentUserRole === 'MEMBER' || window.appContext.currentUserRole === 'VIEWER') ? 'opacity-50 bg-slate-100 cursor-not-allowed' : ''}">
             </div>
             <div>
               <label class="text-xs font-bold text-slate-600 block mb-1">NOVO E-MAIL</label>
-              <input id="editUserEmail" type="email" value="${user.email}" class="w-full border border-slate-200 rounded px-3 py-2 text-xs">
+              <input id="editUserEmail" type="email" value="${user.email}" ${(window.appContext.currentUserRole === 'MEMBER' || window.appContext.currentUserRole === 'VIEWER') ? 'disabled' : ''} class="w-full border border-slate-200 rounded px-3 py-2 text-xs ${(window.appContext.currentUserRole === 'MEMBER' || window.appContext.currentUserRole === 'VIEWER') ? 'opacity-50 bg-slate-100 cursor-not-allowed' : ''}">
             </div>
             <div>
               <label class="text-xs font-bold text-slate-600 block mb-1">FUNÇÃO</label>
-              <select id="editUserRole" class="w-full border border-slate-200 rounded px-3 py-2 text-xs">
+              <select id="editUserRole" ${(window.appContext.currentUserRole === 'MEMBER' || window.appContext.currentUserRole === 'VIEWER') ? 'disabled' : ''} class="w-full border border-slate-200 rounded px-3 py-2 text-xs ${(window.appContext.currentUserRole === 'MEMBER' || window.appContext.currentUserRole === 'VIEWER') ? 'opacity-50 bg-slate-100 cursor-not-allowed' : ''}">
                 <option value="ADMIN" ${user.role === 'ADMIN' ? 'selected' : ''}>ADMIN</option>
                 <option value="MANAGER" ${user.role === 'MANAGER' ? 'selected' : ''}>MANAGER</option>
                 <option value="MEMBER" ${user.role === 'MEMBER' ? 'selected' : ''}>MEMBER</option>
@@ -243,7 +255,7 @@ export class RenderModals {
             </div>
             <div>
               <label class="text-xs font-bold text-slate-600 block mb-1">NÍVEL VIP</label>
-              <select id="editUserVIPLevel" class="w-full border border-slate-200 rounded px-3 py-2 text-xs">
+              <select id="editUserVIPLevel" ${(window.appContext.currentUserRole === 'MEMBER' || window.appContext.currentUserRole === 'VIEWER') ? 'disabled' : ''} class="w-full border border-slate-200 rounded px-3 py-2 text-xs ${(window.appContext.currentUserRole === 'MEMBER' || window.appContext.currentUserRole === 'VIEWER') ? 'opacity-50 bg-slate-100 cursor-not-allowed' : ''}">
                 <option value="0" ${window.priorityManager.getPriority(user) === 0 ? 'selected' : ''}>Sem VIP</option>
                 <option value="1" ${window.priorityManager.getPriority(user) === 1 ? 'selected' : ''}>🔵 Nível 1 (Bronze)</option>
                 <option value="2" ${window.priorityManager.getPriority(user) === 2 ? 'selected' : ''}>🟡 Nível 2 (Prata)</option>
@@ -256,7 +268,7 @@ export class RenderModals {
         
         <div class="flex justify-end gap-2 mt-6 border-t pt-4">
           <button onclick="window.renderModals.closeEditUserModal()" class="px-4 py-2 bg-gray-200 rounded text-xs font-semibold">Fechar</button>
-          <button onclick="window.renderModals.saveEditUser(${userId})" class="px-4 py-2 bg-indigo-600 text-white rounded text-xs font-semibold">Guardar</button>
+          <button ${(window.appContext.currentUserRole === 'MEMBER' || window.appContext.currentUserRole === 'VIEWER') ? 'disabled' : ''} onclick="window.renderModals.saveEditUser(${userId})" class="px-4 py-2 bg-indigo-600 text-white rounded text-xs font-semibold ${(window.appContext.currentUserRole === 'MEMBER' || window.appContext.currentUserRole === 'VIEWER') ? 'opacity-50 cursor-not-allowed' : ''}">Guardar</button>
         </div>
       </div>
     `;
