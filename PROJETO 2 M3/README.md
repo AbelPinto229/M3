@@ -269,7 +269,7 @@ View comprehensive task information:
 2. **TaskService** - Task management with 6 status types
 3. **CommentService** - Task comments and collaboration
 4. **AttachmentService** - File attachment management
-5. **TagService** - Tag management and filtering
+5. **TagManager** - Tag management and filtering
 6. **SearchService** - Advanced search with narrowSearch() method
 7. **StatisticsService** - Real-time dashboard statistics
 8. **DeadlineService** - Deadline tracking and expiration
@@ -278,7 +278,27 @@ View comprehensive task information:
 11. **BackupService** - JSON data export functionality
 12. **AutomationRulesService** - Automated business rules and automation
 13. **NotificationService** - User notifications and alerts
-14. **HistoryLog** - Activity logging and audit trail
+14. **SystemLogger** - Activity logging and audit trail
+
+### Advanced Utility Systems
+8 sophisticated utility classes provide enhanced functionality:
+
+1. **Favorites** - Bookmark and manage favorite tasks/users with persistence
+2. **WatcherSystem** - Monitor entity changes and trigger watchers for reactive updates
+3. **PriorityManager** - Advanced priority management with weighted scoring
+4. **RatingSystem** - Rate entities with 5-star system and aggregated ratings
+5. **DependencyGraph** - Map task dependencies and analyze task relationships
+6. **SimpleCache** - Memory-efficient caching with LRU eviction policy
+7. **Paginator** - Handle data pagination with configurable page sizes
+8. **EntityList** - Generic list management with filtering and sorting capabilities
+
+### Additional Utilities
+- **IdGenerator** - Generate unique identifiers for entities
+- **GlobalValidators** - Centralized validation for data integrity
+- **TaskUtils** - Task-specific utility functions and helpers
+- **BaseEntity** - Base class for all entities with common properties
+- **SystemConfig** - System configuration and settings management
+- **BusinessRules** - Centralized business logic and rule enforcement
 
 ### Modular UI Renderers
 - **RenderUser** - User list with task counter, user details modal
@@ -460,8 +480,19 @@ M3/
 
 ---
 
-## ✅ Recent Updates (January 2026)
+## ✅ Recent Updates (February 2026)
 
+### Advanced Features Added
+- **Favorites System**: Bookmark and manage favorite tasks and users with persistent favorites list
+- **Watcher System**: Reactive monitoring of entity changes with automatic callback triggers
+- **Priority Manager**: Advanced priority management with weighted scoring algorithms
+- **Rating System**: 5-star rating system for tasks and users with aggregated metrics
+- **Dependency Graph**: Visualize and analyze task dependencies and relationships
+- **SimpleCache**: Memory-efficient caching layer with LRU eviction strategy
+- **Paginator**: Data pagination with customizable page sizes
+- **Enhanced Search**: Improved SearchService with advanced filtering capabilities
+
+### Previous Updates (January 2026)
 - **Complete Portuguese Localization**: Entire UI translated to Portuguese
 - **User Card Task Counter**: Shows "Tarefas atribuídas: X" for each user
 - **Export Functionality**: Added JSON export button with timestamp filenames
@@ -480,6 +511,6 @@ For issues or feature requests, refer to the project documentation or contact th
 
 ---
 
-**Version**: 2.1.0  
-**Last Updated**: January 29, 2026  
+**Version**: 2.2.0  
+**Last Updated**: February 2, 2026  
 **Status**: Production Ready ✅
