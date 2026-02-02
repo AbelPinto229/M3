@@ -21,7 +21,7 @@ import { NotificationService } from './src/notifications/NotificationService.js'
 import { RenderUser } from './src/ui/renderUser.js';
 import { RenderTask } from './src/ui/renderTask.js';
 import { RenderModals } from './src/ui/renderModals.js';
-import { EntityList } from './src/index.js';
+import { EntityList } from './src/utils/EntityList.js';
 import { SimpleCache } from './src/utils/SimpleCache.js';
 import { User } from './src/models/Users.js';
 import { Task } from './src/models/Task.js';
