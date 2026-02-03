@@ -59,6 +59,7 @@ interface AppContext {
     currentUserId: number;
     currentUserRole: string;
     taskSortState: string;
+    userSortState: string;
     userFilter: string;
     checkPermission: (action: string) => boolean;
     saveAndRender: () => void;

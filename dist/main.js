@@ -69,6 +69,7 @@ const appContext = {
     currentUserId: 0,
     currentUserRole: 'ADMIN',
     taskSortState: 'none',
+    userSortState: 'none',
     userFilter: 'all',
     checkPermission: function (action) {
         const role = this.currentUserRole;
@@ -565,6 +566,20 @@ function setupSearchAndFilterListeners() {
     filterInactiveBtn?.addEventListener('click', () => setUserFilter('inactive'));
     filterFavoriteUsersBtn?.addEventListener('click', () => setUserFilter('favorites'));
     userSearchInput?.addEventListener('input', () => window.appContext.renderUser.render());
+    // User Sort A-Z
+    const sortUsersAZBtn = document.getElementById('sortUsersAZ');
+    console.log('sortUsersAZBtn element:', sortUsersAZBtn);
+    sortUsersAZBtn?.addEventListener('click', () => {
+        console.log('User Sort button clicked!');
+        const states = ['none', 'asc', 'desc'];
+        const current = window.appContext.userSortState || 'none';
+        const nextIndex = (states.indexOf(current) + 1) % states.length;
+        window.appContext.userSortState = states[nextIndex];
+        const texts = { 'asc': '↑ A-Z', 'desc': '↓ Z-A', 'none': 'A-Z' };
+        if (sortUsersAZBtn)
+            sortUsersAZBtn.textContent = texts[window.appContext.userSortState];
+        window.appContext.renderUser.render();
+    });
 }
 // Setup event listeners
 function setupEventListeners() {

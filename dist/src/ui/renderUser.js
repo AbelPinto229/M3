@@ -23,6 +23,14 @@ export class RenderUser {
         else if (userFilter === 'favorites') {
             filteredUsers = filteredUsers.filter(u => window.favoriteUsers.exists(u));
         }
+        // Apply sorting based on sort state
+        const sortState = window.appContext.userSortState || 'none';
+        if (sortState === 'asc') {
+            filteredUsers = filteredUsers.sort((a, b) => a.name.localeCompare(b.name));
+        }
+        else if (sortState === 'desc') {
+            filteredUsers = filteredUsers.sort((a, b) => b.name.localeCompare(a.name));
+        }
         // Use pagination to render users
         window.renderUsersWithPagination(filteredUsers);
     }
