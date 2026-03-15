@@ -1,0 +1,24 @@
+{
+  "name": "projetom3",
+  "version": "1.0.0",
+  "description": "A comprehensive TypeScript-based task and user management application with role-based access control, built with modern web technologies.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AbelPinto229/M3.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AbelPinto229/M3/issues"
+  },
+  "homepage": "https://github.com/AbelPinto229/M3#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
