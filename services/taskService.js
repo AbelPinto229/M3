@@ -1,17 +1,26 @@
-let tasks = [
-  { id: 1, titulo: "Criar login", categoria: "trabalho", concluida: false, responsavelNome: "João Silva", dataConclusao: undefined },
-  { id: 2, titulo: "Criar dashboard", categoria: "trabalho", concluida: false, responsavelNome: "Maria Santos", dataConclusao: undefined }
-];
-
-let nextId = 3;
+const Task = require('../models/Task');
 
 const isValidTitle = (titulo) => titulo && titulo.length > 3;
 
-const getAllTasks = () => tasks;
+const getAllTasks = async () => {
+  try {
+    return await Task.findAll();
+  } catch (error) {
+    console.error('Erro ao obter tarefas:', error);
+    throw error;
+  }
+};
 
-const getTaskById = (id) => tasks.find(t => t.id === parseInt(id));
+const getTaskById = async (id) => {
+  try {
+    return await Task.findByPk(id);
+  } catch (error) {
+    console.error('Erro ao obter tarefa:', error);
+    throw error;
+  }
+};
 
-const createTask = (titulo, categoria, responsavelNome) => {
+const createTask = async (titulo, categoria, responsavelNome) => {
   if (!isValidTitle(titulo)) {
     return { error: "Título deve ter mais de 3 caracteres" };
   }
@@ -20,78 +29,109 @@ const createTask = (titulo, categoria, responsavelNome) => {
     return { error: "Responsável não pode estar vazio" };
   }
 
-  const newTask = {
-    id: nextId++,
-    titulo,
-    categoria,
-    concluida: false,
-    responsavelNome,
-    dataConclusao: undefined
-  };
+  try {
+    const newTask = await Task.create({
+      titulo,
+      categoria,
+      concluida: false,
+      responsavelNome,
+      dataConclusao: null
+    });
 
-  tasks.push(newTask);
-  return newTask;
+    return newTask;
+  } catch (error) {
+    console.error('Erro ao criar tarefa:', error);
+    throw error;
+  }
 };
 
-const updateTask = (id, updates) => {
-  const task = getTaskById(id);
-  if (!task) {
-    return null;
-  }
-
-  if (updates.titulo && !isValidTitle(updates.titulo)) {
-    return { error: "Título deve ter mais de 3 caracteres" };
-  }
-
-  if (updates.responsavelNome && updates.responsavelNome.trim() === "") {
-    return { error: "Responsável não pode estar vazio" };
-  }
-
-  // Atualizar dataConclusao baseado no status concluida
-  if (updates.concluida !== undefined) {
-    if (updates.concluida === true) {
-      updates.dataConclusao = new Date().toISOString().split('T')[0];
-    } else {
-      updates.dataConclusao = undefined;
+const updateTask = async (id, updates) => {
+  try {
+    const task = await getTaskById(id);
+    if (!task) {
+      return null;
     }
-  }
 
-  Object.assign(task, updates);
-  return task;
-};
-
-const deleteTask = (id) => {
-  const initialLength = tasks.length;
-  tasks = tasks.filter(t => t.id !== parseInt(id));
-  return tasks.length < initialLength;
-};
-
-const getTaskStats = () => {
-  const total = tasks.length;
-  const pendentes = tasks.filter(t => !t.concluida).length;
-  const concluidas = tasks.filter(t => t.concluida).length;
-
-  return {
-    total,
-    pendentes,
-    concluidas
-  };
-};
-
-const searchTasks = (searchTerm) => {
-  return tasks.filter(t =>
-    t.titulo.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-};
-
-const sortTasks = (order = 'asc') => {
-  const sorted = [...tasks];
-  return sorted.sort((a, b) => {
-    if (order === 'desc') {
-      return b.titulo.localeCompare(a.titulo);
+    if (updates.titulo && !isValidTitle(updates.titulo)) {
+      return { error: "Título deve ter mais de 3 caracteres" };
     }
-    return a.titulo.localeCompare(b.titulo);
-  });
+
+    if (updates.responsavelNome && updates.responsavelNome.trim() === "") {
+      return { error: "Responsável não pode estar vazio" };
+    }
+
+    // Atualizar dataConclusao baseado no status concluida
+    if (updates.concluida !== undefined) {
+      if (updates.concluida === true) {
+        updates.dataConclusao = new Date().toISOString().split('T')[0];
+      } else {
+        updates.dataConclusao = null;
+      }
+    }
+
+    await task.update(updates);
+    return task;
+  } catch (error) {
+    console.error('Erro ao atualizar tarefa:', error);
+    throw error;
+  }
+};
+
+const deleteTask = async (id) => {
+  try {
+    const task = await getTaskById(id);
+    if (!task) {
+      return false;
+    }
+
+    await task.destroy();
+    return true;
+  } catch (error) {
+    console.error('Erro ao remover tarefa:', error);
+    throw error;
+  }
+};
+
+const getTaskStats = async () => {
+  try {
+    const total = await Task.count();
+    const pendentes = await Task.count({ where: { concluida: false } });
+    const concluidas = await Task.count({ where: { concluida: true } });
+
+    return {
+      total,
+      pendentes,
+      concluidas
+    };
+  } catch (error) {
+    console.error('Erro ao obter estatísticas:', error);
+    throw error;
+  }
+};
+
+const searchTasks = async (searchTerm) => {
+  try {
+    const { Op } = require('sequelize');
+    return await Task.findAll({
+      where: {
+        titulo: { [Op.like]: `%${searchTerm}%` }
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao pesquisar tarefas:', error);
+    throw error;
+  }
+};
+
+const sortTasks = async (order = 'asc') => {
+  try {
+    return await Task.findAll({
+      order: [['titulo', order.toUpperCase()]]
+    });
+  } catch (error) {
+    console.error('Erro ao ordenar tarefas:', error);
+    throw error;
+  }
 };
 
 module.exports = {
