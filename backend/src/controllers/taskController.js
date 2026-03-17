@@ -12,21 +12,13 @@ export const createTask = (req, res) => {
 }
 
 export const updateTask = (req, res) => {
-  try {
-    const task = taskService.updateTask(Number(req.params.id), req.body);
-    res.json(task);
-  } catch (error) {
-    res.status(404).json({ error: error.message });
-  }
+  const task = taskService.updateTask(Number(req.params.id), req.body);
+  res.json(task);
 }
 
 export const deleteTask = (req, res) => {
-  try {
-    taskService.deleteTask(Number(req.params.id));
-    res.json({ message: "Tarefa deletada com sucesso" });
-  } catch (error) {
-    res.status(404).json({ error: error.message });
-  }
+  taskService.deleteTask(Number(req.params.id));
+  res.json({ message: "Tarefa deletada com sucesso" });
 }
 
 export const getTaskStats = (req, res) => {
@@ -35,10 +27,6 @@ export const getTaskStats = (req, res) => {
 }
 
 export const addTagToTask = (req, res) => {
-  try {
-    const relation = taskService.addTagToTask(Number(req.params.id), req.body.tagId);
-    res.status(201).json(relation);
-  } catch (error) {
-    res.status(404).json({ error: error.message });
-  }
+  const relation = taskService.addTagToTask(Number(req.params.id), req.body.tagId);
+  res.status(201).json(relation);
 }
