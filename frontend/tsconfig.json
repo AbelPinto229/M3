@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "rootDir": "./",
+    "outDir": "./dist",
+    "module": "es2022",
+    "moduleResolution": "bundler",
+    "target": "es2022",
+    "strict": false,               // disable strict type checking
+    "noImplicitAny": false,        // allow implicit any types
+    "noImplicitThis": false,       // allow implicit any for this
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "sourceMap": true
+  },
+  "include": ["frontend/src/main.ts", "frontend/src/**/*"],
+  "exclude": ["node_modules", "dist", "M3/**/*"]
+}
