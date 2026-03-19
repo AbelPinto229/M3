@@ -5,4 +5,5 @@ export interface User {
     role: string;
     active: boolean;
     photo?: string;
+    vip_level?: number;
 }

@@ -1,8 +1,9 @@
 import { Task } from "../models/Task";
 import { TagManager } from "../utils/TagManager";
+import { TaskService } from "./TaskService.js";
 export declare class SearchService {
-    private tasks;
-    constructor(tasks: Task[]);
+    private taskService;
+    constructor(taskService: TaskService);
     searchByTitle(text: string): Task[];
     searchByUser(userId: number, assignmentService: any): Task[];
     searchByStatus(status: string): Task[];

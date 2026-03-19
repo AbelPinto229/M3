@@ -10,10 +10,10 @@ export declare class RenderModals {
     confirmAction(): void;
     openEditTitleModal(taskId: number): void;
     closeEditTitleModal(): void;
-    saveEditTitle(taskId: number): void;
+    saveEditTitle(taskId: number): Promise<void>;
     openModal(title: string, content: string): void;
     closeModal(): void;
-    openEditUserModal(userId: number, user: any): void;
+    openEditUserModal(userId: number, user: any): Promise<void>;
     closeEditUserModal(): void;
     saveEditUser(userId: number): void;
     private performUserUpdate;

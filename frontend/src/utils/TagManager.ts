@@ -25,4 +25,8 @@ export class TagManager<T> {
   getTags(item: T): string[] {
     return this.tags.get(item) || [];
   }
+
+  clearTags(item: T): void {
+    this.tags.delete(item);
+  }
 }

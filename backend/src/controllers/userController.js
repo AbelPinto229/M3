@@ -1,5 +1,20 @@
 import * as userService from "../services/userService.js";
 
+export const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email e password são obrigatórios' });
+    }
+    
+    const result = await userService.loginUser(email, password);
+    res.json(result);
+  } catch (error) {
+    res.status(401).json({ error: error.message });
+  }
+}
+
 export const getUsers = async (req, res) => {
   try {
     const users = await userService.getUsers(req.query);
@@ -23,6 +38,7 @@ export const updateUser = async (req, res) => {
     const user = await userService.updateUser(req.user.id, req.body);
     res.json(user);
   } catch (error) {
+    console.error('❌ Erro ao atualizar utilizador:', error.message);
     res.status(500).json({ error: error.message });
   }
 }

@@ -22,5 +22,8 @@ export class TagManager {
     getTags(item) {
         return this.tags.get(item) || [];
     }
+    clearTags(item) {
+        this.tags.delete(item);
+    }
 }
 //# sourceMappingURL=TagManager.js.map

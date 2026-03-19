@@ -4,6 +4,7 @@ import { checkUserExists } from "../middlewares/checkUserExists.js";
 
 const router = express.Router();
 
+router.post("/login", userController.loginUser);
 router.get("/", userController.getUsers);
 router.get("/stats", userController.getUserStats);
 router.post("/", userController.createUser);

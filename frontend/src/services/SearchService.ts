@@ -1,26 +1,30 @@
 import { Task } from "../models/Task";
 import { TagManager } from "../utils/TagManager";
+import { TaskService } from "./TaskService.js";
 
 // SEARCH SERVICE - Provides search and filtering functionality for tasks
 export class SearchService {
-  constructor(private tasks: Task[]) {}
+  constructor(private taskService: TaskService) {}
 
   // searches tasks by title with case-insensitive matching
   searchByTitle(text: string): Task[] {
-    return this.tasks.filter((t) =>
+    const tasks = this.taskService.getTasks();
+    return tasks.filter((t) =>
       t.title.toLowerCase().includes(text.toLowerCase()),
     );
   }
 
   // retrieves all tasks assigned to a specific user
   searchByUser(userId: number, assignmentService: any): Task[] {
+    const tasks = this.taskService.getTasks();
     const taskIds = assignmentService.getTasksFromUser(userId);
-    return this.tasks.filter((t) => taskIds.includes(t.id));
+    return tasks.filter((t) => taskIds.includes(t.id));
   }
 
   // filters tasks by their status
   searchByStatus(status: string): Task[] {
-    return this.tasks.filter((t) => t.status === status);
+    const tasks = this.taskService.getTasks();
+    return tasks.filter((t) => t.status === status);
   }
 
   // performs comprehensive search across title, status, and user with duplicate removal

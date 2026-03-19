@@ -1,5 +1,7 @@
 import { User } from '../models/Users';
 import { Task } from '../models/Task';
+import { UserService } from './UserService.js';
+import { TaskService } from './TaskService.js';
 export interface BackupData {
     timestamp: Date;
     users: User[];
@@ -7,17 +9,17 @@ export interface BackupData {
     assignments: any;
 }
 export declare class BackupService {
-    private users;
-    private tasks;
+    private userService;
+    private taskService;
     private assignments;
     private backups;
-    constructor(users: User[], tasks: Task[], assignments: any);
+    constructor(userService: UserService, taskService: TaskService, assignments: any);
     exportUsers(): User[];
-    exportTasks(): Task[];
+    exportTasks(): import("./TaskService.js").ExtendedTask[];
     exportAssignments(): any;
     exportAll(): {
         users: User[];
-        tasks: Task[];
+        tasks: import("./TaskService.js").ExtendedTask[];
         assignments: any;
     };
 }

@@ -3,22 +3,51 @@ interface LogEntry {
     id: number;
     message: string;
     timestamp: Date;
+    created_at?: string;
 }
 
-// Logger global do sistema (integra HistoryLog)
-export class SystemLogger {
-    // Armazenamento privado de logs
-    private static logs: LogEntry[] = [];
-    private static nextId: number = 1;
+const LOG_API = 'http://localhost:3000/logs';
 
-    // Registar mensagem no log
+// Logger global do sistema (integra HistoryLog) - persiste na DB via API
+export class SystemLogger {
+    // Cache local para não precisar chamar API em cada render
+    private static logs: LogEntry[] = [];
+    private static loaded: boolean = false;
+
+    // Carregar logs da API
+    static async loadLogs(): Promise<void> {
+        try {
+            const res = await fetch(LOG_API);
+            if (res.ok) {
+                const data = await res.json();
+                SystemLogger.logs = data.map((l: any) => ({
+                    id: l.id,
+                    message: l.message,
+                    timestamp: new Date(l.created_at)
+                }));
+                SystemLogger.loaded = true;
+            }
+        } catch (e) {
+            console.error('Erro ao carregar logs:', e);
+        }
+    }
+
+    // Registar mensagem no log (envia para API + guarda local)
     static log(message: string): void {
+        // Guardar localmente de imediato para UI responsiva
         const logEntry: LogEntry = {
-            id: SystemLogger.nextId++,
+            id: Date.now(),
             message,
             timestamp: new Date(),
         };
         SystemLogger.logs.push(logEntry);
+
+        // Enviar para API em background (fire-and-forget)
+        fetch(LOG_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message })
+        }).catch(() => {});
     }
 
     // Obter todos os logs
@@ -29,7 +58,7 @@ export class SystemLogger {
     // Limpar logs
     static clear(): void {
         SystemLogger.logs = [];
-        SystemLogger.nextId = 1;
+        fetch(LOG_API, { method: 'DELETE' }).catch(() => {});
     }
 
     // Compatibilidade: alias para clear

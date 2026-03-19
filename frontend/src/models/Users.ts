@@ -6,5 +6,6 @@ export interface User {
   name: string;
   role: string;
   active: boolean;
-  photo?: string; 
+  photo?: string;
+  vip_level?: number;
 }

@@ -27,17 +27,17 @@ export declare class RenderTask {
     cycleTaskStatus(id: number): Promise<void>;
     deleteTask(id: number): void;
     manualAssign(taskId: number, email: string): Promise<void>;
-    saveTaskTitle(taskId: number): void;
+    saveTaskTitle(taskId: number): Promise<void>;
     editTaskTitle(taskId: number): void;
-    saveAllTaskChanges(taskId: number): void;
+    saveAllTaskChanges(taskId: number): Promise<void>;
     toggleTaskFavorite(taskId: number): Promise<void>;
     toggleTaskWatch(taskId: number): void;
-    setTaskPriority(taskId: number, priority: string): void;
-    setTaskPriorityLevel(taskId: number, level: string): void;
+    setTaskPriority(taskId: number, priority: string): Promise<void>;
+    setTaskPriorityLevel(taskId: number, level: string): Promise<void>;
     getTaskPriorityLevel(taskId: number): number;
     getTaskPriority(taskId: number): number | undefined;
-    addDependency(taskId: number, dependsOnId: string): void;
-    removeDependency(taskId: number, dependsOnId: number): void;
+    addDependency(taskId: number, dependsOnId: string): Promise<void>;
+    removeDependency(taskId: number, dependsOnId: number): Promise<void>;
     rateTask(taskId: number, rating: number): Promise<void>;
     private renderTaskRatings;
 }

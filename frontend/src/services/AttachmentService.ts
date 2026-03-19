@@ -71,6 +71,30 @@ export class AttachmentService {
     return this.attachments.filter(a => a.taskId === taskId);
   }
 
+  // Loads attachments from API into local cache
+  async loadAttachments(taskId: number): Promise<void> {
+    try {
+      const response = await fetch(`${this.API_BASE_URL}/attachments/task/${taskId}`);
+      if (response.ok) {
+        const data = await response.json();
+        // Remove existing local entries for this task, then re-add from API
+        this.attachments = this.attachments.filter(a => a.taskId !== taskId);
+        for (const a of data) {
+          this.attachments.push({
+            id: a.id,
+            taskId: a.task_id,
+            filename: a.filename,
+            url: a.file_url,
+            size: a.file_size,
+            uploadedAt: new Date(a.uploaded_at)
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Erro ao carregar attachments:', err);
+    }
+  }
+
   // Removes an attachment by ID
   async removeAttachment(attachmentId: number): Promise<void> {
     console.log('🗑️ Removendo attachment', attachmentId);

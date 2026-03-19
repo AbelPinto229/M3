@@ -85,10 +85,14 @@ export class TaskService {
             const response = await fetch(`${this.API_BASE_URL}/tasks/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...task, status })
+                body: JSON.stringify({ status })
             });
             if (response.ok) {
                 task.status = status;
+                console.log(`✅ Status da tarefa ${id} atualizado para ${status}`);
+            }
+            else {
+                console.error('❌ Erro ao atualizar status:', response.status);
             }
         }
         catch (error) {
@@ -104,10 +108,14 @@ export class TaskService {
             const response = await fetch(`${this.API_BASE_URL}/tasks/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...task, title })
+                body: JSON.stringify({ title })
             });
             if (response.ok) {
                 task.title = title;
+                console.log(`✅ Título da tarefa ${id} atualizado`);
+            }
+            else {
+                console.error('❌ Erro ao atualizar título:', response.status);
             }
         }
         catch (error) {
@@ -137,6 +145,27 @@ export class TaskService {
             console.error('Erro ao atualizar prioridade:', error);
         }
     }
+    async updateTaskHighlight(id, highlight) {
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/tasks/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ highlight })
+            });
+            if (response.ok) {
+                const task = this.getTaskById(id);
+                if (task)
+                    task.highlight = highlight;
+                console.log(`✅ Destaque da tarefa ${id} atualizado para ${highlight}`);
+            }
+            else {
+                console.error('❌ Erro ao atualizar destaque:', response.status);
+            }
+        }
+        catch (error) {
+            console.error('Erro ao atualizar destaque:', error);
+        }
+    }
     // updates task deadline date
     async updateTaskDeadline(id, deadline) {
         try {
@@ -146,10 +175,14 @@ export class TaskService {
             const response = await fetch(`${this.API_BASE_URL}/tasks/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...task, deadline })
+                body: JSON.stringify({ deadline })
             });
             if (response.ok) {
                 task.deadline = deadline;
+                console.log(`✅ Deadline da tarefa ${id} atualizado`);
+            }
+            else {
+                console.error('❌ Erro ao atualizar deadline:', response.status);
             }
         }
         catch (error) {

@@ -10,8 +10,8 @@ import { AttachmentService } from '../services/AttachmentService.js';
 import { processTask } from '../utils/TaskUtils.js';
 import { SystemLogger } from '../logs/SystemLogger.js';
 
-const TASK_PRIORITIES = ['LOW', 'MEDIUM', 'HIGH'];
-const PRIORITY_DISPLAY_MAP: Record<string, string> = { 'LOW': 'Baixa', 'MEDIUM': 'Média', 'HIGH': 'Alta' };
+const TASK_PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+const PRIORITY_DISPLAY_MAP: Record<string, string> = { 'LOW': 'Baixa', 'MEDIUM': 'Média', 'HIGH': 'Alta', 'CRITICAL': 'Crítica' };
 
 export class RenderTask {
   private activeTaskModalId: number | null = null;
@@ -49,6 +49,12 @@ export class RenderTask {
       filteredTasks = filteredTasks.filter((t: ExtendedTask) => favoriteTasks.includes(t.id));
     }
 
+    // MEMBER only sees tasks assigned to them (from DB task_assignments)
+    if (window.appContext.currentUserRole === 'MEMBER') {
+      const assignedIds = window.appContext.myAssignedTaskIds || [];
+      filteredTasks = filteredTasks.filter((t: ExtendedTask) => assignedIds.includes(t.id));
+    }
+
     // Apply sorting based on sort state
     const sortState = window.appContext.taskSortState || 'none';
     if (sortState === 'asc') {
@@ -77,10 +83,11 @@ export class RenderTask {
     let priorityColorClass = 'text-slate-400';
     if (t.priority === 'MEDIUM') priorityColorClass = 'text-amber-500 font-bold';
     if (t.priority === 'HIGH') priorityColorClass = 'text-orange-500 font-bold';
+    if (t.priority === 'CRITICAL') priorityColorClass = 'text-red-600 font-bold';
 
     // Map task type and priority to Portuguese display text
     const typeMap: Record<string, string> = { 'bug': 'Erro', 'feature': 'Funcionalidade', 'task': 'Tarefa' };
-    const priorityMap: Record<string, string> = { 'LOW': 'Baixa', 'MEDIUM': 'Média', 'HIGH': 'Alta' };
+    const priorityMap: Record<string, string> = { 'LOW': 'Baixa', 'MEDIUM': 'Média', 'HIGH': 'Alta', 'CRITICAL': 'Crítica' };
     const displayType = typeMap[t.type?.toLowerCase()] || t.type;
     const displayPriority = priorityMap[t.priority || 'LOW'] || (t.priority || 'Baixa');
 
@@ -118,7 +125,7 @@ export class RenderTask {
           <div class="flex-1">
             <p class="font-bold text-slate-700 ${t.status === TaskStatus.COMPLETED ? 'line-through opacity-40' : ''}">\u200b${t.title}</p>
             <div class="flex items-center gap-2 mt-1">
-              <span class="text-[8px] ${priorityColorClass} block uppercase tracking-tighter">${displayType} | ${displayPriority} ${t.deadline ? '| Expira: ' + t.deadline : ''}</span>
+              <span class="text-[8px] ${priorityColorClass} block uppercase tracking-tighter">${displayType} | ${displayPriority} ${t.deadline ? '| Expira: ' + new Date(t.deadline).toLocaleDateString('pt-PT') : ''}</span>
               ${priorityLevel > 0 ? `<span class="text-[7px] font-bold px-1.5 py-0.5 rounded ${priorityBadgeClass} inline-block">P${priorityLevel}</span>` : ''}
             </div>
           </div>
@@ -166,6 +173,47 @@ export class RenderTask {
       }
     });
 
+    // Load ratings from API into ratingSystem then re-render stars
+    fetch(`http://localhost:3000/ratings/task/${taskId}`)
+      .then(r => r.json())
+      .then((data: any[]) => {
+        const taskObj = this.taskService.getTaskById(taskId);
+        if (!taskObj) return;
+        window.ratingSystem.clearRatings(taskObj);
+        data.forEach((r: any) => window.ratingSystem.rate(taskObj, r.rating_value));
+        this.renderTaskRatings(taskId);
+      })
+      .catch(err => console.error('Erro ao carregar ratings:', err));
+
+    // Load tags from API into tagManager then re-render
+    fetch(`http://localhost:3000/tasks/${taskId}/tags`)
+      .then(r => r.json())
+      .then((data: any[]) => {
+        this.tagService.clearTags(taskId);
+        data.forEach((t: any) => this.tagService.addTag(taskId, t.tag_name));
+        this.renderTaskModalContent();
+      })
+      .catch(err => console.error('Erro ao carregar tags:', err));
+
+    // Load attachments from API into attachmentService then re-render
+    this.attachmentService.loadAttachments(taskId).then(() => {
+      this.renderTaskModalContent();
+    });
+
+    // Load dependencies from API and populate local graph + render
+    fetch(`http://localhost:3000/dependencies/${taskId}`)
+      .then(r => r.json())
+      .then((deps: any[]) => {
+        const taskObj = this.taskService.getTaskById(taskId);
+        if (!taskObj) return;
+        deps.forEach((dep: any) => {
+          const depTask = this.taskService.getTaskById(dep.id);
+          if (depTask) window.dependencyGraph.addDependency(taskObj, depTask);
+        });
+        this.renderTaskModalContent();
+      })
+      .catch(err => console.error('Erro ao carregar dependências:', err));
+
     // Map type and priority to Portuguese
     const typeMap: Record<string, string> = { 'bug': 'Erro', 'feature': 'Funcionalidade', 'task': 'Tarefa' };
     const priorityMap: Record<string, string> = { 'LOW': 'Baixa', 'MEDIUM': 'Média', 'HIGH': 'Alta', 'CRITICAL': 'Crítica' };
@@ -199,6 +247,7 @@ export class RenderTask {
                 <option value="">Sem atribuição</option>
                 ${this.userService
                   .getActiveUsers()
+                  .filter(u => u.role !== 'VIEWER')
                   .map(u => `<option value="${u.email}" ${task.assigned?.includes(u.email) ? 'selected' : ''}>${u.name}</option>`)
                   .join('')}
               </select>
@@ -212,11 +261,11 @@ export class RenderTask {
             <div>
               <label class="text-xs font-bold text-slate-600 block mb-1">DESTAQUE:</label>
               <select id="taskPriorityLevelSelect" onchange="window.appContext.renderTask.setTaskPriorityLevel(${taskId}, this.value)" class="w-full text-xs px-2 py-2 rounded border bg-white">
-                <option value="0">Nenhum</option>
-                <option value="1" ${window.priorityManager.getPriority(task) === 1 ? 'selected' : ''}>Nível 1</option>
-                <option value="2" ${window.priorityManager.getPriority(task) === 2 ? 'selected' : ''}>Nível 2</option>
-                <option value="3" ${window.priorityManager.getPriority(task) === 3 ? 'selected' : ''}>Nível 3</option>
-                <option value="4" ${window.priorityManager.getPriority(task) === 4 ? 'selected' : ''}>Nível 4</option>
+                <option value="0" ${!(task as any).highlight ? 'selected' : ''}>Nenhum</option>
+                <option value="1" ${(task as any).highlight === 1 ? 'selected' : ''}>Nível 1</option>
+                <option value="2" ${(task as any).highlight === 2 ? 'selected' : ''}>Nível 2</option>
+                <option value="3" ${(task as any).highlight === 3 ? 'selected' : ''}>Nível 3</option>
+                <option value="4" ${(task as any).highlight === 4 ? 'selected' : ''}>Nível 4</option>
               </select>
             </div>
             ` : `
@@ -225,9 +274,9 @@ export class RenderTask {
                 <p class="text-xs font-bold text-slate-600 mb-1">ATRIBUÍDO A:</p>
                 <p class="text-xs font-semibold text-slate-900">${
                   (task.assigned && Array.isArray(task.assigned) && task.assigned.length > 0) 
-                    ? task.assigned.map((id: string) => {
-                      const user = this.userService.getUserById(parseInt(id, 10));
-                      return user ? user.name : `ID ${id}`;
+                    ? task.assigned.map((email: string) => {
+                      const user = this.userService.getUserByEmail(email);
+                      return user ? user.name : email;
                     }).join(', ')
                     : 'Sem atribuição'
                 }</p>
@@ -632,7 +681,7 @@ export class RenderTask {
   }
 
   // Saves updated task title from modal
-  saveTaskTitle(taskId: number): void {
+  async saveTaskTitle(taskId: number): Promise<void> {
     const input = document.getElementById('taskTitleInput') as HTMLInputElement;
     if (!input) return;
 
@@ -643,7 +692,7 @@ export class RenderTask {
     if (!task) return;
 
     const oldTitle = task.title;
-    this.taskService.updateTaskTitle(taskId, newTitle);
+    await this.taskService.updateTaskTitle(taskId, newTitle);
     SystemLogger.log(`Tarefa renomeada: "${oldTitle}" -> "${newTitle}"`);
     window.appContext.notificationService.addNotification(`Tarefa renomeada: "${newTitle}"`, 'success');
     
@@ -656,7 +705,7 @@ export class RenderTask {
   }
 
   // Saves all changes made in the task modal (title, priority, assignment)
-  saveAllTaskChanges(taskId: number): void {
+  async saveAllTaskChanges(taskId: number): Promise<void> {
     const titleInput = document.getElementById('taskTitleInput') as HTMLInputElement;
     const prioritySelect = document.getElementById('taskPrioritySelect') as HTMLSelectElement;
     const assignSelect = document.getElementById('taskAssignSelect') as HTMLSelectElement;
@@ -671,7 +720,7 @@ export class RenderTask {
       const newTitle = titleInput.value.trim();
       if (newTitle) {
         const oldTitle = task.title;
-        this.taskService.updateTaskTitle(taskId, newTitle);
+        await this.taskService.updateTaskTitle(taskId, newTitle);
         SystemLogger.log(`Tarefa renomeada: "${oldTitle}" -> "${newTitle}"`);
         changed = true;
       }
@@ -679,7 +728,7 @@ export class RenderTask {
 
     // Save priority if changed
     if (prioritySelect && prioritySelect.value !== task.priority) {
-      this.taskService.updateTaskPriority(taskId, prioritySelect.value);
+      await this.taskService.updateTaskPriority(taskId, prioritySelect.value);
       window.appContext.priorityService.setPriority(taskId, prioritySelect.value as any);
       SystemLogger.log(`Tarefa "${task.title}" prioridade -> ${prioritySelect.value}`);
       changed = true;
@@ -718,16 +767,24 @@ export class RenderTask {
     const isFavorite = window.appContext.favoriteService.isFavorite(userId, taskId);
     
     if (isFavorite) {
-      await window.appContext.favoriteService.removeFavorite(userId, taskId);
-      window.appContext.notificationService.addNotification(`"${task.title}" removida de favoritos!`, 'info');
-      SystemLogger.log(`Tarefa "${task.title}" removida de favoritos`);
+      const ok = await window.appContext.favoriteService.removeFavorite(userId, taskId);
+      if (ok) {
+        window.appContext.notificationService.addNotification(`"${task.title}" removida de favoritos!`, 'info');
+        SystemLogger.log(`Tarefa "${task.title}" removida de favoritos`);
+        window.appContext.saveAndRender();
+      } else {
+        window.appContext.notificationService.addNotification('Erro ao remover favorito. Backend em execução?', 'warning');
+      }
     } else {
-      await window.appContext.favoriteService.addFavorite(userId, taskId);
-      window.appContext.notificationService.addNotification(`"${task.title}" adicionada aos favoritos!`, 'success');
-      SystemLogger.log(`Tarefa "${task.title}" adicionada aos favoritos`);
+      const ok = await window.appContext.favoriteService.addFavorite(userId, taskId);
+      if (ok) {
+        window.appContext.notificationService.addNotification(`"${task.title}" adicionada aos favoritos!`, 'success');
+        SystemLogger.log(`Tarefa "${task.title}" adicionada aos favoritos`);
+        window.appContext.saveAndRender();
+      } else {
+        window.appContext.notificationService.addNotification('Erro ao guardar favorito. Backend em execução?', 'warning');
+      }
     }
-    
-    window.appContext.saveAndRender();
   }
 
   // Toggles task watch status
@@ -774,38 +831,40 @@ export class RenderTask {
   }
 
   // ===== PRIORITY MANAGEMENT =====
-  // Set priority (LOW/MEDIUM/HIGH) for a task and save to API
-  setTaskPriority(taskId: number, priority: string): void {
+  // Set priority (LOW/MEDIUM/HIGH/CRITICAL) for a task and save to API
+  async setTaskPriority(taskId: number, priority: string): Promise<void> {
     console.log(`🎯 setTaskPriority chamado: taskId=${taskId}, priority=${priority}`);
     const task = this.taskService.getTaskById(taskId);
     if (!task) { console.error('❌ Task não encontrada:', taskId); return; }
 
-    const validPriorities = ['LOW', 'MEDIUM', 'HIGH'];
+    const validPriorities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
     if (validPriorities.includes(priority)) {
       task.priority = priority;
-      this.taskService.updateTaskPriority(taskId, priority);
+      await this.taskService.updateTaskPriority(taskId, priority);
       window.appContext.notificationService.addNotification(`Prioridade de "${task.title}" alterada para ${priority}`, 'success');
       SystemLogger.log(`Prioridade da tarefa "${task.title}" alterada para ${priority}`);
+      window.appContext.saveAndRender();
     } else {
       console.error('❌ Prioridade inválida:', priority);
     }
   }
 
   // Set task priority level for UI/visualization (1-4) using PriorityManager
-  setTaskPriorityLevel(taskId: number, level: string): void {
+  async setTaskPriorityLevel(taskId: number, level: string): Promise<void> {
     const task = this.taskService.getTaskById(taskId);
     if (!task) return;
 
     const numLevel = parseInt(level);
-    if (numLevel >= 0 && numLevel <= 4) {
+    if (numLevel >= 0 && numLevel <= 5) {
       window.priorityManager.setPriority(task, numLevel);
+      await this.taskService.updateTaskHighlight(taskId, numLevel);
       if (numLevel === 0) {
         window.appContext.notificationService.addNotification(`Destaque removido de "${task.title}"`, 'info');
       } else {
         window.appContext.notificationService.addNotification(`Nível de destaque ${numLevel} definido para "${task.title}"`, 'success');
       }
       SystemLogger.log(`Nível de visualização da tarefa "${task.title}" alterado para ${numLevel}`);
-      window.appContext.saveData();
+      window.appContext.saveAndRender();
     }
   }
 
@@ -825,11 +884,26 @@ export class RenderTask {
 
   // ===== DEPENDENCY MANAGEMENT =====
   // Add a dependency to a task
-  addDependency(taskId: number, dependsOnId: string): void {
+  async addDependency(taskId: number, dependsOnId: string): Promise<void> {
     const task = this.taskService.getTaskById(taskId);
     const dependsOnTask = this.taskService.getTaskById(parseInt(dependsOnId));
     
     if (!task || !dependsOnTask) return;
+
+    try {
+      const response = await fetch('http://localhost:3000/dependencies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task_id: taskId, depends_on_id: parseInt(dependsOnId) })
+      });
+      if (!response.ok && response.status !== 409) {
+        console.error('❌ Erro ao adicionar dependência:', response.status);
+        return;
+      }
+    } catch (err) {
+      console.error('Erro ao adicionar dependência:', err);
+      return;
+    }
 
     window.dependencyGraph.addDependency(task, dependsOnTask);
     window.appContext.notificationService.addNotification(`"${task.title}" agora depende de "${dependsOnTask.title}"`, 'success');
@@ -839,11 +913,24 @@ export class RenderTask {
   }
 
   // Remove a dependency from a task
-  removeDependency(taskId: number, dependsOnId: number): void {
+  async removeDependency(taskId: number, dependsOnId: number): Promise<void> {
     const task = this.taskService.getTaskById(taskId);
     const dependsOnTask = this.taskService.getTaskById(dependsOnId);
     
     if (!task || !dependsOnTask) return;
+
+    try {
+      const response = await fetch(`http://localhost:3000/dependencies/${taskId}/${dependsOnId}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok && response.status !== 404) {
+        console.error('❌ Erro ao remover dependência:', response.status);
+        return;
+      }
+    } catch (err) {
+      console.error('Erro ao remover dependência:', err);
+      return;
+    }
 
     window.dependencyGraph.removeDependency(task, dependsOnTask);
     window.appContext.notificationService.addNotification(`Dependência removida de "${task.title}"`, 'info');

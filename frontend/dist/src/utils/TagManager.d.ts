@@ -3,4 +3,5 @@ export declare class TagManager<T> {
     addTag(item: T, tag: string): void;
     removeTag(item: T, tag: string): void;
     getTags(item: T): string[];
+    clearTags(item: T): void;
 }

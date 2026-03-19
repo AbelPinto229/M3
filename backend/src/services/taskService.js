@@ -17,6 +17,24 @@ export const getTasks = async (query = {}) => {
   }
   
   const [tasks] = await db.query(sql);
+
+  // Load assignments for each task
+  const [allAssignments] = await db.query(
+    'SELECT ta.task_id, u.email FROM task_assignments ta INNER JOIN users u ON ta.user_id = u.id'
+  );
+  
+  // Group assignments by task_id
+  const assignmentMap = {};
+  for (const a of allAssignments) {
+    if (!assignmentMap[a.task_id]) assignmentMap[a.task_id] = [];
+    assignmentMap[a.task_id].push(a.email);
+  }
+  
+  // Attach assigned emails to each task
+  for (const task of tasks) {
+    task.assigned = assignmentMap[task.id] || [];
+  }
+
   return tasks;
 }
 
@@ -76,6 +94,13 @@ export const updateTask = async (id, data) => {
   if (data.deadline !== undefined) {
     fields.push('deadline = ?');
     values.push(data.deadline);
+  }
+  if (data.highlight !== undefined) {
+    const h = parseInt(data.highlight);
+    if (!isNaN(h) && h >= 0 && h <= 5) {
+      fields.push('highlight = ?');
+      values.push(h);
+    }
   }
   
   if (fields.length === 0) {

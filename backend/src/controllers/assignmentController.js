@@ -43,3 +43,12 @@ export const clearTaskAssignments = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 }
+
+export const getAssignmentsByUser = async (req, res) => {
+  try {
+    const assignments = await assignmentService.getAssignmentsByUser(Number(req.params.userId));
+    res.json(assignments);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}

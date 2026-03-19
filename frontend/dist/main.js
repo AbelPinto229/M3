@@ -28,8 +28,6 @@ import { RatingSystem } from './src/utils/RatingSystem.js';
 import { DependencyGraph } from './src/utils/DependencyGraph.js';
 import { IdGenerator } from './src/utils/IdGenerator.js';
 import { SystemConfig } from './src/services/SystemConfig.js';
-import { BusinessRules } from './src/services/BusinessRules.js';
-import { GlobalValidators } from './src/utils/GlobalValidators.js';
 import { BaseEntity } from './src/models/BaseEntity.js';
 // ===== INITIALIZE SERVICES =====
 const userService = new UserService();
@@ -42,9 +40,9 @@ const attachmentService = new AttachmentService();
 const favoriteService = new FavoriteService();
 const tagService = new TagManager();
 const automationService = new AutomationRulesService(assignmentService, deadlineService, priorityService);
-const statisticsService = new StatisticsService(taskService.getTasks(), userService.getUsers());
-const searchService = new SearchService(taskService.getTasks());
-const backupService = new BackupService(userService.getUsers(), taskService.getTasks(), assignmentService);
+const statisticsService = new StatisticsService(taskService, userService);
+const searchService = new SearchService(taskService);
+const backupService = new BackupService(userService, taskService, assignmentService);
 const notificationService = new NotificationService();
 const ratingSystem = new RatingSystem();
 const dependencyGraph = new DependencyGraph();
@@ -72,6 +70,7 @@ const appContext = {
     taskSortState: 'none',
     userSortState: 'none',
     userFilter: 'all',
+    myAssignedTaskIds: [],
     checkPermission: function (action) {
         const role = this.currentUserRole;
         const permissions = {
@@ -111,14 +110,15 @@ window.ratingSystem = ratingSystem;
 const paginator = new Paginator();
 // ===== FAVORITES STATE =====
 const favoriteTasks = new Favorites();
-const favoriteUsers = new Favorites();
+// User favorites now use Set of IDs (loaded from DB)
+const favoriteUserIds = new Set();
 // ===== WATCHER SYSTEM =====
 const watcherSystem = new WatcherSystem();
 // ===== PRIORITY MANAGER =====
 const priorityManager = new PriorityManager();
 // Expose favorites, watcher system, and priority manager to window for global access
 window.favoriteTasks = favoriteTasks;
-window.favoriteUsers = favoriteUsers;
+window.favoriteUserIds = favoriteUserIds;
 window.watcherSystem = watcherSystem;
 window.priorityManager = priorityManager;
 window.ratingSystem = ratingSystem;
@@ -233,45 +233,10 @@ window.renderTasksWithPagination = renderTasksWithPagination;
 window.renderUsersWithPagination = renderUsersWithPagination;
 // ===== INITIALIZE GLOBAL SYSTEMS (Exercícios 1-7) =====
 function initializeGlobalSystems() {
-    // Exercício 2: Configurar sistema
-    SystemConfig.set('environment', 'production');
-    SystemConfig.set('debugMode', false);
-    const sysInfo = SystemConfig.getInfo();
-    SystemLogger.log(`Sistema inicializado: ${sysInfo.appName} v${sysInfo.version} (${sysInfo.environment})`);
-    // Exercício 3: Gerar alguns IDs
-    const id1 = IdGenerator.generate();
-    const id2 = IdGenerator.generate();
-    const id3 = IdGenerator.generate();
-    SystemLogger.log(`IDs gerados: ${id1}, ${id2}, ${id3}`);
-    // Exercício 6: Validar dados
-    const testEmail = 'user@example.com';
-    const testTitle = 'Nova Tarefa de Teste';
-    const invalidEmail = 'invalid-email';
-    const isEmailValid = GlobalValidators.isValidEmail(testEmail);
-    const isInvalidEmailValid = GlobalValidators.isValidEmail(invalidEmail);
-    const isTitleValid = BusinessRules.isValidTitle(testTitle);
-    const isNonEmptyValid = GlobalValidators.isNonEmpty(testTitle);
-    SystemLogger.log(`Email "${testEmail}" válido: ${isEmailValid}`);
-    SystemLogger.log(`Email "${invalidEmail}" válido: ${isInvalidEmailValid}`);
-    SystemLogger.log(`Título "${testTitle}" válido: ${isTitleValid}`);
-    SystemLogger.log(`Texto não vazio: ${isNonEmptyValid}`);
-    // Exercício 4: Aplicar regras de negócio
-    const canDeactivate = BusinessRules.canUserBeDeactivated(0);
-    const canComplete = BusinessRules.canTaskBeCompleted(false);
-    const canAssign = BusinessRules.canAssignTask(true);
-    const isValidPriority = BusinessRules.isValidPriority('HIGH');
-    const isValidRole = BusinessRules.isValidRole('ADMIN');
-    SystemLogger.log(`Utilizador pode ser desativado (0 tarefas): ${canDeactivate}`);
-    SystemLogger.log(`Tarefa pode ser concluída (não bloqueada): ${canComplete}`);
-    SystemLogger.log(`Tarefa pode ser atribuída (utilizador ativo): ${canAssign}`);
-    SystemLogger.log(`Prioridade "HIGH" válida: ${isValidPriority}`);
-    SystemLogger.log(`Role "ADMIN" válida: ${isValidRole}`);
     // Exercício 1: Obter total de entidades
     const totalEntities = BaseEntity.getTotalEntities();
-    SystemLogger.log(`Total de entidades no sistema: ${totalEntities}`);
     // Exercício 5: Exibir logs do sistema
     const sysLogs = SystemLogger.getLastN(SystemLogger.count());
-    SystemLogger.log(`Total de logs do sistema: ${sysLogs.length}`);
     // Guardar estatísticas no window para UI
     window.systemStats = {
         totalEntities,
@@ -395,13 +360,29 @@ export async function initializeApp() {
             Promise.all([
                 window.appContext.userService.loadUsers(),
                 window.appContext.taskService.loadTasks(),
-                window.appContext.favoriteService.loadUserFavorites(window.appContext.currentUserId)
+                window.appContext.favoriteService.loadUserFavorites(window.appContext.currentUserId),
+                SystemLogger.loadLogs(),
+                loadUserFavorites(window.appContext.currentUserId)
             ]),
             new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
         ]);
     }
     catch (error) {
         console.warn('Não foi possível carregar dados do backend. A trabalhar em modo offline.', error);
+    }
+    // Load assignments from DB for MEMBER role filtering
+    if (window.appContext.currentUserRole === 'MEMBER') {
+        try {
+            const res = await fetch(`http://localhost:3000/assignments/user/${window.appContext.currentUserId}`);
+            if (res.ok) {
+                const assignments = await res.json();
+                window.appContext.myAssignedTaskIds = assignments.map((a) => a.task_id);
+                console.log('✅ Assignments carregados:', window.appContext.myAssignedTaskIds);
+            }
+        }
+        catch (e) {
+            console.warn('⚠️ Não foi possível carregar assignments do backend');
+        }
     }
     updateDashboard();
     window.appContext.renderUser.render();
@@ -451,6 +432,21 @@ function setProgressBar(id, width) {
     const el = document.getElementById(id);
     if (el)
         el.style.width = `${width}%`;
+}
+// Helper to load user favorites from API
+async function loadUserFavorites(userId) {
+    try {
+        const res = await fetch(`http://localhost:3000/user-favorites/${userId}`);
+        if (res.ok) {
+            const data = await res.json();
+            window.favoriteUserIds.clear();
+            data.forEach((fav) => window.favoriteUserIds.add(fav.favorite_user_id || fav.id));
+            console.log(`✅ ${window.favoriteUserIds.size} user favorites carregados`);
+        }
+    }
+    catch (e) {
+        console.warn('⚠️ Erro ao carregar user favorites');
+    }
 }
 // Helper to save and render
 export function saveAndRender() {
@@ -505,14 +501,6 @@ async function createNewUser(email, name, role, photo) {
 }
 // Setup search and filter listeners
 function setupSearchAndFilterListeners() {
-    // Role selector
-    const roleSelector = document.getElementById('roleSelector');
-    if (roleSelector) {
-        roleSelector.addEventListener('change', (e) => {
-            window.appContext.currentUserRole = e.target.value;
-            saveAndRender();
-        });
-    }
     // Task search and filter inputs
     const searchInput = document.getElementById('searchTask');
     const filterStatus = document.getElementById('filterStatus');
@@ -806,6 +794,21 @@ function setupEventListeners() {
             saveAndRender();
         });
     }
+    // Global Escape key handler to close any open modals/overlays
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            // Close any dynamically created modals
+            document.querySelectorAll('[id$="Modal"]:not(.hidden)').forEach(modal => {
+                if (modal.id !== 'confirmModal')
+                    modal.remove();
+            });
+            // Close static overlays
+            const overlays = ['confirmModal', 'chatConversation', 'chatPanel', 'logsPanel'];
+            overlays.forEach(id => {
+                document.getElementById(id)?.classList.add('hidden');
+            });
+        }
+    });
 }
 // ===== TEST EntityList CLASS =====
 // Create test users and tasks BEFORE initialization
@@ -837,12 +840,323 @@ const task10 = await taskService.addTask('Test Task 10', 'Feature');
 const task11 = await taskService.addTask('Test Task 11', 'Bug');
 const task12 = await taskService.addTask('Test Task 12', 'Task');
 */
+// ===== AUTH / LOGIN SYSTEM =====
+const API_URL = 'http://localhost:3000';
+function getSession() {
+    const raw = sessionStorage.getItem('auth');
+    if (!raw)
+        return null;
+    try {
+        return JSON.parse(raw);
+    }
+    catch {
+        return null;
+    }
+}
+function saveSession(session) {
+    sessionStorage.setItem('auth', JSON.stringify(session));
+}
+function clearSession() {
+    sessionStorage.removeItem('auth');
+}
+function showLogin() {
+    document.getElementById('loginPage').classList.remove('hidden');
+    document.getElementById('appContainer').classList.add('hidden');
+}
+function showApp() {
+    document.getElementById('loginPage').classList.add('hidden');
+    document.getElementById('appContainer').classList.remove('hidden');
+}
+async function handleLogin(email, password) {
+    const res = await fetch(`${API_URL}/users/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+    });
+    if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Erro ao fazer login');
+    }
+    return res.json();
+}
+function applySession(session) {
+    window.appContext.currentUserId = session.user.id;
+    window.appContext.currentUserRole = session.user.role;
+    // Update greeting in navbar
+    const greetingName = document.getElementById('greetingName');
+    const greetingRole = document.getElementById('greetingRole');
+    if (greetingName)
+        greetingName.textContent = `Olá, ${session.user.name}`;
+    if (greetingRole)
+        greetingRole.textContent = session.user.role;
+    // Show/hide admin-only actions
+    const isAdmin = session.user.role === 'ADMIN';
+    const adminActions = document.getElementById('adminActions');
+    if (adminActions) {
+        adminActions.style.display = ['ADMIN', 'MANAGER'].includes(session.user.role) ? '' : 'none';
+    }
+    const exportBtn = document.getElementById('exportBtn');
+    if (exportBtn) {
+        exportBtn.style.display = isAdmin ? '' : 'none';
+    }
+    const sysConfigBtn = document.getElementById('sysConfigBtn');
+    if (sysConfigBtn) {
+        sysConfigBtn.style.display = isAdmin ? '' : 'none';
+    }
+}
+function setupLogout() {
+    document.getElementById('logoutBtn')?.addEventListener('click', () => {
+        clearSession();
+        location.reload();
+    });
+}
+// ===== CHAT / MESSAGING SYSTEM =====
+let currentChatUserId = null;
+let chatPollInterval = null;
+async function loadConversations() {
+    const userId = window.appContext.currentUserId;
+    const chatList = document.getElementById('chatList');
+    if (!chatList)
+        return;
+    try {
+        const res = await fetch(`${API_URL}/messages/conversations/${userId}`);
+        if (!res.ok)
+            throw new Error('Erro');
+        const conversations = await res.json();
+        if (conversations.length === 0) {
+            chatList.innerHTML = `
+        <div class="p-6 text-center">
+          <p class="text-xs text-slate-400 mb-2">Sem conversas ainda</p>
+          <p class="text-[10px] text-slate-300">Clique em "💬 Mensagem" na lista de utilizadores para iniciar uma conversa</p>
+        </div>`;
+            return;
+        }
+        chatList.innerHTML = conversations.map((c) => {
+            const initial = c.name?.charAt(0).toUpperCase() || '?';
+            const photoHTML = c.photo
+                ? `<img src="${c.photo}" class="w-9 h-9 rounded-full object-cover border border-slate-200">`
+                : `<div class="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold">${initial}</div>`;
+            const unreadBadge = c.unread > 0
+                ? `<span class="w-5 h-5 bg-indigo-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">${c.unread}</span>`
+                : '';
+            const timeAgo = c.lastMessageAt ? new Date(c.lastMessageAt).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : '';
+            const preview = c.lastMessage?.length > 35 ? c.lastMessage.substring(0, 35) + '...' : (c.lastMessage || '');
+            const senderPrefix = c.lastSenderId === userId ? 'Tu: ' : '';
+            return `
+        <div class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer border-b border-slate-100 transition-colors"
+             onclick="window.openChatWith(${c.id}, '${c.name.replace(/'/g, "\\'")}', '${c.role}')">
+          ${photoHTML}
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-800">${c.name}</span>
+              <span class="text-[9px] text-slate-400">${timeAgo}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] text-slate-400 truncate">${senderPrefix}${preview}</span>
+              ${unreadBadge}
+            </div>
+          </div>
+        </div>`;
+        }).join('');
+    }
+    catch {
+        chatList.innerHTML = '<div class="p-4 text-center text-xs text-red-400">Erro ao carregar conversas</div>';
+    }
+}
+async function loadUnreadBadge() {
+    try {
+        const res = await fetch(`${API_URL}/messages/unread/${window.appContext.currentUserId}`);
+        if (!res.ok)
+            return;
+        const { count } = await res.json();
+        const badge = document.getElementById('chatBadge');
+        if (badge) {
+            if (count > 0) {
+                badge.textContent = String(count);
+                badge.style.display = 'flex';
+            }
+            else {
+                badge.style.display = 'none';
+            }
+        }
+    }
+    catch { /* ignore */ }
+}
+async function openChatWith(userId, name, role) {
+    currentChatUserId = userId;
+    // Close chat panel if open
+    document.getElementById('chatPanel')?.classList.add('hidden');
+    // Open conversation modal
+    const modal = document.getElementById('chatConversation');
+    modal.classList.remove('hidden');
+    document.getElementById('chatWithName').textContent = name;
+    document.getElementById('chatWithRole').textContent = role;
+    await loadMessages(userId);
+    // Poll for new messages every 3 seconds
+    if (chatPollInterval)
+        clearInterval(chatPollInterval);
+    chatPollInterval = setInterval(() => loadMessages(userId), 3000);
+}
+async function loadMessages(otherUserId) {
+    const container = document.getElementById('chatMessages');
+    const myId = window.appContext.currentUserId;
+    try {
+        const res = await fetch(`${API_URL}/messages/${myId}/${otherUserId}`);
+        if (!res.ok)
+            throw new Error('Erro');
+        const messages = await res.json();
+        if (messages.length === 0) {
+            container.innerHTML = '<div class="text-center text-xs text-slate-400 py-8">Nenhuma mensagem ainda. Diga olá! 👋</div>';
+            return;
+        }
+        container.innerHTML = messages.map((m) => {
+            const isMine = m.sender_id === myId;
+            const time = new Date(m.created_at).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+            return `
+        <div class="flex ${isMine ? 'justify-end' : 'justify-start'}">
+          <div class="max-w-[75%] px-3 py-2 rounded-xl text-sm ${isMine ? 'bg-indigo-600 text-white rounded-br-sm' : 'bg-slate-100 text-slate-800 rounded-bl-sm'}">
+            <p>${m.content}</p>
+            <p class="text-[9px] mt-1 ${isMine ? 'text-indigo-200' : 'text-slate-400'} text-right">${time}</p>
+          </div>
+        </div>`;
+        }).join('');
+        container.scrollTop = container.scrollHeight;
+    }
+    catch {
+        container.innerHTML = '<div class="text-center text-xs text-red-400 py-4">Erro ao carregar mensagens</div>';
+    }
+    // Update unread badge
+    loadUnreadBadge();
+}
+async function sendChatMessage() {
+    if (!currentChatUserId)
+        return;
+    const input = document.getElementById('chatInput');
+    const content = input.value.trim();
+    if (!content)
+        return;
+    input.value = '';
+    try {
+        await fetch(`${API_URL}/messages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sender_id: window.appContext.currentUserId,
+                receiver_id: currentChatUserId,
+                content
+            })
+        });
+        await loadMessages(currentChatUserId);
+    }
+    catch {
+        window.appContext.notificationService?.addNotification('Erro ao enviar mensagem', 'warning');
+    }
+}
+function setupChatListeners() {
+    // Toggle chat panel
+    const toggleChat = document.getElementById('toggleChat');
+    const chatPanel = document.getElementById('chatPanel');
+    const closeChatBtn = document.getElementById('closeChatPanel');
+    toggleChat?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        chatPanel?.classList.toggle('hidden');
+        if (!chatPanel?.classList.contains('hidden')) {
+            loadConversations();
+        }
+    });
+    closeChatBtn?.addEventListener('click', () => chatPanel?.classList.add('hidden'));
+    // Close chat panel on outside click
+    document.addEventListener('click', (e) => {
+        if (chatPanel && !chatPanel.classList.contains('hidden')) {
+            const target = e.target;
+            if (!chatPanel.contains(target) && !toggleChat?.contains(target)) {
+                chatPanel.classList.add('hidden');
+            }
+        }
+    });
+    // Close conversation modal
+    document.getElementById('closeChatConversation')?.addEventListener('click', () => {
+        document.getElementById('chatConversation')?.classList.add('hidden');
+        if (chatPollInterval) {
+            clearInterval(chatPollInterval);
+            chatPollInterval = null;
+        }
+        currentChatUserId = null;
+        loadUnreadBadge();
+    });
+    // Send message
+    document.getElementById('chatSendBtn')?.addEventListener('click', sendChatMessage);
+    document.getElementById('chatInput')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter')
+            sendChatMessage();
+    });
+}
+// Expose to window for onclick calls in rendered HTML
+window.openChatWith = openChatWith;
+async function bootstrapApp() {
+    const session = getSession();
+    if (session) {
+        // Already logged in — show app
+        showApp();
+        applySession(session);
+        await initializeApp();
+        setupLogout();
+        setupChatListeners();
+        loadUnreadBadge();
+        setInterval(loadUnreadBadge, 10000);
+        return;
+    }
+    // Not logged in — show login
+    showLogin();
+    const loginForm = document.getElementById('loginForm');
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const emailInput = document.getElementById('loginEmail');
+        const passwordInput = document.getElementById('loginPassword');
+        const errorDiv = document.getElementById('loginError');
+        const loginBtn = document.getElementById('loginBtn');
+        errorDiv.classList.add('hidden');
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'A entrar...';
+        try {
+            const session = await handleLogin(emailInput.value, passwordInput.value);
+            saveSession(session);
+            showApp();
+            // Ensure all modals and overlays are closed after login
+            document.querySelectorAll('[id$="Modal"]').forEach(modal => {
+                if (modal.id !== 'confirmModal')
+                    modal.remove();
+            });
+            const overlays = ['confirmModal', 'chatConversation', 'chatPanel', 'logsPanel'];
+            overlays.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && !el.classList.contains('hidden')) {
+                    el.classList.add('hidden');
+                }
+            });
+            applySession(session);
+            await initializeApp();
+            setupLogout();
+            setupChatListeners();
+            loadUnreadBadge();
+            setInterval(loadUnreadBadge, 10000);
+        }
+        catch (err) {
+            errorDiv.textContent = err.message;
+            errorDiv.classList.remove('hidden');
+        }
+        finally {
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Entrar';
+        }
+    });
+}
 // Auto-initialize when DOM is ready
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeApp);
+    document.addEventListener('DOMContentLoaded', bootstrapApp);
 }
 else {
-    initializeApp();
+    bootstrapApp();
 }
 /*
 // Código de teste comentado - usar apenas quando necessário

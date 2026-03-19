@@ -27,7 +27,7 @@ declare global {
         appContext: AppContext;
         renderModals: RenderModals;
         favoriteTasks: Favorites<Task>;
-        favoriteUsers: Favorites<User>;
+        favoriteUserIds: Set<number>;
         watcherSystem: WatcherSystem<Task | User, User>;
         priorityManager: PriorityManager<Task | User>;
         ratingSystem: RatingSystem<Task | User>;
@@ -63,6 +63,7 @@ interface AppContext {
     taskSortState: string;
     userSortState: string;
     userFilter: string;
+    myAssignedTaskIds: number[];
     checkPermission: (action: string) => boolean;
     saveAndRender: () => void;
     saveData: () => void;

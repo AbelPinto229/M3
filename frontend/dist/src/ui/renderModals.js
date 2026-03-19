@@ -3,6 +3,7 @@ import { SystemLogger } from '../logs/SystemLogger.js';
 import { SystemConfig } from '../services/SystemConfig.js';
 import { BaseEntity } from '../models/BaseEntity.js';
 import { IdGenerator } from '../utils/IdGenerator.js';
+const API_URL = 'http://localhost:3000';
 export class RenderModals {
     taskService;
     userService;
@@ -83,7 +84,7 @@ export class RenderModals {
             modal.remove();
     }
     // Saves updated task title and logs the change
-    saveEditTitle(taskId) {
+    async saveEditTitle(taskId) {
         const input = document.getElementById('editTitleInput');
         if (!input)
             return;
@@ -94,7 +95,7 @@ export class RenderModals {
         if (!task)
             return;
         const oldTitle = task.title;
-        this.taskService.updateTaskTitle(taskId, newTitle);
+        await this.taskService.updateTaskTitle(taskId, newTitle);
         SystemLogger.log(`Tarefa renomeada: "${oldTitle}" -> "${newTitle}"`);
         this.closeEditTitleModal();
         window.appContext.saveAndRender();
@@ -136,28 +137,47 @@ export class RenderModals {
     }
     // ===== EDIT USER MODAL =====
     // Opens modal to edit user details (name, email, role, photo)
-    openEditUserModal(userId, user) {
+    async openEditUserModal(userId, user) {
         const modalId = 'editUserModal';
         // Close any existing edit user modal
         const existing = document.getElementById(modalId);
         if (existing)
             existing.remove();
-        // Get ratings for the user
-        const average = window.ratingSystem.getAverage(user);
-        const ratings = window.ratingSystem.getRatings(user);
+        // Fetch ratings from API
+        let average = 0;
+        let ratingsCount = 0;
+        try {
+            const rRes = await fetch(`${API_URL}/user-ratings/${userId}/average`);
+            if (rRes.ok) {
+                const rData = await rRes.json();
+                average = rData.average || 0;
+                ratingsCount = rData.count || 0;
+            }
+        }
+        catch (e) { /* ignore */ }
         const ratingStarsHTML = [1, 2, 3, 4, 5]
             .map(i => {
             const isFilled = i <= Math.round(average);
             return `<span class="text-xl ${isFilled ? 'text-amber-400' : 'text-amber-200'}">${isFilled ? '★' : '☆'}</span>`;
         })
             .join('');
-        const ratingsInfoHTML = ratings.length === 0
+        const ratingsInfoHTML = ratingsCount === 0
             ? '<p class="text-slate-500 text-xs">Nenhuma avaliação ainda</p>'
-            : `<p class="text-xs"><b>Média:</b> ${average.toFixed(1)} (${ratings.length} avaliações)</p>`;
-        // Get watchers for the user
-        const watchers = window.watcherSystem.getWatchers(user);
-        const watchersListHTML = watchers.length > 0
-            ? watchers.map((w) => `<li class="text-xs text-slate-700">• ${w.name}</li>`).join('')
+            : `<p class="text-xs"><b>Média:</b> ${average.toFixed(1)} (${ratingsCount} avaliações)</p>`;
+        // Fetch watchers from API
+        let watchersList = [];
+        let watcherCount = 0;
+        try {
+            const wRes = await fetch(`${API_URL}/user-watchers/${userId}`);
+            if (wRes.ok) {
+                const wData = await wRes.json();
+                watchersList = wData.watchers || wData || [];
+                watcherCount = Array.isArray(watchersList) ? watchersList.length : 0;
+            }
+        }
+        catch (e) { /* ignore */ }
+        const watchersListHTML = watcherCount > 0
+            ? watchersList.map((w) => `<li class="text-xs text-slate-700">• ${w.name || w.watcher_name || 'Utilizador'}</li>`).join('')
             : '<li class="text-xs text-slate-500 italic">Nenhum seguidor</li>';
         // Get assigned tasks
         const assignedTasks = window.appContext.taskService.getTasks().filter((t) => t.assigned && Array.isArray(t.assigned) && t.assigned.some((email) => String(email) === String(user.email)));
@@ -192,7 +212,7 @@ export class RenderModals {
             </div>
             <div>
               <p class="text-xs font-bold text-slate-600 mb-1">NÍVEL VIP ATUAL</p>
-              <p class="text-xs font-semibold text-slate-900">${window.priorityManager.getPriority(user) || 'Sem VIP'}</p>
+              <p class="text-xs font-semibold text-slate-900">${user.vip_level ? 'Nível ' + user.vip_level : 'Sem VIP'}</p>
             </div>
             <div class="pt-2 border-t border-slate-200">
               <p class="text-xs font-bold text-slate-600 mb-2">⭐ AVALIAÇÕES</p>
@@ -202,7 +222,7 @@ export class RenderModals {
               ${ratingsInfoHTML}
             </div>
             <div class="pt-2 border-t border-slate-200">
-              <p class="text-xs font-bold text-slate-600 mb-2">👁️ SEGUIDORES (${watchers.length})</p>
+              <p class="text-xs font-bold text-slate-600 mb-2">👁️ SEGUIDORES (${watcherCount})</p>
               <ul class="max-h-24 overflow-y-auto bg-white p-2 rounded border border-slate-200">
                 ${watchersListHTML}
               </ul>
@@ -253,11 +273,11 @@ export class RenderModals {
             <div>
               <label class="text-xs font-bold text-slate-600 block mb-1">NÍVEL VIP</label>
               <select id="editUserVIPLevel" ${(window.appContext.currentUserRole === 'MEMBER' || window.appContext.currentUserRole === 'VIEWER') ? 'disabled' : ''} class="w-full border border-slate-200 rounded px-3 py-2 text-xs ${(window.appContext.currentUserRole === 'MEMBER' || window.appContext.currentUserRole === 'VIEWER') ? 'opacity-50 bg-slate-100 cursor-not-allowed' : ''}">
-                <option value="0" ${window.priorityManager.getPriority(user) === 0 ? 'selected' : ''}>Sem VIP</option>
-                <option value="1" ${window.priorityManager.getPriority(user) === 1 ? 'selected' : ''}>🔵 Nível 1 (Bronze)</option>
-                <option value="2" ${window.priorityManager.getPriority(user) === 2 ? 'selected' : ''}>🟡 Nível 2 (Prata)</option>
-                <option value="3" ${window.priorityManager.getPriority(user) === 3 ? 'selected' : ''}>🟠 Nível 3 (Ouro)</option>
-                <option value="4" ${window.priorityManager.getPriority(user) === 4 ? 'selected' : ''}>🔴 Nível 4 (Platina)</option>
+                <option value="0" ${(user.vip_level || 0) === 0 ? 'selected' : ''}>Sem VIP</option>
+                <option value="1" ${(user.vip_level || 0) === 1 ? 'selected' : ''}>🔵 Nível 1 (Bronze)</option>
+                <option value="2" ${(user.vip_level || 0) === 2 ? 'selected' : ''}>🟡 Nível 2 (Prata)</option>
+                <option value="3" ${(user.vip_level || 0) === 3 ? 'selected' : ''}>🟠 Nível 3 (Ouro)</option>
+                <option value="4" ${(user.vip_level || 0) === 4 ? 'selected' : ''}>🔴 Nível 4 (Platina)</option>
               </select>
             </div>
           </div>
@@ -299,11 +319,11 @@ export class RenderModals {
             email: emailInput.value,
             role: roleSelect.value
         };
-        // Handle VIP level
-        if (vipLevelSelect && userBeingEdited) {
+        // Handle VIP level - send via API update
+        if (vipLevelSelect) {
             const vipLevel = parseInt(vipLevelSelect.value);
-            window.priorityManager.setPriority(userBeingEdited, vipLevel);
-            if (vipLevel > 0) {
+            updateData.vip_level = vipLevel;
+            if (vipLevel > 0 && userBeingEdited) {
                 SystemLogger.log(`Nível VIP de "${userBeingEdited.name}" alterado para ${vipLevel}`);
             }
         }
@@ -450,6 +470,10 @@ export class RenderModals {
               <option value="bug">Erro</option>
               <option value="feature">Funcionalidade</option>
               <option value="task">Tarefa</option>
+              <option value="improvement">Melhoria</option>
+              <option value="documentation">Documentação</option>
+              <option value="test">Teste</option>
+              <option value="design">Design</option>
             </select>
           </div>
           <div>

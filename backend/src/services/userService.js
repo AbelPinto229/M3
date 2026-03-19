@@ -1,4 +1,49 @@
 import { db } from '../db.js';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'clickup_secret_key_2026';
+
+export const loginUser = async (email, password) => {
+  const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+  
+  if (users.length === 0) {
+    throw new Error('Email ou password incorretos');
+  }
+  
+  const user = users[0];
+  
+  if (!user.active) {
+    throw new Error('Conta desativada. Contacte o administrador.');
+  }
+  
+  if (!user.password) {
+    throw new Error('Password não definida. Execute a migração de passwords.');
+  }
+  
+  const isValid = await bcrypt.compare(password, user.password);
+  if (!isValid) {
+    throw new Error('Email ou password incorretos');
+  }
+  
+  const token = jwt.sign(
+    { id: user.id, email: user.email, role: user.role },
+    JWT_SECRET,
+    { expiresIn: '8h' }
+  );
+  
+  return {
+    token,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      active: user.active,
+      photo: user.photo
+    }
+  };
+};
 
 export const getUsers = async (query = {}) => {
   let sql = 'SELECT * FROM users';
@@ -22,13 +67,20 @@ export const getUsers = async (query = {}) => {
 
 export const createUser = async (data) => {
   console.log('📝 Criando utilizador na DB:', data);
-  const sql = 'INSERT INTO users (name, email, role, active, photo) VALUES (?, ?, ?, ?, ?)';
+  
+  // Auto-generate password: first name (lowercase) + "123"
+  const firstName = data.name.trim().split(/\s+/)[0].toLowerCase();
+  const autoPassword = firstName + '123';
+  const hashedPassword = await bcrypt.hash(autoPassword, 10);
+  
+  const sql = 'INSERT INTO users (name, email, role, active, photo, password) VALUES (?, ?, ?, ?, ?, ?)';
   const [result] = await db.query(sql, [
     data.name, 
     data.email, 
     data.role || 'MEMBER',
     data.active ?? true,
-    data.photo || null
+    data.photo || null,
+    hashedPassword
   ]);
   
   const newUser = {
@@ -45,8 +97,22 @@ export const createUser = async (data) => {
 }
 
 export const updateUser = async (id, data) => {
-  const sql = 'UPDATE users SET name = ?, email = ?, active = ? WHERE id = ?';
-  const [result] = await db.query(sql, [data.name ?? null, data.email ?? null, data.active ?? null, id]);
+  // Build dynamic UPDATE with only provided fields
+  const fields = [];
+  const values = [];
+  
+  if (data.name !== undefined) { fields.push('name = ?'); values.push(data.name); }
+  if (data.email !== undefined) { fields.push('email = ?'); values.push(data.email); }
+  if (data.active !== undefined) { fields.push('active = ?'); values.push(data.active); }
+  if (data.role !== undefined) { fields.push('role = ?'); values.push(data.role); }
+  if (data.photo !== undefined) { fields.push('photo = ?'); values.push(data.photo); }
+  if (data.vip_level !== undefined) { fields.push('vip_level = ?'); values.push(data.vip_level); }
+  
+  if (fields.length === 0) return await getUserById(id);
+  
+  values.push(id);
+  const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
+  const [result] = await db.query(sql, values);
   
   if (result.affectedRows === 0) {
     throw new Error("Utilizador não encontrado");

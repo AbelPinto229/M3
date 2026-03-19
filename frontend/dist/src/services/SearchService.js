@@ -1,21 +1,24 @@
 // SEARCH SERVICE - Provides search and filtering functionality for tasks
 export class SearchService {
-    tasks;
-    constructor(tasks) {
-        this.tasks = tasks;
+    taskService;
+    constructor(taskService) {
+        this.taskService = taskService;
     }
     // searches tasks by title with case-insensitive matching
     searchByTitle(text) {
-        return this.tasks.filter((t) => t.title.toLowerCase().includes(text.toLowerCase()));
+        const tasks = this.taskService.getTasks();
+        return tasks.filter((t) => t.title.toLowerCase().includes(text.toLowerCase()));
     }
     // retrieves all tasks assigned to a specific user
     searchByUser(userId, assignmentService) {
+        const tasks = this.taskService.getTasks();
         const taskIds = assignmentService.getTasksFromUser(userId);
-        return this.tasks.filter((t) => taskIds.includes(t.id));
+        return tasks.filter((t) => taskIds.includes(t.id));
     }
     // filters tasks by their status
     searchByStatus(status) {
-        return this.tasks.filter((t) => t.status === status);
+        const tasks = this.taskService.getTasks();
+        return tasks.filter((t) => t.status === status);
     }
     // performs comprehensive search across title, status, and user with duplicate removal
     globalSearch(query, assignmentService) {

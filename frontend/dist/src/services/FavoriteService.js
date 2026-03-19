@@ -38,7 +38,6 @@ export class FavoriteService {
             });
             console.log('📡 Resposta da API:', response.status, response.ok);
             if (response.ok) {
-                // Update local cache
                 if (!this.userFavorites.has(userId)) {
                     this.userFavorites.set(userId, new Set());
                 }
@@ -46,23 +45,12 @@ export class FavoriteService {
                 console.log('✅ Favorito adicionado na API');
                 return true;
             }
-            console.error('❌ API retornou erro:', response.status);
-            // Fallback: add locally
-            if (!this.userFavorites.has(userId)) {
-                this.userFavorites.set(userId, new Set());
-            }
-            this.userFavorites.get(userId)?.add(taskId);
-            console.log('📦 Modo offline: Favorito adicionado localmente');
-            return true;
+            console.error('❌ Erro ao adicionar favorito:', response.status);
+            return false;
         }
         catch (error) {
-            console.error('⚠️ Erro ao adicionar favorito na API. A adicionar localmente...', error);
-            // Fallback: add locally
-            if (!this.userFavorites.has(userId)) {
-                this.userFavorites.set(userId, new Set());
-            }
-            this.userFavorites.get(userId)?.add(taskId);
-            return true;
+            console.error('⚠️ Erro ao adicionar favorito:', error);
+            return false;
         }
     }
     // Removes a task from user's favorites
@@ -74,22 +62,16 @@ export class FavoriteService {
             });
             console.log('📡 Resposta da API:', response.status, response.ok);
             if (response.ok) {
-                // Update local cache
                 this.userFavorites.get(userId)?.delete(taskId);
                 console.log('✅ Favorito removido na API');
                 return true;
             }
-            console.error('❌ API retornou erro:', response.status);
-            // Fallback: remove locally
-            this.userFavorites.get(userId)?.delete(taskId);
-            console.log('📦 Modo offline: Favorito removido localmente');
-            return true;
+            console.error('❌ Erro ao remover favorito:', response.status);
+            return false;
         }
         catch (error) {
-            console.error('⚠️ Erro ao remover favorito na API. A remover localmente...', error);
-            // Fallback: remove locally
-            this.userFavorites.get(userId)?.delete(taskId);
-            return true;
+            console.error('⚠️ Erro ao remover favorito:', error);
+            return false;
         }
     }
     // Gets all favorite task IDs for a user

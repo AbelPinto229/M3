@@ -1,5 +1,7 @@
 import { User } from '../models/Users';
 import { Task } from '../models/Task';
+import { UserService } from './UserService.js';
+import { TaskService } from './TaskService.js';
 
 // Data structure for storing complete system backup snapshots
 export interface BackupData {
@@ -14,12 +16,12 @@ export class BackupService {
   // Array storing all created backups
   private backups: BackupData[] = [];
 
-  constructor(private users: User[], private tasks: Task[], private assignments: any) {}
+  constructor(private userService: UserService, private taskService: TaskService, private assignments: any) {}
 
   // Exports a shallow copy of all users
-  exportUsers() { return [...this.users]; }
+  exportUsers() { return [...this.userService.getUsers()]; }
   // Exports a shallow copy of all tasks
-  exportTasks() { return [...this.tasks]; }
+  exportTasks() { return [...this.taskService.getTasks()]; }
   // Exports a shallow copy of all assignments
   exportAssignments() { return { ...this.assignments }; }
   

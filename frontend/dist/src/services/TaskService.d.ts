@@ -15,6 +15,7 @@ export declare class TaskService {
     updateTaskStatus(id: number, status: string): Promise<void>;
     updateTaskTitle(id: number, title: string): Promise<void>;
     updateTaskPriority(id: number, priority: string): Promise<void>;
+    updateTaskHighlight(id: number, highlight: number): Promise<void>;
     updateTaskDeadline(id: number, deadline: string): Promise<void>;
     assignUser(taskId: number, email: string): Promise<void>;
     unassignUser(taskId: number, email: string): Promise<void>;

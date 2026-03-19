@@ -1,5 +1,5 @@
-import { Task } from '../models/Task';
-import { User } from '../models/Users';
+import { TaskService } from './TaskService.js';
+import { UserService } from './UserService.js';
 export interface TaskStats {
     total: number;
     completed: number;
@@ -14,9 +14,9 @@ export interface UserStats {
     activeRate: number;
 }
 export declare class StatisticsService {
-    private tasks;
-    private users;
-    constructor(tasks: Task[], users: User[]);
+    private taskService;
+    private userService;
+    constructor(taskService: TaskService, userService: UserService);
     countUsers(): UserStats;
     countTasks(): TaskStats;
     countCompletedTasks(): number;
