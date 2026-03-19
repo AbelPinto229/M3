@@ -1,46 +1,28 @@
-// USER SERVICE - Manages user accounts, roles, and permissions
+// USER SERVICE - Manages user accounts, roles, and permissions with backend API integration
 export class UserService {
-    // Array storing all system users
-    users = [
-        { id: 0, email: 'admin@sistema.com', name: 'Administrator', role: 'ADMIN', active: true },
-        { id: 1, name: 'Abel Pinto', email: 'abel@example.com', role: 'MEMBER', active: true },
-        { id: 2, name: 'Joel Pinto', email: 'joel@example.com', role: 'MANAGER', active: false },
-        { id: 3, name: 'Lionel Pinto', email: 'Lionel@example.com', role: 'MEMBER', active: true },
-        { id: 4, name: 'Isabel Pinto', email: 'Isabel@example.com', role: 'VIEWER', active: false },
-        { id: 5, name: 'Ezequiel Pinto', email: 'Ezequiel@example.com', role: 'MEMBER', active: true },
-        { id: 6, name: 'Ana Silva', email: 'ana.silva@example.com', role: 'MEMBER', active: true },
-        { id: 7, name: 'Bruno Costa', email: 'bruno.costa@example.com', role: 'MANAGER', active: true },
-        { id: 8, name: 'Carla Martins', email: 'carla.martins@example.com', role: 'MEMBER', active: false },
-        { id: 9, name: 'David Santos', email: 'david.santos@example.com', role: 'MEMBER', active: true },
-        { id: 10, name: 'Elisa Ferreira', email: 'elisa.ferreira@example.com', role: 'VIEWER', active: true },
-        { id: 11, name: 'Francisco Oliveira', email: 'francisco.oliveira@example.com', role: 'MEMBER', active: true },
-        { id: 12, name: 'Graça Sousa', email: 'graca.sousa@example.com', role: 'MANAGER', active: false },
-        { id: 13, name: 'Hugo Pereira', email: 'hugo.pereira@example.com', role: 'MEMBER', active: true },
-        { id: 14, name: 'Iris Gomes', email: 'iris.gomes@example.com', role: 'MEMBER', active: true },
-        { id: 15, name: 'Jorge Ribeiro', email: 'jorge.ribeiro@example.com', role: 'VIEWER', active: false },
-        { id: 16, name: 'Karen Lopes', email: 'karen.lopes@example.com', role: 'MEMBER', active: true },
-        { id: 17, name: 'Lúcio Tavares', email: 'lucio.tavares@example.com', role: 'MEMBER', active: true },
-        { id: 18, name: 'Marta Alves', email: 'marta.alves@example.com', role: 'MANAGER', active: true },
-        { id: 19, name: 'Nuno Dias', email: 'nuno.dias@example.com', role: 'MEMBER', active: false },
-        { id: 20, name: 'Olga Rocha', email: 'olga.rocha@example.com', role: 'MEMBER', active: true },
-        { id: 21, name: 'Paulo Mendes', email: 'paulo.mendes@example.com', role: 'VIEWER', active: true },
-        { id: 22, name: 'Querida Cruz', email: 'querida.cruz@example.com', role: 'MEMBER', active: true },
-        { id: 23, name: 'Rita Neves', email: 'rita.neves@example.com', role: 'MEMBER', active: false },
-        { id: 24, name: 'Sergio Cabral', email: 'sergio.cabral@example.com', role: 'MANAGER', active: true },
-        { id: 25, name: 'Tânia Monteiro', email: 'tania.monteiro@example.com', role: 'MEMBER', active: true },
-        { id: 26, name: 'Ulisses Brás', email: 'ulisses.bras@example.com', role: 'MEMBER', active: true },
-        { id: 27, name: 'Vanessa Leite', email: 'vanessa.leite@example.com', role: 'VIEWER', active: false },
-        { id: 28, name: 'Wagner Nascimento', email: 'wagner.nascimento@example.com', role: 'MEMBER', active: true },
-        { id: 29, name: 'Ximena Cardoso', email: 'ximena.cardoso@example.com', role: 'MEMBER', active: true },
-        { id: 30, name: 'Yara Barbosa', email: 'yara.barbosa@example.com', role: 'MANAGER', active: false },
-        { id: 31, name: 'Zila Moreira', email: 'zila.moreira@example.com', role: 'MEMBER', active: true },
-        { id: 32, name: 'André Neves', email: 'andre.neves@example.com', role: 'MEMBER', active: true },
-        { id: 33, name: 'Beatriz Teixeira', email: 'beatriz.teixeira@example.com', role: 'VIEWER', active: true },
-        { id: 34, name: 'Cristóvão Duarte', email: 'cristovao.duarte@example.com', role: 'MEMBER', active: false },
-        { id: 35, name: 'Deolinda Leal', email: 'deolinda.leal@example.com', role: 'MANAGER', active: true }
-    ];
-    // Counter for generating unique user IDs
-    nextId = 36;
+    API_BASE_URL = 'http://localhost:3000';
+    // Cache local para evitar chamadas repetidas
+    users = [];
+    // Carrega todos os users da API
+    async loadUsers() {
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/users`);
+            if (response.ok) {
+                this.users = await response.json();
+                console.log(`✅ ${this.users.length} utilizadores carregados da API`);
+            }
+        }
+        catch (error) {
+            console.error('⚠️ Erro ao carregar users da API:', error);
+            // Fallback: usar alguns users de exemplo
+            this.users = [
+                { id: 0, email: 'admin@sistema.com', name: 'Administrator', role: 'ADMIN', active: true },
+                { id: 1, name: 'Abel Pinto', email: 'abel@example.com', role: 'MEMBER', active: true },
+                { id: 2, name: 'Joel Pinto', email: 'joel@example.com', role: 'MANAGER', active: true },
+            ];
+            console.log('📦 Modo offline: A usar utilizadores de exemplo');
+        }
+    }
     // Returns all users
     getUsers() {
         return this.users;
@@ -58,34 +40,115 @@ export class UserService {
         return this.users.filter(u => u.active);
     }
     // Creates a new user (returns null if email already exists)
-    addUser(email, name, role, photo) {
-        if (this.users.some(u => u.email === email))
-            return null;
-        const user = { id: this.nextId++, email, name, role: role, active: true, photo };
-        this.users.push(user);
-        return user;
-    }
-    // Toggles user active/inactive status
-    toggleUserStatus(id) {
-        const user = this.getUserById(id);
-        if (user)
-            user.active = !user.active;
-    }
-    // Deletes a user by ID
-    deleteUser(id) {
-        this.users = this.users.filter(u => u.id !== id);
-    }
-    // Updates user information with duplicate email prevention
-    updateUser(id, updates) {
-        const user = this.getUserById(id);
-        if (!user)
-            return null;
-        // Don't allow email duplicates on update
-        if (updates.email && updates.email !== user.email && this.users.some(u => u.email === updates.email)) {
+    async addUser(email, name, role, photo) {
+        // Check for duplicates locally first
+        if (this.users.some(u => u.email === email)) {
+            console.warn('Email já existe:', email);
             return null;
         }
-        Object.assign(user, updates);
-        return user;
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/users`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, name, role, photo, active: true })
+            });
+            if (response.ok) {
+                const newUser = await response.json();
+                this.users.push(newUser);
+                console.log('✅ Utilizador criado na API:', newUser);
+                return newUser;
+            }
+            return null;
+        }
+        catch (error) {
+            console.error('⚠️ Erro ao criar user na API. A criar localmente...', error);
+            // Fallback: criar localmente
+            const newUser = {
+                id: Date.now(),
+                email,
+                name,
+                role: role,
+                active: true,
+                photo
+            };
+            this.users.push(newUser);
+            console.log('📦 Modo offline: Utilizador criado localmente:', newUser);
+            return newUser;
+        }
+    }
+    // Toggles user active/inactive status
+    async toggleUserStatus(id) {
+        const user = this.getUserById(id);
+        if (!user)
+            return;
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/users/${id}`, {
+                method: 'PATCH'
+            });
+            if (response.ok) {
+                const updatedUser = await response.json();
+                const index = this.users.findIndex(u => u.id === id);
+                if (index !== -1) {
+                    this.users[index] = updatedUser;
+                }
+                console.log('✅ Status atualizado na API');
+            }
+        }
+        catch (error) {
+            console.error('⚠️ Erro ao toggle status na API. A atualizar localmente...', error);
+            // Fallback: atualizar localmente
+            user.active = !user.active;
+            console.log('📦 Modo offline: Status atualizado localmente');
+        }
+    }
+    // Deletes a user by ID
+    async deleteUser(id) {
+        console.log('🗑️ A eliminar utilizador com ID:', id);
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/users/${id}`, {
+                method: 'DELETE'
+            });
+            console.log('📡 Resposta da API:', response.status, response.ok);
+            if (response.ok) {
+                this.users = this.users.filter(u => u.id !== id);
+                console.log('✅ Utilizador deletado na API. Users restantes:', this.users.length);
+            }
+            else {
+                console.error('❌ API retornou erro:', response.status);
+                // Fallback: deletar localmente mesmo assim
+                this.users = this.users.filter(u => u.id !== id);
+                console.log('📦 Deletado localmente apesar do erro. Users restantes:', this.users.length);
+            }
+        }
+        catch (error) {
+            console.error('⚠️ Erro ao deletar user na API. A deletar localmente...', error);
+            // Fallback: deletar localmente
+            this.users = this.users.filter(u => u.id !== id);
+            console.log('📦 Modo offline: Utilizador deletado localmente. Users restantes:', this.users.length);
+        }
+    }
+    // Updates user information with duplicate email prevention
+    async updateUser(id, updates) {
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/users/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updates)
+            });
+            if (response.ok) {
+                const updatedUser = await response.json();
+                const index = this.users.findIndex(u => u.id === id);
+                if (index !== -1) {
+                    this.users[index] = updatedUser;
+                }
+                return updatedUser;
+            }
+            return null;
+        }
+        catch (error) {
+            console.error('Erro ao atualizar user:', error);
+            return null;
+        }
     }
 }
 //# sourceMappingURL=UserService.js.map

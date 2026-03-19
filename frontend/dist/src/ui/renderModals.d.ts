@@ -5,7 +5,7 @@ export declare class RenderModals {
     private userService;
     private pendingDeleteAction;
     constructor(taskService: TaskService, userService: UserService);
-    openConfirmModal(message: string, confirmCallback: () => void): void;
+    openConfirmModal(message: string, confirmCallback: () => void | Promise<void>): void;
     closeConfirmModal(): void;
     confirmAction(): void;
     openEditTitleModal(taskId: number): void;
@@ -19,11 +19,11 @@ export declare class RenderModals {
     private performUserUpdate;
     openCreateUserModal(): void;
     closeCreateUserModal(): void;
-    saveCreateUser(): void;
+    saveCreateUser(): Promise<void>;
     openCreateTaskModal(): void;
     closeCreateTaskModal(): void;
     handleTaskFileUpload(event: Event): void;
-    saveCreateTask(): void;
+    saveCreateTask(): Promise<void>;
     openSystemConfigModal(): void;
     closeSystemConfigModal(): void;
 }

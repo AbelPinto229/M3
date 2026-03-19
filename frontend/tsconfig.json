@@ -14,6 +14,6 @@
     "declaration": true,
     "sourceMap": true
   },
-  "include": ["frontend/src/main.ts", "frontend/src/**/*"],
-  "exclude": ["node_modules", "dist", "M3/**/*"]
+  "include": ["main.ts", "src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

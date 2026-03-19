@@ -1,30 +1,39 @@
+import { db } from '../db.js';
 import { getTasksByTag } from "./taskService.js";
 
-let tags = [];
-let id = 1;
-
-export const getTags = () => {
+export const getTags = async () => {
+  const sql = 'SELECT * FROM tags';
+  const [tags] = await db.query(sql);
   return tags;
 }
 
-export const createTag = (data) => {
-  const newTag = { 
-    id: id++, 
-    nome: data.nome
+export const createTag = async (data) => {
+  console.log('📝 Criando tag na DB:', data);
+  const sql = 'INSERT INTO tags (name) VALUES (?)';
+  const [result] = await db.query(sql, [data.name || data.nome]);
+  
+  const newTag = {
+    id: result.insertId,
+    name: data.name || data.nome
   };
-  tags.push(newTag);
+  
+  console.log('✅ Tag criada na DB:', newTag);
   return newTag;
 }
 
-export const deleteTag = (id) => {
-  const tag = tags.find(t => t.id === id);
-  if (!tag) {
+export const deleteTag = async (id) => {
+  console.log('🗑️ Deletando tag ID:', id);
+  const sql = 'DELETE FROM tags WHERE id = ?';
+  const [result] = await db.query(sql, [id]);
+  
+  if (result.affectedRows === 0) {
     throw new Error("Tag não encontrada");
   }
-  tags = tags.filter(t => t.id !== id);
+  
+  console.log('✅ Tag deletada com sucesso');
 }
 
-export const getTasksForTag = (tagId) => {
-  return getTasksByTag(tagId);
+export const getTasksForTag = async (tagId) => {
+  return await getTasksByTag(tagId);
 }
 

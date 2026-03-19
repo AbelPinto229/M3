@@ -10,8 +10,8 @@ import { AttachmentService } from '../services/AttachmentService.js';
 import { processTask } from '../utils/TaskUtils.js';
 import { SystemLogger } from '../logs/SystemLogger.js';
 
-const TASK_PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
-const PRIORITY_DISPLAY_MAP: Record<string, string> = { 'LOW': 'Baixa', 'MEDIUM': 'Média', 'HIGH': 'Alta', 'CRITICAL': 'Crítica' };
+const TASK_PRIORITIES = ['LOW', 'MEDIUM', 'HIGH'];
+const PRIORITY_DISPLAY_MAP: Record<string, string> = { 'LOW': 'Baixa', 'MEDIUM': 'Média', 'HIGH': 'Alta' };
 
 export class RenderTask {
   private activeTaskModalId: number | null = null;
@@ -44,7 +44,9 @@ export class RenderTask {
     // Apply favorites filter if selected
     const favoritesFilter = (document.getElementById('filterFavoriteTasks') as HTMLButtonElement)?.classList.contains('bg-yellow-200');
     if (favoritesFilter) {
-      filteredTasks = filteredTasks.filter((t: ExtendedTask) => window.favoriteTasks.exists(t));
+      const userId = window.appContext.currentUserId;
+      const favoriteTasks = window.appContext.favoriteService.getUserFavorites(userId);
+      filteredTasks = filteredTasks.filter((t: ExtendedTask) => favoriteTasks.includes(t.id));
     }
 
     // Apply sorting based on sort state
@@ -73,18 +75,16 @@ export class RenderTask {
           : 'bg-blue-50 text-blue-600 border-blue-100';
 
     let priorityColorClass = 'text-slate-400';
-    // Set priority colors: medium (amber), high (orange), critical (red)
     if (t.priority === 'MEDIUM') priorityColorClass = 'text-amber-500 font-bold';
     if (t.priority === 'HIGH') priorityColorClass = 'text-orange-500 font-bold';
-    if (t.priority === 'CRITICAL') priorityColorClass = 'text-red-600 font-bold';
 
     // Map task type and priority to Portuguese display text
     const typeMap: Record<string, string> = { 'bug': 'Erro', 'feature': 'Funcionalidade', 'task': 'Tarefa' };
-    const priorityMap: Record<string, string> = { 'LOW': 'Baixa', 'MEDIUM': 'Média', 'HIGH': 'Alta', 'CRITICAL': 'Crítica' };
+    const priorityMap: Record<string, string> = { 'LOW': 'Baixa', 'MEDIUM': 'Média', 'HIGH': 'Alta' };
     const displayType = typeMap[t.type?.toLowerCase()] || t.type;
     const displayPriority = priorityMap[t.priority || 'LOW'] || (t.priority || 'Baixa');
 
-    const isFavorite = window.favoriteTasks.exists(t);
+    const isFavorite = window.appContext.favoriteService.isFavorite(window.appContext.currentUserId, t.id);
     const favoriteStarClass = isFavorite ? 'favorite-star active' : 'favorite-star inactive';
     
     const currentUser = window.appContext.userService.getUserById(window.appContext.currentUserId);
@@ -150,6 +150,21 @@ export class RenderTask {
     this.activeTaskModalId = taskId;
     const task = this.taskService.getTaskById(taskId);
     if (!task) return;
+
+    // Load comments from API before rendering
+    this.commentService.loadComments(taskId).then(() => {
+      const commentsContainer = document.getElementById('taskComments');
+      if (commentsContainer) {
+        const comments = this.commentService.getComments(taskId);
+        commentsContainer.innerHTML = comments.length === 0
+          ? '<p class="text-[10px] text-slate-400 italic">Sem comentários</p>'
+          : comments.map(c => {
+              const user = this.userService.getUserById(c.userId);
+              const userEmail = user?.email || `User ${c.userId}`;
+              return `<div class="flex justify-between text-[10px] mb-1"><span><b>${userEmail}:</b> ${c.message}</span><button onclick="window.appContext.renderTask.deleteComment(${c.id})" class="text-red-500">×</button></div>`;
+            }).join('');
+      }
+    });
 
     // Map type and priority to Portuguese
     const typeMap: Record<string, string> = { 'bug': 'Erro', 'feature': 'Funcionalidade', 'task': 'Tarefa' };
@@ -232,7 +247,10 @@ export class RenderTask {
             <div>
               <h4 class="font-bold text-xs mb-2">Etiquetas:</h4>
               <div id="taskTagsList" class="flex flex-wrap gap-1 mb-2"></div>
-              <input type="text" id="tagInput" class="w-full px-2 py-1 border rounded text-xs" placeholder="Nova etiqueta..." onkeypress="if(event.key==='Enter'){ window.appContext.renderTask.addTag(); }">
+              <div class="flex gap-2">
+                <input type="text" id="tagInput" class="flex-1 px-2 py-1 border rounded text-xs" placeholder="Nova etiqueta..." onkeypress="if(event.key==='Enter'){ window.appContext.renderTask.addTag(); }">
+                <button onclick="window.appContext.renderTask.addTag()" class="px-3 py-1 bg-indigo-500 text-white rounded text-xs hover:bg-indigo-600">+</button>
+              </div>
             </div>
             ` : '<div><h4 class="font-bold text-xs mb-2">Etiquetas:</h4><div id="taskTagsList" class="flex flex-wrap gap-1 mb-2"></div></div>'}
           </div>
@@ -242,7 +260,12 @@ export class RenderTask {
             <div>
               <h4 class="font-bold text-xs mb-2">Comentários:</h4>
               <div id="taskComments" class="max-h-20 overflow-y-auto text-xs bg-slate-50 p-2 rounded mb-2 flex-1"></div>
-              ${!isViewer ? `<input type="text" id="newCommentInput" class="w-full px-2 py-1 border rounded text-xs" placeholder="Comentário..." onkeypress="if(event.key==='Enter'){ window.appContext.renderTask.addComment(); }">` : '<p class="text-xs text-slate-400 italic">Ver. - Sem permissão</p>'}
+              ${!isViewer ? `
+                <div class="flex gap-2">
+                  <input type="text" id="newCommentInput" class="flex-1 px-2 py-1 border rounded text-xs" placeholder="Comentário..." onkeypress="if(event.key==='Enter'){ window.appContext.renderTask.addComment(); }">
+                  <button onclick="window.appContext.renderTask.addComment()" class="px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600">Enviar</button>
+                </div>
+              ` : '<p class="text-xs text-slate-400 italic">Ver. - Sem permissão</p>'}
             </div>
             
             ${!isViewer ? `
@@ -355,10 +378,64 @@ export class RenderTask {
 
   // ===== TAG MANAGEMENT =====
   // Adds a new tag to the active task
-  addTag(): void {
+  async addTag(): Promise<void> {
     if (!this.activeTaskModalId) return;
     const input = document.getElementById('tagInput') as HTMLInputElement;
-    this.tagService.addTag(this.activeTaskModalId, input.value);
+    if (!input.value.trim()) return;
+
+    console.log('🏷️ Adicionando tag:', input.value);
+    const tagName = input.value.trim();
+    
+    try {
+      // First, create or get the tag
+      const tagsResponse = await fetch('http://localhost:3000/tags');
+      const existingTags = await tagsResponse.json();
+      let tagId = existingTags.find((t: any) => t.name.toLowerCase() === tagName.toLowerCase())?.id;
+      
+      if (!tagId) {
+        console.log('📝 Criando nova tag:', tagName);
+        const createResponse = await fetch('http://localhost:3000/tags', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: tagName })
+        });
+        
+        if (createResponse.ok) {
+          const newTag = await createResponse.json();
+          tagId = newTag.id;
+          console.log('✅ Tag criada:', newTag);
+        } else {
+          console.error('❌ Erro ao criar tag:', createResponse.status);
+          window.appContext.notificationService.addNotification('Erro ao criar tag!', 'warning');
+          return;
+        }
+      }
+      
+      // Now associate the tag with the task
+      console.log('🔗 Associando tag', tagId, 'à tarefa', this.activeTaskModalId);
+      const associateResponse = await fetch(`http://localhost:3000/tasks/${this.activeTaskModalId}/tags`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tagId })
+      });
+      
+      if (associateResponse.ok) {
+        console.log('✅ Tag associada à tarefa');
+        // Update local cache
+        this.tagService.addTag(this.activeTaskModalId, tagName);
+        window.appContext.notificationService.addNotification(`Tag "${tagName}" adicionada!`, 'success');
+      } else {
+        const error = await associateResponse.text();
+        console.error('❌ Erro ao associar tag:', error);
+        window.appContext.notificationService.addNotification('Tag já existe nesta tarefa!', 'warning');
+      }
+    } catch (error) {
+      console.error('⚠️ Erro ao adicionar tag:', error);
+      // Fallback: add locally only
+      this.tagService.addTag(this.activeTaskModalId, tagName);
+      window.appContext.notificationService.addNotification('Tag adicionada localmente (offline)', 'info');
+    }
+    
     input.value = '';
     this.renderTaskModalContent();
   }
@@ -372,29 +449,33 @@ export class RenderTask {
 
   // ===== COMMENT MANAGEMENT =====
   // Adds a comment to the task (permission-based)
-  addComment(): void {
+  async addComment(): Promise<void> {
+    console.log('🎯 addComment() chamada!');
     // VIEWER role cannot add comments
     if (window.appContext.currentUserRole === 'VIEWER') {
       window.appContext.notificationService.addNotification('Sem permissão para comentar!', 'warning');
       return;
     }
 
-    if (!this.activeTaskModalId) return;
-    const input = document.getElementById('newCommentInput') as HTMLInputElement;
-    if (!input.value.trim()) return;
-
-    // Get the task and its assigned user
-    const task = this.taskService.getTaskById(this.activeTaskModalId);
-    let userId = 0; // Default to admin
-    
-    if (task?.assigned && task.assigned.length > 0) {
-      // Find the user ID from the assigned email
-      const assignedEmail = task.assigned[0];
-      const assignedUser = this.userService.getUserByEmail(assignedEmail);
-      if (assignedUser) userId = assignedUser.id;
+    if (!this.activeTaskModalId) {
+      console.error('❌ activeTaskModalId não existe:', this.activeTaskModalId);
+      return;
     }
+    const input = document.getElementById('newCommentInput') as HTMLInputElement;
+    if (!input) {
+      console.error('❌ Input newCommentInput não encontrado!');
+      return;
+    }
+    if (!input.value.trim()) {
+      console.warn('⚠️ Input vazio');
+      return;
+    }
+
+    // Use current logged in user (not assigned user)
+    const userId = window.appContext.currentUserId;
+    console.log('📤 Enviando comentário:', { taskId: this.activeTaskModalId, userId, message: input.value });
     
-    this.commentService.addComment(this.activeTaskModalId, userId, input.value);
+    await this.commentService.addComment(this.activeTaskModalId, userId, input.value);
     SystemLogger.log(`Comentário adicionado à tarefa ${this.activeTaskModalId}`);
     window.appContext.notificationService.addNotification('Comentário adicionado!', 'success');
     input.value = '';
@@ -410,15 +491,15 @@ export class RenderTask {
 
   // ===== ATTACHMENT MANAGEMENT =====
   // Reads file as base64 and adds it as task attachment
-  addAttachment(event: Event): void {
+  async addAttachment(event: Event): Promise<void> {
     if (!this.activeTaskModalId) return;
     const target = event.target as HTMLInputElement;
     const file = target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (e: ProgressEvent<FileReader>) => {
-      this.attachmentService.addAttachment(this.activeTaskModalId!, {
+    reader.onload = async (e: ProgressEvent<FileReader>) => {
+      await this.attachmentService.addAttachment(this.activeTaskModalId!, {
         taskId: this.activeTaskModalId!,
         filename: file.name,
         size: file.size,
@@ -432,8 +513,8 @@ export class RenderTask {
   }
 
   // Removes an attachment from the task
-  deleteAttachment(id: number): void {
-    this.attachmentService.removeAttachment(id);
+  async deleteAttachment(id: number): Promise<void> {
+    await this.attachmentService.removeAttachment(id);
     SystemLogger.log(`Ficheiro ${id} removido da tarefa`);
     window.appContext.notificationService.addNotification('Ficheiro removido!', 'success');
     this.renderTaskModalContent();
@@ -441,7 +522,7 @@ export class RenderTask {
 
   // ===== TASK ACTIONS =====
   // Cycles task through PENDING -> IN_PROGRESS -> COMPLETED
-  cycleTaskStatus(id: number): void {
+  async cycleTaskStatus(id: number): Promise<void> {
     // VIEWER cannot change task status
     if (window.appContext.currentUserRole === 'VIEWER') {
       window.appContext.notificationService.addNotification('Sem permissão para alterar o estado!', 'warning');
@@ -454,7 +535,7 @@ export class RenderTask {
 
     const currentIndex = TASK_STATUS_CYCLE.indexOf(task.status as TaskStatus);
     const newStatus = TASK_STATUS_CYCLE[(currentIndex + 1) % TASK_STATUS_CYCLE.length];
-    this.taskService.updateTaskStatus(id, newStatus);
+    await this.taskService.updateTaskStatus(id, newStatus);
     SystemLogger.log(`Status "${task.title}": ${task.status} -> ${newStatus}`);
     window.appContext.notificationService.addNotification(`Status alterado: ${task.status} → ${newStatus}`, 'success');
     
@@ -479,8 +560,8 @@ export class RenderTask {
   deleteTask(id: number): void {
     const task = this.taskService.getTaskById(id);
     if (!task) return;
-    window.appContext.renderModals.openConfirmModal(`Eliminar tarefa?`, () => {
-      this.taskService.deleteTask(id);
+    window.appContext.renderModals.openConfirmModal(`Eliminar tarefa?`, async () => {
+      await this.taskService.deleteTask(id);
       SystemLogger.log(`Tarefa "${task.title}" eliminada`);
       window.appContext.notificationService.addNotification(`Tarefa "${task.title}" eliminada!`, 'success');
       window.appContext.saveAndRender();
@@ -488,14 +569,65 @@ export class RenderTask {
   }
 
   // Assigns task to a user via email
-  manualAssign(taskId: number, email: string): void {
+  async manualAssign(taskId: number, email: string): Promise<void> {
     const task = this.taskService.getTaskById(taskId);
     if (!task) return;
-    task.assigned = email ? [email] : [];
+    
+    console.log('👤 Atribuindo tarefa:', { taskId, email });
+    
     if (email) {
-      SystemLogger.log(`Tarefa "${task.title}" atribuída a ${email}`);
-      window.appContext.notificationService.addNotification(`Tarefa "${task.title}" atribuída a ${email}!`, 'success');
+      // Find user by email
+      const user = this.userService.getUserByEmail(email);
+      if (!user) {
+        console.error('❌ Utilizador não encontrado:', email);
+        return;
+      }
+      
+      try {
+        // Call API to assign
+        const response = await fetch(`http://localhost:3000/assignments/task/${taskId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: user.id })
+        });
+        
+        console.log('📡 Resposta da API:', response.status, response.ok);
+        
+        if (response.ok) {
+          task.assigned = [email];
+          console.log('✅ Atribuição criada na API');
+          SystemLogger.log(`Tarefa "${task.title}" atribuída a ${email}`);
+          window.appContext.notificationService.addNotification(`Tarefa "${task.title}" atribuída a ${email}!`, 'success');
+        } else {
+          console.error('❌ Erro ao atribuir:', response.status);
+          window.appContext.notificationService.addNotification('Erro ao atribuir tarefa', 'warning');
+        }
+      } catch (error) {
+        console.error('⚠️ Erro ao chamar API:', error);
+        // Fallback: update locally
+        task.assigned = [email];
+        window.appContext.notificationService.addNotification('Atribuída localmente (offline)', 'info');
+      }
+    } else {
+      // Remove assignment
+      if (task.assigned && task.assigned.length > 0) {
+        const oldEmail = task.assigned[0];
+        const user = this.userService.getUserByEmail(oldEmail);
+        
+        if (user) {
+          try {
+            await fetch(`http://localhost:3000/assignments/task/${taskId}/user/${user.id}`, {
+              method: 'DELETE'
+            });
+            console.log('✅ Atribuição removida da API');
+          } catch (error) {
+            console.error('⚠️ Erro ao remover atribuição:', error);
+          }
+        }
+      }
+      task.assigned = [];
     }
+    
     window.appContext.saveAndRender();
   }
 
@@ -578,16 +710,19 @@ export class RenderTask {
   }
 
   // Toggles task favorite status
-  toggleTaskFavorite(taskId: number): void {
+  async toggleTaskFavorite(taskId: number): Promise<void> {
     const task = this.taskService.getTaskById(taskId);
     if (!task) return;
     
-    if (window.favoriteTasks.exists(task)) {
-      window.favoriteTasks.remove(task);
+    const userId = window.appContext.currentUserId;
+    const isFavorite = window.appContext.favoriteService.isFavorite(userId, taskId);
+    
+    if (isFavorite) {
+      await window.appContext.favoriteService.removeFavorite(userId, taskId);
       window.appContext.notificationService.addNotification(`"${task.title}" removida de favoritos!`, 'info');
       SystemLogger.log(`Tarefa "${task.title}" removida de favoritos`);
     } else {
-      window.favoriteTasks.add(task);
+      await window.appContext.favoriteService.addFavorite(userId, taskId);
       window.appContext.notificationService.addNotification(`"${task.title}" adicionada aos favoritos!`, 'success');
       SystemLogger.log(`Tarefa "${task.title}" adicionada aos favoritos`);
     }
@@ -639,21 +774,20 @@ export class RenderTask {
   }
 
   // ===== PRIORITY MANAGEMENT =====
-  // Set priority level for a task (1-4)
-  setTaskPriority(taskId: number, priorityLevel: number): void {
+  // Set priority (LOW/MEDIUM/HIGH) for a task and save to API
+  setTaskPriority(taskId: number, priority: string): void {
+    console.log(`🎯 setTaskPriority chamado: taskId=${taskId}, priority=${priority}`);
     const task = this.taskService.getTaskById(taskId);
-    if (!task) return;
+    if (!task) { console.error('❌ Task não encontrada:', taskId); return; }
 
-    const level = parseInt(priorityLevel.toString());
-    if (level >= 0 && level <= 4) {
-      window.priorityManager.setPriority(task, level);
-      if (level === 0) {
-        window.appContext.notificationService.addNotification(`Prioridade removida de "${task.title}"`, 'info');
-      } else {
-        window.appContext.notificationService.addNotification(`Prioridade ${level} definida para "${task.title}"`, 'success');
-      }
-      SystemLogger.log(`Prioridade da tarefa "${task.title}" alterada para ${level}`);
-      window.appContext.saveData();
+    const validPriorities = ['LOW', 'MEDIUM', 'HIGH'];
+    if (validPriorities.includes(priority)) {
+      task.priority = priority;
+      this.taskService.updateTaskPriority(taskId, priority);
+      window.appContext.notificationService.addNotification(`Prioridade de "${task.title}" alterada para ${priority}`, 'success');
+      SystemLogger.log(`Prioridade da tarefa "${task.title}" alterada para ${priority}`);
+    } else {
+      console.error('❌ Prioridade inválida:', priority);
     }
   }
 
@@ -720,7 +854,7 @@ export class RenderTask {
 
   // ===== RATING MANAGEMENT =====
   // Rate a task with a value 1-5
-  rateTask(taskId: number, rating: number): void {
+  async rateTask(taskId: number, rating: number): Promise<void> {
     const task = this.taskService.getTaskById(taskId);
     if (!task) return;
 
@@ -729,8 +863,39 @@ export class RenderTask {
       return;
     }
 
-    window.ratingSystem.rate(task, rating);
-    window.appContext.notificationService.addNotification(`Tarefa avaliada com ${rating} ⭐!`, 'success');
+    console.log('⭐ Adicionando rating:', { taskId, rating });
+    
+    try {
+      const response = await fetch(`http://localhost:3000/ratings/task/${taskId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          user_id: window.appContext.currentUserId,
+          rating_value: rating
+        })
+      });
+      
+      console.log('📡 Resposta da API:', response.status, response.ok);
+      
+      if (response.ok) {
+        const newRating = await response.json();
+        console.log('✅ Rating criado na API:', newRating);
+        // Update local cache
+        window.ratingSystem.rate(task, rating);
+        window.appContext.notificationService.addNotification(`Tarefa avaliada com ${rating} ⭐!`, 'success');
+      } else {
+        console.error('❌ API retornou erro:', response.status);
+        // Fallback: criar localmente
+        window.ratingSystem.rate(task, rating);
+        window.appContext.notificationService.addNotification(`Avaliada localmente: ${rating} ⭐`, 'info');
+      }
+    } catch (error) {
+      console.error('⚠️ Erro ao criar rating na API:', error);
+      // Fallback: criar localmente
+      window.ratingSystem.rate(task, rating);
+      window.appContext.notificationService.addNotification(`Avaliada localmente: ${rating} ⭐`, 'info');
+    }
+    
     SystemLogger.log(`Tarefa "${task.title}" avaliada com ${rating} estrelas`);
     this.renderTaskRatings(taskId);
     window.appContext.saveData();

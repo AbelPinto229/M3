@@ -2,6 +2,7 @@ import { UserService } from './src/services/UserService.js';
 import { TaskService } from './src/services/TaskService.js';
 import { CommentService } from './src/services/CommentService.js';
 import { AttachmentService } from './src/services/AttachmentService.js';
+import { FavoriteService } from './src/services/FavoriteService.js';
 import { TagManager } from './src/utils/TagManager.js';
 import { DeadlineService } from './src/services/DeadlineService.js';
 import { PriorityService } from './src/services/PriorityService.js';
@@ -47,6 +48,7 @@ interface AppContext {
     assignmentService: AssignmentService;
     commentService: CommentService;
     attachmentService: AttachmentService;
+    favoriteService: FavoriteService;
     tagService: TagManager<any>;
     automationService: AutomationRulesService;
     statisticsService: StatisticsService;
@@ -65,6 +67,6 @@ interface AppContext {
     saveAndRender: () => void;
     saveData: () => void;
 }
-export declare function initializeApp(): void;
+export declare function initializeApp(): Promise<void>;
 export declare function saveAndRender(): void;
 export {};

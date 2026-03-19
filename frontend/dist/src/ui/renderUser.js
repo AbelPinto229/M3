@@ -99,7 +99,7 @@ export class RenderUser {
     }
     // ===== USER ACTIONS =====
     // Toggles user active/inactive status
-    toggleUserStatus(id) {
+    async toggleUserStatus(id) {
         const user = this.userService.getUserById(id);
         if (!user)
             return;
@@ -108,7 +108,7 @@ export class RenderUser {
             window.appContext.notificationService.addNotification('Gerentes não podem modificar utilizadores administradores!', 'warning');
             return;
         }
-        this.userService.toggleUserStatus(id);
+        await this.userService.toggleUserStatus(id);
         const updatedUser = this.userService.getUserById(id);
         const newStatus = updatedUser?.active ? 'ATIVO' : 'INATIVO';
         window.appContext.notificationService.addNotification(`${user.name} agora está ${newStatus}!`, 'success');
@@ -120,17 +120,22 @@ export class RenderUser {
         const user = this.userService.getUserById(id);
         if (!user)
             return;
+        console.log('🗑️ Tentando eliminar user:', user.email, 'ID:', id);
         // Prevent managers from deleting admin users
         if (window.appContext.currentUserRole === 'MANAGER' && user.role === 'ADMIN') {
             window.appContext.notificationService.addNotification('Gerentes não podem eliminar utilizadores administradores!', 'warning');
             return;
         }
         // Trigger confirmation modal
-        window.appContext.renderModals.openConfirmModal(`Eliminar ${user.email}?`, () => {
-            this.userService.deleteUser(id);
+        window.appContext.renderModals.openConfirmModal(`Eliminar ${user.email}?`, async () => {
+            console.log('✅ Confirmação aceite, a executar delete...');
+            await this.userService.deleteUser(id);
+            console.log('✅ Delete completo, a notificar...');
             window.appContext.notificationService.addNotification(`${user.name} eliminado!`, 'success');
             SystemLogger.log(`Utilizador ${user.name} eliminado`);
+            console.log('✅ A chamar saveAndRender...');
             window.appContext.saveAndRender();
+            console.log('✅ Processo de eliminação completo!');
         });
     }
     // Displays detailed user information in a modal

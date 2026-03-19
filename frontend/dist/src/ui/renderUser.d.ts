@@ -4,7 +4,7 @@ export declare class RenderUser {
     constructor(userService: UserService);
     render(): void;
     renderUserRow(u: any): string;
-    toggleUserStatus(id: number): void;
+    toggleUserStatus(id: number): Promise<void>;
     deleteUser(id: number): void;
     showUserDetails(id: number): void;
     editUser(id: number): void;

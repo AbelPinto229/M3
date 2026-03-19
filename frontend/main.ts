@@ -2,40 +2,41 @@
 // This file bootstraps the entire application with all services and UI
 
 // Import all services
-import { UserService } from './services/UserService.js';
-import { TaskService } from './services/TaskService.js';
-import { SystemLogger } from './logs/SystemLogger.js';
-import { CommentService } from './services/CommentService.js';
-import { AttachmentService } from './services/AttachmentService.js';
-import { TagManager } from './utils/TagManager.js';
-import { DeadlineService } from './services/DeadlineService.js';
-import { PriorityService } from './services/PriorityService.js';
-import { AssignmentService } from './services/AssignmentService.js';
-import { SearchService } from './services/SearchService.js';
-import { StatisticsService } from './services/StatisticService.js';
-import { BackupService } from './services/BackupService.js';
-import { AutomationRulesService } from './services/AutomationRulesService.js';
-import { NotificationService } from './notifications/NotificationService.js';
+import { UserService } from './src/services/UserService.js';
+import { TaskService } from './src/services/TaskService.js';
+import { SystemLogger } from './src/logs/SystemLogger.js';
+import { CommentService } from './src/services/CommentService.js';
+import { AttachmentService } from './src/services/AttachmentService.js';
+import { FavoriteService } from './src/services/FavoriteService.js';
+import { TagManager } from './src/utils/TagManager.js';
+import { DeadlineService } from './src/services/DeadlineService.js';
+import { PriorityService } from './src/services/PriorityService.js';
+import { AssignmentService } from './src/services/AssignmentService.js';
+import { SearchService } from './src/services/SearchService.js';
+import { StatisticsService } from './src/services/StatisticService.js';
+import { BackupService } from './src/services/BackupService.js';
+import { AutomationRulesService } from './src/services/AutomationRulesService.js';
+import { NotificationService } from './src/notifications/NotificationService.js';
 
 // Import UI components
-import { RenderUser } from './ui/renderUser.js';
-import { RenderTask } from './ui/renderTask.js';
-import { RenderModals } from './ui/renderModals.js';
-import { EntityList } from './utils/EntityList.js';
-import { SimpleCache } from './utils/SimpleCache.js';
-import { User } from './models/Users.js';
-import { Task } from './models/Task.js';
-import { Paginator } from './utils/Paginator.js';
-import { Favorites } from './utils/Favorites.js';
-import { WatcherSystem } from './utils/WatcherSystem.js';
-import { PriorityManager } from './utils/PriorityManager.js';
-import { RatingSystem } from './utils/RatingSystem.js';
-import { DependencyGraph } from './utils/DependencyGraph.js';
-import { IdGenerator } from './utils/IdGenerator.js';
-import { SystemConfig } from './services/SystemConfig.js';
-import { BusinessRules } from './services/BusinessRules.js';
-import { GlobalValidators } from './utils/GlobalValidators.js';
-import { BaseEntity } from './models/BaseEntity.js';
+import { RenderUser } from './src/ui/renderUser.js';
+import { RenderTask } from './src/ui/renderTask.js';
+import { RenderModals } from './src/ui/renderModals.js';
+import { EntityList } from './src/utils/EntityList.js';
+import { SimpleCache } from './src/utils/SimpleCache.js';
+import { User } from './src/models/Users.js';
+import { Task } from './src/models/Task.js';
+import { Paginator } from './src/utils/Paginator.js';
+import { Favorites } from './src/utils/Favorites.js';
+import { WatcherSystem } from './src/utils/WatcherSystem.js';
+import { PriorityManager } from './src/utils/PriorityManager.js';
+import { RatingSystem } from './src/utils/RatingSystem.js';
+import { DependencyGraph } from './src/utils/DependencyGraph.js';
+import { IdGenerator } from './src/utils/IdGenerator.js';
+import { SystemConfig } from './src/services/SystemConfig.js';
+import { BusinessRules } from './src/services/BusinessRules.js';
+import { GlobalValidators } from './src/utils/GlobalValidators.js';
+import { BaseEntity } from './src/models/BaseEntity.js';
 
 // ===== EXTEND WINDOW TYPE =====
 declare global {
@@ -62,6 +63,7 @@ interface AppContext {
   assignmentService: AssignmentService;
   commentService: CommentService;
   attachmentService: AttachmentService;
+  favoriteService: FavoriteService;
   tagService: TagManager<any>;
   automationService: AutomationRulesService;
   statisticsService: StatisticsService;
@@ -89,6 +91,7 @@ const priorityService = new PriorityService();
 const assignmentService = new AssignmentService();
 const commentService = new CommentService();
 const attachmentService = new AttachmentService();
+const favoriteService = new FavoriteService();
 const tagService = new TagManager<any>();
 const automationService = new AutomationRulesService(assignmentService, deadlineService, priorityService);
 const statisticsService = new StatisticsService(taskService.getTasks(), userService.getUsers());
@@ -107,6 +110,7 @@ const appContext: AppContext = {
   assignmentService,
   commentService,
   attachmentService,
+  favoriteService,
   tagService,
   automationService,
   statisticsService,
@@ -116,7 +120,7 @@ const appContext: AppContext = {
   renderUser: new RenderUser(userService),
   renderTask: new RenderTask(taskService, userService, tagService, searchService, commentService, attachmentService),
   renderModals: new RenderModals(taskService, userService),
-  currentUserId: 0,
+  currentUserId: 1,
   currentUserRole: 'ADMIN',
   taskSortState: 'none',
   userSortState: 'none',
@@ -499,9 +503,25 @@ function renderSystemStats() {
 }
 
 // ===== APPLICATION INITIALIZATION =====
-export function initializeApp() {
+export async function initializeApp() {
+  // Configurar event listeners PRIMEIRO (antes de carregar dados)
   setupEventListeners();
   setupSearchAndFilterListeners();
+  
+  // Tentar carregar dados do backend (não bloquear se falhar)
+  try {
+    await Promise.race([
+      Promise.all([
+        window.appContext.userService.loadUsers(),
+        window.appContext.taskService.loadTasks(),
+        window.appContext.favoriteService.loadUserFavorites(window.appContext.currentUserId)
+      ]),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+    ]);
+  } catch (error) {
+    console.warn('Não foi possível carregar dados do backend. A trabalhar em modo offline.', error);
+  }
+  
   updateDashboard();
   window.appContext.renderUser.render();
   window.appContext.renderTask.render();
@@ -603,8 +623,8 @@ function setFilterButton(btn, active) {
 }
 
 // Helper to create a user
-function createNewUser(email: string, name: string, role: string, photo?: string) {
-  const newUser = window.appContext.userService.addUser(email, name, role, photo);
+async function createNewUser(email: string, name: string, role: string, photo?: string) {
+  const newUser = await window.appContext.userService.addUser(email, name, role, photo);
   
   if (newUser) {
     SystemLogger.log(`Utilizador ${name} (${email}) criado com role ${role}`);
@@ -890,7 +910,7 @@ function setupEventListeners() {
 
   const addUserForm = document.getElementById('userForm');
   if (addUserForm) {
-    addUserForm.addEventListener('submit', (e) => {
+    addUserForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
       if (!window.appContext.checkPermission('create_user')) {
@@ -908,14 +928,14 @@ function setupEventListeners() {
       // Handle photo if selected
       if (photoInput?.files?.length) {
         const reader = new FileReader();
-        reader.onload = (event) => {
-          createNewUser(emailInput.value, nameInput.value, roleSelect.value, event.target?.result as string);
+        reader.onload = async (event) => {
+          await createNewUser(emailInput.value, nameInput.value, roleSelect.value, event.target?.result as string);
           (addUserForm as HTMLFormElement).reset();
           saveAndRender();
         };
         reader.readAsDataURL(photoInput.files[0]);
       } else {
-        createNewUser(emailInput.value, nameInput.value, roleSelect.value);
+        await createNewUser(emailInput.value, nameInput.value, roleSelect.value);
         (addUserForm as HTMLFormElement).reset();
         saveAndRender();
       }
@@ -924,7 +944,7 @@ function setupEventListeners() {
 
   const addTaskForm = document.getElementById('taskForm');
   if (addTaskForm) {
-    addTaskForm.addEventListener('submit', (e) => {
+    addTaskForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
       if (!window.appContext.checkPermission('create_task')) {
@@ -938,7 +958,7 @@ function setupEventListeners() {
       
       if (!titleInput?.value || !typeSelect?.value) return;
       
-      const newTask = window.appContext.taskService.addTask(titleInput.value, typeSelect.value, deadlineInput?.value);
+      const newTask = await window.appContext.taskService.addTask(titleInput.value, typeSelect.value, deadlineInput?.value);
       
       if (deadlineInput?.value) {
         window.appContext.deadlineService.setDeadline(newTask.id, new Date(deadlineInput.value));
@@ -949,15 +969,14 @@ function setupEventListeners() {
       
       // Auto-configure bug tasks
       if (typeSelect.value.toLowerCase() === 'bug') {
-        window.appContext.taskService.updateTaskPriority(newTask.id, 'CRITICAL');
+        await window.appContext.taskService.updateTaskPriority(newTask.id, 'CRITICAL');
         const admin = window.appContext.userService.getUsers().find((u: any) => u.role === 'ADMIN' || u.role === 'MANAGER');
         if (admin) {
-          newTask.assigned = [admin.email];
+          await window.appContext.taskService.assignUser(newTask.id, admin.email);
           SystemLogger.log(`Bug task "${newTask.title}" atribuído a ${admin.email}`);
         }
       }
       
-      window.appContext.notificationService.addNotification('Tarefa criada!');
       window.appContext.notificationService.addNotification('Tarefa criada!');
       (addTaskForm as HTMLFormElement).reset();
       saveAndRender();
@@ -965,15 +984,10 @@ function setupEventListeners() {
   }
 }
 
-// Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeApp);
-} else {
-  initializeApp();
-}
-
 // ===== TEST EntityList CLASS =====
-// Create test users and tasks
+// Create test users and tasks BEFORE initialization
+// Comentado - agora os dados vêm do backend
+/*
 const user1 = userService.addUser('test1@example.com', 'Test User 1', 'MEMBER');
 const user2 = userService.addUser('test2@example.com', 'Test User 2', 'MEMBER');
 const user3 = userService.addUser('test3@example.com', 'Test User 3', 'MEMBER');
@@ -987,19 +1001,29 @@ const user10 = userService.addUser('test10@example.com', 'Test User 10', 'VIEWER
 const user11 = userService.addUser('test11@example.com', 'Test User 11', 'MEMBER');
 const user12 = userService.addUser('test12@example.com', 'Test User 12', 'MEMBER');
 
-const task1 = taskService.addTask('Test Task 1', 'Feature');
-const task2 = taskService.addTask('Test Task 2', 'Bug');
-const task3 = taskService.addTask('Test Task 3', 'Task');
-const task4 = taskService.addTask('Test Task 4', 'Feature');
-const task5 = taskService.addTask('Test Task 5', 'Bug');
-const task6 = taskService.addTask('Test Task 6', 'Task');
-const task7 = taskService.addTask('Test Task 7', 'Feature');
-const task8 = taskService.addTask('Test Task 8', 'Bug');
-const task9 = taskService.addTask('Test Task 9', 'Task');
-const task10 = taskService.addTask('Test Task 10', 'Feature');
-const task11 = taskService.addTask('Test Task 11', 'Bug');
-const task12 = taskService.addTask('Test Task 12', 'Task');
+const task1 = await taskService.addTask('Test Task 1', 'Feature');
+const task2 = await taskService.addTask('Test Task 2', 'Bug');
+const task3 = await taskService.addTask('Test Task 3', 'Task');
+const task4 = await taskService.addTask('Test Task 4', 'Feature');
+const task5 = await taskService.addTask('Test Task 5', 'Bug');
+const task6 = await taskService.addTask('Test Task 6', 'Task');
+const task7 = await taskService.addTask('Test Task 7', 'Feature');
+const task8 = await taskService.addTask('Test Task 8', 'Bug');
+const task9 = await taskService.addTask('Test Task 9', 'Task');
+const task10 = await taskService.addTask('Test Task 10', 'Feature');
+const task11 = await taskService.addTask('Test Task 11', 'Bug');
+const task12 = await taskService.addTask('Test Task 12', 'Task');
+*/
 
+// Auto-initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+  initializeApp();
+}
+
+/*
+// Código de teste comentado - usar apenas quando necessário
 // test EntityList with users
 const userList = new EntityList();
 userList.add(user1);
@@ -1030,7 +1054,7 @@ const cachedUser = userCache.get('user123');
 const taskCache = new SimpleCache<string, Task>();
 const taskData = task1;
 taskCache.set('task456', taskData);
-const cachedTask = taskCache.get('task456');
+const cachedTask =taskCache.get('task456');
 
 console.log('Cached User:', cachedUser);
 console.log('Cached Task:', cachedTask);
@@ -1040,7 +1064,6 @@ const tagManager = new TagManager<any>();
 tagManager.addTag(task1, 'urgente');
 tagManager.addTag(task1, 'backend');
 console.log(tagManager.getTags(task1));
-
 
 //  test rarting system with tasks
 const testRatingSystem = new RatingSystem<Task>();
@@ -1063,4 +1086,6 @@ console.log('testWatcherSystem.getWatchers(task1):', testWatcherSystem.getWatche
 //re-render after adding test data
 window.appContext.renderTask.render();
 window.appContext.renderUser.render();
+*/
+
 

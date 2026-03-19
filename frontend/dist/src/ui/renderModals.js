@@ -30,8 +30,24 @@ export class RenderModals {
     }
     // Executes pending action and closes modal
     confirmAction() {
-        if (this.pendingDeleteAction)
-            this.pendingDeleteAction();
+        console.log('🔔 confirmAction chamado');
+        if (this.pendingDeleteAction) {
+            console.log('⚡ A executar pendingDeleteAction...');
+            const result = this.pendingDeleteAction();
+            // Se o resultado for uma Promise, aguardar antes de fechar o modal
+            if (result instanceof Promise) {
+                console.log('⏳ Resultado é Promise, a aguardar...');
+                result.then(() => {
+                    console.log('✅ Promise resolvida, a fechar modal');
+                    this.closeConfirmModal();
+                }).catch((error) => {
+                    console.error('❌ Erro ao executar ação:', error);
+                    this.closeConfirmModal();
+                });
+                return;
+            }
+            console.log('⚡ Ação síncrona executada');
+        }
         this.closeConfirmModal();
     }
     // ===== EDIT TITLE MODAL =====
@@ -307,8 +323,8 @@ export class RenderModals {
         }
     }
     // Performs the actual user update and handles success/error responses
-    performUserUpdate(userId, updateData) {
-        const result = window.appContext.userService.updateUser(userId, updateData);
+    async performUserUpdate(userId, updateData) {
+        const result = await window.appContext.userService.updateUser(userId, updateData);
         if (result) {
             window.appContext.notificationService.addNotification('Utilizador atualizado com sucesso!', 'success');
             SystemLogger.log(`Utilizador ${result.name} atualizado`);
@@ -370,7 +386,7 @@ export class RenderModals {
         if (modal)
             modal.remove();
     }
-    saveCreateUser() {
+    async saveCreateUser() {
         const nameInput = document.getElementById('createUserName');
         const emailInput = document.getElementById('createUserEmail');
         const roleSelect = document.getElementById('createUserRole');
@@ -382,22 +398,30 @@ export class RenderModals {
         // Handle photo if selected
         if (photoInput?.files?.length) {
             const reader = new FileReader();
-            reader.onload = (event) => {
-                const newUser = window.appContext.userService.addUser(emailInput.value, nameInput.value, roleSelect.value, event.target?.result);
+            reader.onload = async (event) => {
+                const newUser = await window.appContext.userService.addUser(emailInput.value, nameInput.value, roleSelect.value, event.target?.result);
                 if (newUser) {
                     SystemLogger.log(`Utilizador "${nameInput.value}" criado com função ${roleSelect.value}`);
+                    window.appContext.notificationService.addNotification(`Utilizador ${nameInput.value} criado!`, 'success');
                     this.closeCreateUserModal();
                     window.appContext.saveAndRender();
+                }
+                else {
+                    window.appContext.notificationService.addNotification('Erro: Email já existe!', 'warning');
                 }
             };
             reader.readAsDataURL(photoInput.files[0]);
         }
         else {
-            const newUser = window.appContext.userService.addUser(emailInput.value, nameInput.value, roleSelect.value);
+            const newUser = await window.appContext.userService.addUser(emailInput.value, nameInput.value, roleSelect.value);
             if (newUser) {
                 SystemLogger.log(`Utilizador "${nameInput.value}" criado com função ${roleSelect.value}`);
+                window.appContext.notificationService.addNotification(`Utilizador ${nameInput.value} criado!`, 'success');
                 this.closeCreateUserModal();
                 window.appContext.saveAndRender();
+            }
+            else {
+                window.appContext.notificationService.addNotification('Erro: Email já existe!', 'warning');
             }
         }
     }
@@ -470,7 +494,7 @@ export class RenderModals {
         };
         reader.readAsDataURL(file);
     }
-    saveCreateTask() {
+    async saveCreateTask() {
         const titleInput = document.getElementById('createTaskTitle');
         const typeSelect = document.getElementById('createTaskType');
         const deadlineInput = document.getElementById('createTaskDeadline');
@@ -479,7 +503,7 @@ export class RenderModals {
             window.appContext.notificationService.addNotification('Por favor, preencha todos os campos!', 'warning');
             return;
         }
-        const newTask = window.appContext.taskService.addTask(titleInput.value, typeSelect.value, deadlineInput?.value);
+        const newTask = await window.appContext.taskService.addTask(titleInput.value, typeSelect.value, deadlineInput?.value);
         if (deadlineInput?.value) {
             window.appContext.deadlineService.setDeadline(newTask.id, new Date(deadlineInput.value));
         }
@@ -499,10 +523,10 @@ export class RenderModals {
         SystemLogger.log(`Tarefa criada: "${newTask.title}" (${typeSelect.value})`);
         // Auto-configure bug tasks
         if (typeSelect.value.toLowerCase() === 'bug') {
-            window.appContext.taskService.updateTaskPriority(newTask.id, 'CRITICAL');
+            await window.appContext.taskService.updateTaskPriority(newTask.id, 'CRITICAL');
             const admin = window.appContext.userService.getUsers().find((u) => u.role === 'ADMIN' || u.role === 'MANAGER');
             if (admin) {
-                newTask.assigned = [admin.email];
+                await window.appContext.taskService.assignUser(newTask.id, admin.email);
                 SystemLogger.log(`Bug task "${newTask.title}" atribuído a ${admin.email}`);
             }
         }
